@@ -5,9 +5,10 @@ import Home from './pages/Home'
 import UserManagement from './pages/UserManagement'
 import Loading from './components/Loading'
 import Layout from './components/Layout'
-
-// 👇 [เพิ่ม] Import หน้า Settings เข้ามา
 import Settings from './pages/Settings'
+
+// 👇 [แก้ไข] ต้อง Import Calendar เข้ามาด้วยครับ
+import Calendar from './pages/Calendar' 
 
 // Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Home)
 function LoginRoute() {
@@ -65,7 +66,7 @@ function App() {
           }
         />
 
-        {/* 👇 [เพิ่ม] Route สำหรับหน้า Settings (User ทุกคนเข้าได้) */}
+        {/* Route สำหรับหน้า Settings */}
         <Route
           path="/settings"
           element={
@@ -82,6 +83,15 @@ function App() {
             <AdminRoute>
               <UserManagement />
             </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/calendar"
+          element={
+            <PrivateRoute>
+              <Calendar />
+            </PrivateRoute>
           }
         />
         

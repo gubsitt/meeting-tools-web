@@ -6,16 +6,15 @@ export default function Layout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#16213e' }}>
-      {/* 2. ส่ง State ไปให้ Sidebar ใช้งาน */}
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'transparent' }}> {/* ให้โปร่งใสเพื่อโชว์ Gradient จาก body */}
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      
-      {/* 3. ปรับขอบซ้ายของเนื้อหา ตามสถานะ isCollapsed */}
-      <main style={{ 
-        flex: 1, 
-        marginLeft: isCollapsed ? '80px' : '260px', 
+
+      <main style={{
+        flex: 1,
+        marginLeft: isCollapsed ? '80px' : '260px',
         width: isCollapsed ? 'calc(100% - 80px)' : 'calc(100% - 260px)',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+        color: 'white' // บังคับตัวหนังสือสีขาว
       }}>
         {children}
       </main>

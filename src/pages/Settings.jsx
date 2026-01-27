@@ -9,13 +9,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 export default function Settings() {
   const { user, loading: authLoading } = useAuth()
-  
+
   // Form States
   const [displayName, setDisplayName] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  
+
   // UI States
   const [activeTab, setActiveTab] = useState('profile') // 'profile' | 'security'
   const [message, setMessage] = useState({ type: '', text: '' })
@@ -83,7 +83,12 @@ export default function Settings() {
 
   return (
     <div className="settings-container">
-      <motion.div 
+      {/* Floating Orbs */}
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+
+      <motion.div
         className="settings-header"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -95,16 +100,16 @@ export default function Settings() {
       <div className="settings-layout">
         {/* --- Sidebar Tabs --- */}
         <div className="settings-sidebar">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
           >
             <User size={18} />
             <span>Profile</span>
           </button>
-          
+
           {isLocalUser && (
-            <button 
+            <button
               className={`tab-btn ${activeTab === 'security' ? 'active' : ''}`}
               onClick={() => setActiveTab('security')}
             >
@@ -115,7 +120,7 @@ export default function Settings() {
         </div>
 
         {/* --- Content Area --- */}
-        <motion.div 
+        <motion.div
           className="settings-content"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -133,7 +138,7 @@ export default function Settings() {
             <form onSubmit={handleUpdateProfile}>
               <div className="form-section">
                 <h2>Public Profile</h2>
-                
+
                 <div className="profile-upload">
                   <div className="avatar-preview">
                     {user?.profilePicture ? (
@@ -143,29 +148,29 @@ export default function Settings() {
                     )}
                   </div>
                   <div className="upload-btn-wrapper">
-                     <button type="button" className="btn-secondary" disabled>
-                        <Camera size={16} /> Change Photo
-                     </button>
-                     <span className="helper-text">Image upload coming soon</span>
+                    <button type="button" className="btn-secondary" disabled>
+                      <Camera size={16} /> Change Photo
+                    </button>
+                    <span className="helper-text">Image upload coming soon</span>
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label>Display Name</label>
-                  <input 
-                    type="text" 
-                    value={displayName} 
-                    onChange={(e) => setDisplayName(e.target.value)} 
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     className="input-field"
                   />
                 </div>
 
                 <div className="form-group">
                   <label>Email</label>
-                  <input 
-                    type="email" 
-                    value={user?.email || ''} 
-                    disabled 
+                  <input
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
                     className="input-field disabled"
                   />
                   <span className="helper-text">Email cannot be changed</span>
@@ -185,11 +190,11 @@ export default function Settings() {
             <form onSubmit={handleChangePassword}>
               <div className="form-section">
                 <h2>Change Password</h2>
-                
+
                 <div className="form-group">
                   <label>Current Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
@@ -199,8 +204,8 @@ export default function Settings() {
 
                 <div className="form-group">
                   <label>New Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
@@ -210,8 +215,8 @@ export default function Settings() {
 
                 <div className="form-group">
                   <label>Confirm New Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required

@@ -4,18 +4,27 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+  /* พื้นหลังโปร่งใสเพื่อโชว์ Gradient จาก body */
+  background: transparent;
 }
 
 .home-card {
   max-width: 500px;
   width: 100%;
-  background: var(--color-bg-glass);
+  position: relative;
+  z-index: 10;
+
+  /* Glassmorphism Effect - เข้มขึ้นเหมือน Login */
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 24px;
   padding: 60px 40px;
   text-align: center;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 .success-icon {
@@ -45,8 +54,10 @@
 }
 
 .user-info-card {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
   padding: 32px;
   margin-bottom: 32px;
@@ -201,20 +212,22 @@
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
-  text-decoration: none; /* สำหรับ Link */
+  text-decoration: none;
+  /* สำหรับ Link */
 }
 
 /* Admin Button */
 .admin-btn {
-  background: #6c5ce7;
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+  transition: all 0.3s ease;
 }
 
 .admin-btn:hover {
-  background: #5f4dd0;
+  filter: brightness(1.1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
 }
 
 /* Logout Button */

@@ -19,6 +19,11 @@ export default function Home() {
 
   return (
     <div className="home-container">
+      {/* Floating Orbs */}
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+      
       <motion.div
         className="home-card"
         initial={{ opacity: 0, scale: 0.9 }}

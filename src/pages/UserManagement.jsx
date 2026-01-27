@@ -30,8 +30,8 @@ export default function UserManagement() {
   // เปลี่ยน Role
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await axios.patch(`${API_URL}/api/auth/users/${userId}/role`, 
-        { role: newRole }, 
+      await axios.patch(`${API_URL}/api/auth/users/${userId}/role`,
+        { role: newRole },
         { withCredentials: true }
       )
       // อัปเดตข้อมูลใน State ทันทีไม่ต้องโหลดใหม่
@@ -45,7 +45,7 @@ export default function UserManagement() {
   // ลบ User
   const handleDelete = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return
-    
+
     try {
       await axios.delete(`${API_URL}/api/auth/users/${userId}`, { withCredentials: true })
       setUsers(users.filter(u => u._id !== userId))
@@ -59,14 +59,14 @@ export default function UserManagement() {
   }, [])
 
   // Filter สำหรับช่องค้นหา
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.displayName.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Helper สำหรับเลือก Icon ตาม Role
   const getRoleIcon = (role) => {
-    switch(role) {
+    switch (role) {
       case 'superadmin': return <ShieldAlert size={16} color="#ff6b6b" />
       case 'admin': return <Shield size={16} color="#4cd137" />
       default: return <User size={16} color="#a4b0be" />
@@ -75,8 +75,13 @@ export default function UserManagement() {
 
   return (
     <div className="page-container">
+      {/* Floating Orbs */}
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+
       <div className="content-wrapper">
-        <motion.div 
+        <motion.div
           className="header-section"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,16 +93,16 @@ export default function UserManagement() {
         {/* Search Bar */}
         <div className="search-bar">
           <Search className="search-icon" size={20} />
-          <input 
-            type="text" 
-            placeholder="Search by name or email..." 
+          <input
+            type="text"
+            placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Table Card */}
-        <motion.div 
+        <motion.div
           className="table-card"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -124,9 +129,9 @@ export default function UserManagement() {
                     <tr key={user._id}>
                       <td>
                         <div className="user-info">
-                          <img 
-                            src={user.profilePicture || `https://ui-avatars.com/api/?name=${user.displayName}`} 
-                            alt={user.displayName} 
+                          <img
+                            src={user.profilePicture || `https://ui-avatars.com/api/?name=${user.displayName}`}
+                            alt={user.displayName}
                             className="avatar"
                           />
                           <span>{user.displayName}</span>
@@ -141,8 +146,8 @@ export default function UserManagement() {
                       <td>
                         <div className="role-selector">
                           {getRoleIcon(user.role)}
-                          <select 
-                            value={user.role} 
+                          <select
+                            value={user.role}
                             onChange={(e) => handleRoleChange(user._id, e.target.value)}
                             disabled={user.role === 'superadmin'} // ห้ามแก้ Super Admin
                             className={`role-select ${user.role}`}
@@ -155,7 +160,7 @@ export default function UserManagement() {
                       </td>
                       <td>
                         {user.role !== 'superadmin' && (
-                          <button 
+                          <button
                             className="delete-btn"
                             onClick={() => handleDelete(user._id)}
                           >

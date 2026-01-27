@@ -1,0 +1,256 @@
+import { useState, useCallback } from 'react'
+import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
+import moment from 'moment'
+import CalendarService from '../services/CalendarService'
+import { motion, AnimatePresence } from 'framer-motion'
+import Loading from '../components/Loading'
+// ✅ รวม Import ไว้ในบรรทัดเดียว (มี Trash2 เรียบร้อย)
+import { Search, X, MapPin, Clock, Users, FileText, Trash2 } from 'lucide-react'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
+import './Calendar.css'
+
+const localizer = momentLocalizer(moment)
+
+export default function Calendar() {
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [roomEmail, setRoomEmail] = useState('dev365.room1@exzydev.onmicrosoft.com')
+
+  const [dateRange, setDateRange] = useState({
+    start: moment().startOf('month').format('YYYY-MM-DD'),
+    end: moment().endOf('month').format('YYYY-MM-DD')
+  })
+
+  const [currentDate, setCurrentDate] = useState(new Date())
+
+  // State สำหรับเก็บ Event ที่ถูกกดเลือก
+  const [selectedEvent, setSelectedEvent] = useState(null)
+
+  const handleSearch = async (e) => {
+    if (e) e.preventDefault();
+    if (!roomEmail) return;
+
+    setLoading(true)
+    try {
+      const res = await CalendarService.getEvents(roomEmail, dateRange.start, dateRange.end)
+
+      if (res.success && res.data) {
+        // 👇 [เพิ่มใหม่] กรองเอาเฉพาะ Event ที่ 'ไม่' ขึ้นต้นด้วย Canceled:
+        const activeEvents = res.data.filter(item => !item.subject.startsWith('Canceled:'))
+
+        // เอาตัวที่กรองแล้วมา map ต่อ
+        const formattedEvents = activeEvents.map(item => ({
+          id: item.id,
+          title: item.subject,
+          start: new Date(item.start.dateTime + 'Z'),
+          end: new Date(item.end.dateTime + 'Z'),
+          resource: item,
+          isCancelled: false, // ไม่จำเป็นต้องเช็คแล้ว เพราะเรากรองทิ้งหมดแล้ว
+          location: item.location?.displayName || 'Unknown Location'
+        }))
+
+        setEvents(formattedEvents)
+        setCurrentDate(new Date(dateRange.start))
+      } else {
+        setEvents([])
+      }
+    } catch (error) {
+      console.error("Failed to fetch calendar events", error)
+      setEvents([])
+    } finally {
+      setLoading(false)
+    }
+  }
+  // ฟังก์ชันเมื่อกดที่ Event ในปฏิทิน
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event)
+  }
+
+  // ฟังก์ชันปิด Modal
+  const closeModal = () => {
+    setSelectedEvent(null)
+  }
+
+  const eventStyleGetter = (event) => {
+    let backgroundColor = '#6c5ce7'
+    if (event.isCancelled) backgroundColor = '#ff6b6b'
+
+    return {
+      style: {
+        backgroundColor,
+        borderRadius: '6px',
+        opacity: 0.9,
+        color: 'white',
+        border: '0px',
+        display: 'block',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+        textDecoration: event.isCancelled ? 'line-through' : 'none'
+      }
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!selectedEvent) return
+
+    // ถามยืนยันก่อนลบ
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${selectedEvent.title}"?`)
+    if (!confirmDelete) return
+
+    setLoading(true)
+    try {
+      // เรียก Service ลบ
+      await CalendarService.deleteEvent(selectedEvent.id)
+
+      // ปิด Modal
+      closeModal()
+
+      // ดึงข้อมูลใหม่เพื่ออัปเดตหน้าจอ
+      await handleSearch()
+
+    } catch (error) {
+      console.error("Failed to delete event", error)
+      alert("Failed to delete event. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="calendar-page">
+      {/* Floating Orbs */}
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+      <div className="orb orb-3" />
+
+      <div className="calendar-header-control">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+          <h1>Meeting Schedule</h1>
+          <p>Search room availability</p>
+        </motion.div>
+      </div>
+
+      <motion.div className="search-bar-container" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <form onSubmit={handleSearch} className="search-form">
+          <div className="form-group-inline">
+            <label>Room Email</label>
+            <input type="text" placeholder="Enter room email..." value={roomEmail} onChange={(e) => setRoomEmail(e.target.value)} className="custom-input" />
+          </div>
+          <div className="form-group-inline">
+            <label>Start Date</label>
+            <input type="date" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} className="custom-input date-input" />
+          </div>
+          <div className="form-group-inline">
+            <label>End Date</label>
+            <input type="date" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} className="custom-input date-input" />
+          </div>
+          <button type="submit" className="search-btn" disabled={loading}>
+            <Search size={18} /> {loading ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+      </motion.div>
+
+      <div className="calendar-wrapper">
+        {loading && <div className="calendar-loading-overlay"><Loading /></div>}
+
+        <BigCalendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: '75vh', minHeight: '600px' }}
+          eventPropGetter={eventStyleGetter}
+          views={['month', 'week', 'day', 'agenda']}
+          defaultView="month"
+          date={currentDate}
+          onNavigate={(date) => setCurrentDate(date)}
+          popup
+          onSelectEvent={handleSelectEvent}
+        />
+      </div>
+
+      <AnimatePresence>
+        {selectedEvent && (
+          <motion.div
+            className="event-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeModal}
+          >
+            <motion.div
+              className="event-modal-content"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="modal-header">
+                <h2>{selectedEvent.title}</h2>
+                <button className="close-btn" onClick={closeModal}>
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="modal-body">
+                <div className="detail-item">
+                  <Clock className="icon" size={20} />
+                  <div>
+                    <label>Time</label>
+                    <p>
+                      {moment(selectedEvent.start).format('DD MMM YYYY, HH:mm')} -
+                      {moment(selectedEvent.end).format('HH:mm')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="detail-item">
+                  <MapPin className="icon" size={20} />
+                  <div>
+                    <label>Location</label>
+                    <p>{selectedEvent.resource?.location?.displayName || roomEmail}</p>
+                  </div>
+                </div>
+
+                {selectedEvent.resource?.bodyPreview && (
+                  <div className="detail-item">
+                    <FileText className="icon" size={20} />
+                    <div>
+                      <label>Description</label>
+                      <p className="description-text">{selectedEvent.resource.bodyPreview}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="detail-item">
+                  <Users className="icon" size={20} />
+                  <div>
+                    <label>Organizer</label>
+                    <p>{selectedEvent.resource?.organizer?.emailAddress?.name || 'Unknown'}</p>
+                    <span className="email-sub">
+                      {selectedEvent.resource?.organizer?.emailAddress?.address}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="modal-footer">
+                {!selectedEvent.isCancelled && (
+                  <button className="delete-btn" onClick={handleDelete} disabled={loading}>
+                    <Trash2 size={16} /> Delete
+                  </button>
+                )}
+                <span className={`status-badge ${selectedEvent.isCancelled ? 'cancelled' : 'active'}`}>
+                  {selectedEvent.isCancelled ? 'Cancelled' : 'Scheduled'}
+                </span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  )
+}

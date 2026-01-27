@@ -1,9 +1,11 @@
 .settings-container {
   width: 100%;
-  padding: 40px;
+  padding: 20px;
   color: white;
-  max-width: 1000px;
-  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
 }
 
 .settings-header {
@@ -13,10 +15,13 @@
 .settings-header h1 {
   font-size: 2rem;
   margin-bottom: 8px;
+  color: white;
+  font-weight: 700;
 }
 
 .settings-header p {
   color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
 }
 
 /* Layout */
@@ -63,11 +68,16 @@
 /* Content Area */
 .settings-content {
   flex: 1;
-  background: rgba(255, 255, 255, 0.03);
+  position: relative;
+  z-index: 10;
+  /* Glassmorphism เข้มขึ้นเหมือน Login */
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
   padding: 32px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 .form-section h2 {
@@ -155,22 +165,26 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #6c5ce7;
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
 }
 
 .btn-primary:hover {
-  background: #5f4dd0;
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
 }
 
 .btn-primary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
@@ -216,6 +230,7 @@
   .settings-layout {
     flex-direction: column;
   }
+
   .settings-sidebar {
     width: 100%;
     flex-direction: row;

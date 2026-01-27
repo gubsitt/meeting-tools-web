@@ -1,0 +1,230 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.home-card {
+  max-width: 500px;
+  width: 100%;
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.success-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 32px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 32px rgba(108, 92, 231, 0.4);
+}
+
+.home-card h1 {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  margin: 0 0 16px 0;
+  color: var(--color-text-primary);
+}
+
+.welcome-message {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  margin: 0 0 40px 0;
+}
+
+.user-info-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.user-avatar-large {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.3);
+}
+
+.user-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info-card h2 {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+}
+
+.user-info-card p {
+  margin: 0 0 16px 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.role-badge.admin {
+  background: rgba(253, 203, 110, 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(253, 203, 110, 0.3);
+}
+
+.role-badge.user {
+  background: rgba(0, 184, 148, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, rgba(255, 118, 117, 0.2), rgba(255, 118, 117, 0.3));
+  border: 1px solid rgba(255, 118, 117, 0.4);
+  border-radius: 14px;
+  color: var(--color-error);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, rgba(255, 118, 117, 0.3), rgba(255, 118, 117, 0.4));
+  border-color: var(--color-error);
+  box-shadow: 0 8px 24px rgba(255, 118, 117, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .home-card {
+    padding: 40px 24px;
+  }
+
+  .home-card h1 {
+    font-size: 28px;
+  }
+
+  .welcome-message {
+    font-size: 16px;
+  }
+
+  .user-info-card {
+    padding: 24px;
+  }
+}
+
+/* ... CSS เดิม ... */
+
+/* Badge สีสำหรับ Super Admin */
+.role-badge {
+  /* ... ค่าเดิม ... */
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.role-badge.superadmin {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.role-badge.admin {
+  background: rgba(76, 209, 55, 0.2);
+  color: #4cd137;
+  border: 1px solid rgba(76, 209, 55, 0.3);
+}
+
+.role-badge.user {
+  background: rgba(164, 176, 190, 0.2);
+  color: #a4b0be;
+  border: 1px solid rgba(164, 176, 190, 0.3);
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Base Button Style */
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none; /* สำหรับ Link */
+}
+
+/* Admin Button */
+.admin-btn {
+  background: #6c5ce7;
+  color: white;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.admin-btn:hover {
+  background: #5f4dd0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+}
+
+/* Logout Button */
+.logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 107, 107, 0.1);
+  transform: translateY(-2px);
+}

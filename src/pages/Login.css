@@ -1,0 +1,367 @@
+/* =========================================
+   Root Variables
+   ========================================= */
+:root {
+  --color-bg-glass: rgba(255, 255, 255, 0.1);
+  --color-border: rgba(255, 255, 255, 0.2);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --shadow-lg: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --font-heading: 'Inter', sans-serif;
+  --transition-base: all 0.3s ease;
+}
+
+/* =========================================
+   Main Layout (Split Screen)
+   ========================================= */
+.login-container {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* --- LEFT SIDE (Image) --- */
+.login-left {
+  flex: 1.2;
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop'); 
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 60px;
+  color: white;
+  z-index: 1;
+}
+
+.login-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  z-index: -1;
+}
+
+.login-quote {
+  max-width: 600px;
+}
+
+.login-quote h1 {
+  font-family: var(--font-heading);
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.login-quote p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+/* --- RIGHT SIDE (Login Form) --- */
+.login-right {
+  flex: 0.8;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: radial-gradient(circle at top right, #2a2a4a, #1a1a2e);
+  overflow: hidden;
+}
+
+/* =========================================
+   Floating Orbs
+   ========================================= */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: float 20s infinite ease-in-out;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(108, 92, 231, 0.5), transparent);
+  top: -10%;
+  right: -10%;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 206, 201, 0.4), transparent);
+  bottom: -20%;
+  left: -20%;
+  animation-delay: 7s;
+}
+
+.orb-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(253, 121, 168, 0.4), transparent);
+  top: 40%;
+  right: 10%;
+  animation-delay: 14s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -50px) scale(1.1); }
+  66% { transform: translate(-50px, 50px) scale(0.9); }
+}
+
+/* =========================================
+   Login Card
+   ========================================= */
+.login-content {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 10;
+  
+  /* Glassmorphism Effect */
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Logo - แก้ไขให้สว่างชัด */
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.logo-image {
+  max-width: 220px;
+  height: auto;
+  /* เร่งแสงและสีตามที่ขอ */
+  filter: brightness(2.5) saturate(1.5);
+}
+
+/* Header */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header h2 {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: var(--color-text-primary);
+}
+
+.login-header p {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+/* =========================================
+   Buttons
+   ========================================= */
+.login-buttons-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.login-btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.provider-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Google Button */
+.google-btn {
+  background: white;
+  color: #1f1f1f;
+}
+
+.google-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.google-btn:hover::before {
+  left: 100%;
+}
+
+/* Microsoft Button */
+.microsoft-btn {
+  background: #2f2f2f;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hover Effects */
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.microsoft-btn:hover {
+  background: #3e3e3e;
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   Responsive
+   ========================================= */
+@media (max-width: 960px) {
+  .login-left {
+    display: none;
+  }
+  
+  .login-right {
+    flex: 1;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+
+  .orb-1 { top: -20%; right: -20%; }
+  .orb-2 { bottom: -20%; left: -20%; }
+}
+
+@media (max-width: 480px) {
+  .login-content {
+    padding: 32px 24px;
+  }
+  
+  .login-btn {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.input-group {
+  width: 100%;
+}
+
+.login-input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05); /* โปร่งแสงเล็กน้อย */
+  color: white; /* ตัวหนังสือสีขาว */
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+/* ถ้าใช้ธีม Card สีขาว ให้เปลี่ยน color เป็น #333 */
+/* .login-content ที่เป็นสีขาว ให้ใช้ color: #333; background: #f5f5f5; */
+
+.login-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.login-input:focus {
+  border-color: #6c5ce7; /* สีม่วงธีมหลัก */
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+}
+
+/* ปุ่ม Submit สำหรับ Admin */
+.submit-btn {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  color: white;
+  margin-top: 8px;
+  border: none;
+}
+
+.submit-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ข้อความ Error */
+.error-msg {
+  color: #ff6b6b;
+  font-size: 14px;
+  text-align: center;
+  margin: -8px 0 8px 0;
+}
+
+/* --- Toggle Footer --- */
+.login-footer {
+  margin-top: 24px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+.toggle-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.toggle-link:hover {
+  color: white;
+}

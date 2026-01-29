@@ -40,8 +40,14 @@ export const authAPI = {
 // User API (Admin)
 export const userAPI = {
   getAllUsers: (params) => api.get('/api/auth/users', { params }),
-updateUserRole: (userId, role) => api.patch(`/api/auth/users/${userId}/role`, { role }),
+  updateUserRole: (userId, role) => api.patch(`/api/auth/users/${userId}/role`, { role }),
   deleteUser: (userId) => api.delete(`/api/auth/users/${userId}`)
 }
+
+// // User Events API
+// export const userEventsAPI = {
+//   searchUsers: (query) => api.get('/api/users/search', { params: { q: query } }),
+//   getUserEvents: (userId) => api.get(`/api/events/user/${userId}`)
+// }
 
 export default api

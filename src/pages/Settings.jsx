@@ -88,14 +88,10 @@ export default function Settings() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <motion.div
-        className="settings-header"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <div className="settings-header"> {/* เปลี่ยนจาก motion.div เป็น div ธรรมดา */}
         <h1>Account Settings</h1>
         <p>Manage your profile and security preferences</p>
-      </motion.div>
+      </div>
 
       <div className="settings-layout">
         {/* --- Sidebar Tabs --- */}
@@ -120,12 +116,7 @@ export default function Settings() {
         </div>
 
         {/* --- Content Area --- */}
-        <motion.div
-          className="settings-content"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          key={activeTab} // Animation เมื่อเปลี่ยน Tab
-        >
+        <div className="settings-content">
           {/* Message Alert */}
           {message.text && (
             <div className={`alert-box ${message.type}`}>
@@ -233,7 +224,7 @@ export default function Settings() {
             </form>
           )}
 
-        </motion.div>
+        </div>
       </div>
     </div>
   )

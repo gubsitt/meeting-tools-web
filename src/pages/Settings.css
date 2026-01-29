@@ -1,6 +1,8 @@
 .settings-container {
   width: 100%;
-  padding: 20px;
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
   color: white;
   min-height: 100vh;
   position: relative;
@@ -227,13 +229,87 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .settings-container {
+    padding: 8px;
+    padding-top: 16px;
+    /* Space for hamburger */
+  }
+
+  .settings-header {
+    padding-left: 56px;
+    min-height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .settings-header h1 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .settings-header p {
+    font-size: 0.85rem;
+    margin: 0;
+    opacity: 0.8;
+  }
+
   .settings-layout {
     flex-direction: column;
+    gap: 16px;
   }
 
   .settings-sidebar {
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    padding-bottom: 8px;
+    /* space for scrollbar */
+    gap: 12px;
+  }
+
+  .tab-btn {
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+  .tab-btn.active {
+    background: #6c5ce7;
+    color: white;
+  }
+
+  .settings-content {
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    /* Unified glass style */
+  }
+
+  .profile-upload {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .upload-btn-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
   }
 }

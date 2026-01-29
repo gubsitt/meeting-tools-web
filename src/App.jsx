@@ -1,21 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
-import Home from './pages/Home'
 import UserManagement from './pages/UserManagement'
 import Loading from './components/Loading'
 import Layout from './components/Layout'
 import Settings from './pages/Settings'
+import Calendar from './pages/Calendar'
+import UserEvents from './pages/UserEvents'
 
-// 👇 [แก้ไข] ต้อง Import Calendar เข้ามาด้วยครับ
-import Calendar from './pages/Calendar' 
-
-// Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Home)
+// Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Calendar)
 function LoginRoute() {
   const { user, loading } = useAuth()
 
   if (loading) return <Loading />
-  if (user) return <Navigate to="/home" replace />
+  if (user) return <Navigate to="/calendar" replace />
 
   return <Login />
 }
@@ -37,9 +35,9 @@ function AdminRoute({ children }) {
 
   if (loading) return <Loading />
   if (!user) return <Navigate to="/login" />
-  
+
   if (user.role !== 'admin' && user.role !== 'superadmin') {
-    return <Navigate to="/home" replace />
+    return <Navigate to="/calendar" replace />
   }
 
   // หุ้มด้วย Layout
@@ -51,19 +49,9 @@ function App() {
     <Router>
       <Routes>
         {/* Public Route */}
-        <Route 
-          path="/login" 
-          element={<LoginRoute />} 
-        />
-        
-        {/* Private Route (User ทั่วไป) */}
         <Route
-          path="/home"
-          element={
-            <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          }
+          path="/login"
+          element={<LoginRoute />}
         />
 
         {/* Route สำหรับหน้า Settings */}
@@ -94,12 +82,21 @@ function App() {
             </PrivateRoute>
           }
         />
-        
+
+        <Route
+          path="/user-events"
+          element={
+            <PrivateRoute>
+              <UserEvents />
+            </PrivateRoute>
+          }
+        />
+
         {/* Default Redirect */}
         <Route path="/" element={<Navigate to="/login" />} />
-        
+
         {/* Catch all - 404 */}
-        <Route path="*" element={<Navigate to="/home" />} />
+        <Route path="*" element={<Navigate to="/calendar" />} />
       </Routes>
     </Router>
   )

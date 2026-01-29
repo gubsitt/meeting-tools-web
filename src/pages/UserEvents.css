@@ -1,0 +1,941 @@
+/* --- Container หลัก --- */
+.user-events-page {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    /* ให้พื้นหลังใส เพื่อโชว์ Gradient ของ Body */
+    background: transparent;
+}
+
+.calendar-header-control {
+    margin-bottom: 24px;
+}
+
+.calendar-header-control h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-header-control p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+}
+
+/* --- Search Bar (กล่องค้นหาแบบแก้ว) --- */
+.search-bar-container {
+    position: relative;
+    z-index: 50;
+    /* ✨ Glassmorphism เข้มขึ้นเหมือน Login */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+    padding: 24px;
+    border-radius: 20px;
+    margin-bottom: 32px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar-container:hover {
+    /* เมาส์ชี้แล้วลอยขึ้นนิดนึง + เงาฟุ้ง */
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.form-group-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+    /* Added for dropdown positioning */
+}
+
+.form-group-inline label {
+    font-size: 0.9rem;
+    color: #a29bfe;
+    /* สีม่วงอ่อนๆ */
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.custom-input {
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.custom-input:focus {
+    border-color: #6c5ce7;
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+.search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* ปรับขนาดให้เท่า Input */
+    padding: 12px 20px;
+
+    /* ปุ่มสีไล่ระดับ */
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    /* เอา height fix ออกเพื่อให้สูงเท่า input ตาม padding */
+    /* height: 48px; */
+    transition: all 0.3s;
+    min-width: 100px;
+    /* ลดความกว้างลง */
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
+    filter: brightness(1.1);
+}
+
+.search-btn:disabled {
+    background: #4a4a4a;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+.search-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* --- Split Layout Container --- */
+.user-events-content-wrapper {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* --- Calendar Wrapper (Left Side) --- */
+.calendar-wrapper {
+    flex: 3;
+    /* Allocate more space to calendar */
+    position: relative;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 40px;
+    min-height: 600px;
+}
+
+/* --- Events List Sidebar (Right Side) --- */
+.events-list-sidebar {
+    flex: 1;
+    /* Sidebar takes 1 part */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 20px;
+    max-height: 75vh;
+    overflow-y: auto;
+    position: sticky;
+    top: 20px;
+}
+
+.events-list-header {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.event-list-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.event-list-item:hover {
+    background: rgba(108, 92, 231, 0.15);
+    border-color: rgba(108, 92, 231, 0.3);
+    transform: translateX(4px);
+}
+
+.event-list-date {
+    font-size: 0.8rem;
+    color: #a29bfe;
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.event-list-title {
+    font-size: 0.95rem;
+    color: white;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.event-list-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Loading Overlay */
+.calendar-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(22, 33, 62, 0.7);
+    /* พื้นหลังสี Theme เข้มๆ โปร่งแสง */
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24px;
+}
+
+/* --- Override React Big Calendar --- */
+.rbc-calendar {
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Toolbar Buttons */
+.rbc-toolbar button {
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px !important;
+    /* บังคับมน */
+    margin-left: 4px;
+    transition: all 0.2s;
+}
+
+.rbc-toolbar button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.rbc-toolbar button.rbc-active {
+    background: linear-gradient(135deg, #6c5ce7 0%, #5f4dd0 100%);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 2px 10px rgba(108, 92, 231, 0.4);
+}
+
+/* Toolbar Title */
+.rbc-toolbar-label {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+}
+
+/* Grid Lines */
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.rbc-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 0;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.02);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: #a29bfe;
+}
+
+.rbc-day-bg+.rbc-day-bg {
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rbc-month-row+.rbc-month-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Cell Colors */
+.rbc-off-range-bg {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.rbc-today {
+    background: linear-gradient(180deg, rgba(108, 92, 231, 0.15) 0%, transparent 100%);
+}
+
+/* Events Styling */
+.rbc-event {
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px 6px !important;
+}
+
+/* Popup Overlay */
+.rbc-overlay {
+    background: rgba(22, 33, 62, 0.95);
+    /* สี Theme เข้มๆ */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    padding: 16px;
+    z-index: 1000;
+    animation: fadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.rbc-overlay-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin: -8px -8px 12px -8px;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px 12px 0 0;
+}
+
+.rbc-overlay .rbc-event {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    font-size: 0.95rem;
+    transition: transform 0.2s;
+}
+
+.rbc-overlay .rbc-event:hover {
+    transform: translateX(4px);
+    filter: brightness(1.2);
+}
+
+/* Show More Button */
+.rbc-show-more {
+    background-color: rgba(108, 92, 231, 0.15);
+    color: #a29bfe !important;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+    border: 1px solid rgba(108, 92, 231, 0.3);
+}
+
+.rbc-show-more:hover {
+    background-color: #6c5ce7;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.4);
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.event-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    /* เบลอฉากหลัง */
+    z-index: 2000;
+    /* อยู่บนสุด */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* กล่อง Modal */
+.event-modal-content {
+    background: rgba(22, 33, 62, 0.85);
+    /* สี Theme เข้มๆ โปร่งแสง */
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 700px;
+    /* Widened from 500px */
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    /* ขอบเรืองแสงด้านใน */
+    overflow: hidden;
+    color: white;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.3;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: 16px;
+}
+
+.close-btn:hover {
+    background: #ff6b6b;
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.detail-item .icon {
+    color: #a29bfe;
+    /* สีม่วงไอคอน */
+    margin-top: 2px;
+    background: rgba(108, 92, 231, 0.15);
+    padding: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+}
+
+.detail-item label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.detail-item p {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.5;
+}
+
+.description-text {
+    font-size: 0.95rem !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    white-space: pre-wrap;
+    /* เพื่อให้ขึ้นบรรทัดใหม่ตามข้อมูล */
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.email-sub {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    /* ดันปุ่มลบไปซ้าย Badge ไปขวา */
+    align-items: center;
+}
+
+/* ปุ่ม Delete */
+.delete-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 107, 107, 0.1);
+    /* สีแดงจางๆ */
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-btn:hover {
+    background: #ff6b6b;
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    transform: translateY(-1px);
+}
+
+.delete-btn:active {
+    transform: scale(0.98);
+}
+
+.delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: rgba(0, 184, 148, 0.2);
+    color: #55efc4;
+    border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.status-badge.cancelled {
+    background: rgba(255, 118, 117, 0.2);
+    color: #ff7675;
+    border: 1px solid rgba(255, 118, 117, 0.3);
+    text-decoration: none;
+}
+
+/* --- User Dropdown Styles (Added) --- */
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #2d3436;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.user-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-item:hover {
+    background: rgba(108, 92, 231, 0.2);
+}
+
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #6c5ce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: white;
+    overflow: hidden;
+}
+
+.user-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info-text h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.user-info-text p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #b2bec3;
+}
+
+/* --- Transaction Timeline Styles --- */
+.transaction-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transaction-section h3 {
+    font-size: 1rem;
+    color: white;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+/* Vertical Line */
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 5px;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    z-index: 1;
+    box-shadow: 0 0 0 4px rgba(22, 33, 62, 1);
+}
+
+/* Specific colors based on action */
+.timeline-dot.create,
+.timeline-dot.Create {
+    background: #00b894;
+    /* Green */
+    box-shadow: 0 0 10px rgba(0, 184, 148, 0.5);
+}
+
+.timeline-dot.cancel,
+.timeline-dot.Cancel {
+    background: #ff7675;
+    /* Red */
+    box-shadow: 0 0 10px rgba(255, 118, 117, 0.5);
+}
+
+.timeline-content {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeline-action {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+    text-transform: capitalize;
+}
+
+.timeline-date {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- Responsive Styles for User Events --- */
+@media (max-width: 768px) {
+    .user-events-page {
+        padding: 8px;
+        padding-top: 16px;
+    }
+
+    .calendar-header-control {
+        padding-left: 56px;
+        min-height: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    .calendar-header-control h1 {
+        font-size: 1.25rem;
+        margin: 0;
+    }
+
+    .calendar-header-control p {
+        font-size: 0.8rem;
+        margin: 0;
+        opacity: 0.8;
+    }
+
+    /* Compact Search Bar */
+    .search-bar-container {
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        /* Slightly more transparent */
+        z-index: 30;
+    }
+
+    .search-form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .form-group-inline {
+        min-width: 100%;
+        gap: 6px;
+    }
+
+    .form-group-inline label {
+        font-size: 0.85rem;
+    }
+
+    .custom-input {
+        padding: 10px 14px;
+        font-size: 0.95rem;
+    }
+
+    .search-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    .user-events-content-wrapper {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Calendar Compact */
+    .calendar-wrapper {
+        width: 100%;
+        min-height: auto;
+        padding: 12px;
+        order: 1;
+        /* Calendar on top */
+        border-radius: 16px;
+    }
+
+    .rbc-calendar {
+        height: 500px !important;
+    }
+
+    /* Toolbar Refined */
+    .rbc-toolbar {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .rbc-toolbar-label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 4px 0;
+    }
+
+    .rbc-btn-group {
+        width: 100%;
+        display: flex;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 4px;
+    }
+
+    .rbc-btn-group button {
+        flex: 1;
+        padding: 6px 0;
+        font-size: 0.85rem;
+        border: none !important;
+        background: transparent !important;
+        border-radius: 6px !important;
+        margin: 0 2px;
+    }
+
+    .rbc-btn-group button.rbc-active {
+        background: #6c5ce7 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .rbc-header {
+        padding: 8px 0;
+        font-size: 0.8rem;
+    }
+
+    /* Events List Compact */
+    .events-list-sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 400px;
+        position: static;
+        order: 2;
+        /* List below */
+        margin-bottom: 24px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .events-list-header {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .event-list-item {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    /* Modal Mobile Fixes */
+    .event-modal-overlay {
+        padding: 8px;
+        /* Minimized padding */
+        align-items: center;
+    }
+
+    .event-modal-content {
+        max-width: 100%;
+        width: 100%;
+        max-height: 92vh;
+        /* Taller */
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        /* Remove extra margin */
+    }
+
+    .modal-body {
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    .detail-item {
+        gap: 12px;
+    }
+}

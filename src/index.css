@@ -165,9 +165,11 @@ body::before {
 
 /* --- Common Card Style (ใช้ร่วมกันทุกหน้า) --- */
 .glass-card {
-  background: var(--color-bg-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(26, 26, 46, 0.95);
+  /* ใช้สีทึบแทน glass effect */
+  /* backdrop-filter: blur(10px); */
+  /* ปิดเพื่อประสิทธิภาพ */
+  /* -webkit-backdrop-filter: blur(10px); */
   border: 1px solid var(--color-border);
   border-radius: 16px;
   box-shadow: var(--shadow-lg);
@@ -176,14 +178,23 @@ body::before {
 /* =========================================
    Floating Orbs Animation (Global)
    ========================================= */
+/* ปิดลูกบอลลอยเพื่อประสิทธิภาพสูงสุด */
+.orb {
+  display: none;
+  /* ปิดการแสดงผลทั้งหมด */
+}
+
+/* เก็บ code ไว้เผื่อต้องการเปิดกลับมา
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.6;
+  filter: blur(50px);
+  opacity: 0.5;
   animation: float 20s infinite ease-in-out;
   z-index: 0;
   pointer-events: none;
+  will-change: transform;
+  contain: layout style paint;
 }
 
 .orb-1 {
@@ -214,17 +225,17 @@ body::before {
 }
 
 @keyframes float {
-
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   33% {
-    transform: translate(50px, -50px) scale(1.1);
+    transform: translate3d(50px, -50px, 0) scale(1.1);
   }
 
   66% {
-    transform: translate(-50px, 50px) scale(0.9);
+    transform: translate3d(-50px, 50px, 0) scale(0.9);
   }
 }
+*/

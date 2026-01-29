@@ -5,7 +5,7 @@ import CalendarService from '../services/CalendarService'
 import { motion, AnimatePresence } from 'framer-motion'
 import Loading from '../components/Loading'
 // ✅ รวม Import ไว้ในบรรทัดเดียว (มี Trash2 เรียบร้อย)
-import { Search, X, MapPin, Clock, Users, FileText, Trash2 } from 'lucide-react'
+import { Search, X, MapPin, Clock, Users, FileText, Trash2, Code, Copy, Check } from 'lucide-react'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import './Calendar.css'
 
@@ -25,6 +25,18 @@ export default function Calendar() {
 
   // State สำหรับเก็บ Event ที่ถูกกดเลือก
   const [selectedEvent, setSelectedEvent] = useState(null)
+
+  // State for Modal View Mode (Detail vs JSON)
+  const [viewMode, setViewMode] = useState('detail')
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyJson = () => {
+    if (!selectedEvent) return
+    const jsonString = JSON.stringify(selectedEvent.resource, null, 2)
+    navigator.clipboard.writeText(jsonString)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
@@ -69,6 +81,7 @@ export default function Calendar() {
   // ฟังก์ชันปิด Modal
   const closeModal = () => {
     setSelectedEvent(null)
+    setViewMode('detail')
   }
 
   const eventStyleGetter = (event) => {
@@ -123,13 +136,13 @@ export default function Calendar() {
       <div className="orb orb-3" />
 
       <div className="calendar-header-control">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+        <div> {/* เปลี่ยนจาก motion.div เป็น div ธรรมดา */}
           <h1>Meeting Schedule</h1>
           <p>Search room availability</p>
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div className="search-bar-container" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <div className="search-bar-container"> {/* เปลี่ยนจาก motion.div เป็น div ธรรมดา */}
         <form onSubmit={handleSearch} className="search-form">
           <div className="form-group-inline">
             <label>Room Email</label>
@@ -143,11 +156,14 @@ export default function Calendar() {
             <label>End Date</label>
             <input type="date" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} className="custom-input date-input" />
           </div>
-          <button type="submit" className="search-btn" disabled={loading}>
-            <Search size={18} /> {loading ? 'Searching...' : 'Search'}
-          </button>
+          <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
+            <label style={{ opacity: 0 }}>Search</label>
+            <button type="submit" className="search-btn" disabled={loading}>
+              <Search size={18} /> {loading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
         </form>
-      </motion.div>
+      </div >
 
       <div className="calendar-wrapper">
         {loading && <div className="calendar-loading-overlay"><Loading /></div>}
@@ -186,7 +202,44 @@ export default function Calendar() {
             >
               {/* Header */}
               <div className="modal-header">
-                <h2>{selectedEvent.title}</h2>
+                <div>
+                  <h2>{selectedEvent.title}</h2>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <button
+                      onClick={() => setViewMode('detail')}
+                      style={{
+                        background: viewMode === 'detail' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      Details
+                    </button>
+                    <button
+                      onClick={() => setViewMode('json')}
+                      style={{
+                        background: viewMode === 'json' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <Code size={14} /> JSON
+                    </button>
+                  </div>
+                </div>
                 <button className="close-btn" onClick={closeModal}>
                   <X size={24} />
                 </button>
@@ -194,45 +247,105 @@ export default function Calendar() {
 
               {/* Body */}
               <div className="modal-body">
-                <div className="detail-item">
-                  <Clock className="icon" size={20} />
-                  <div>
-                    <label>Time</label>
-                    <p>
-                      {moment(selectedEvent.start).format('DD MMM YYYY, HH:mm')} -
-                      {moment(selectedEvent.end).format('HH:mm')}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="detail-item">
-                  <MapPin className="icon" size={20} />
-                  <div>
-                    <label>Location</label>
-                    <p>{selectedEvent.resource?.location?.displayName || roomEmail}</p>
-                  </div>
-                </div>
-
-                {selectedEvent.resource?.bodyPreview && (
-                  <div className="detail-item">
-                    <FileText className="icon" size={20} />
-                    <div>
-                      <label>Description</label>
-                      <p className="description-text">{selectedEvent.resource.bodyPreview}</p>
+                {viewMode === 'detail' ? (
+                  <>
+                    <div className="detail-item">
+                      <Clock className="icon" size={20} />
+                      <div>
+                        <label>Time</label>
+                        <p>
+                          {moment(selectedEvent.start).format('DD MMM YYYY, HH:mm')} -
+                          {moment(selectedEvent.end).format('HH:mm')}
+                        </p>
+                      </div>
                     </div>
+
+                    <div className="detail-item">
+                      <MapPin className="icon" size={20} />
+                      <div>
+                        <label>Location</label>
+                        <p>{selectedEvent.resource?.location?.displayName || roomEmail}</p>
+                      </div>
+                    </div>
+
+                    {selectedEvent.resource?.bodyPreview && (
+                      <div className="detail-item">
+                        <FileText className="icon" size={20} />
+                        <div>
+                          <label>Description</label>
+                          <p className="description-text">{selectedEvent.resource.bodyPreview}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="detail-item">
+                      <Users className="icon" size={20} />
+                      <div>
+                        <label>Organizer</label>
+                        <p>{selectedEvent.resource?.organizer?.emailAddress?.name || 'Unknown'}</p>
+                        <span className="email-sub">
+                          {selectedEvent.resource?.organizer?.emailAddress?.address}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Attendees Section */}
+                    {selectedEvent.resource?.attendees && selectedEvent.resource?.attendees.length > 0 && (
+                      <div className="detail-item" style={{ alignItems: 'flex-start' }}>
+                        <div className="icon" style={{ marginTop: 2 }}>
+                          <Users size={20} />
+                        </div>
+                        <div style={{ width: '100%' }}>
+                          <label>Attendees ({selectedEvent.resource.attendees.length})</label>
+                          <div className="attendees-list" style={{ marginTop: '8px', maxHeight: '150px', overflowY: 'auto', paddingRight: '4px' }}>
+                            {selectedEvent.resource.attendees.map((attendee, index) => (
+                              <div key={index} style={{ marginBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                                <p style={{ fontSize: '0.9rem', marginBottom: '2px' }}>{attendee.emailAddress?.name || 'Unknown'}</p>
+                                <span className="email-sub" style={{ fontSize: '0.8rem' }}>
+                                  {attendee.emailAddress?.address}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ position: 'relative' }}>
+                    <button
+                      onClick={handleCopyJson}
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '6px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {copied ? <Check size={16} color="#55efc4" /> : <Copy size={16} />}
+                      {copied && <span style={{ fontSize: '0.8rem', color: '#55efc4' }}>Copied!</span>}
+                    </button>
+                    <pre style={{
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      overflowX: 'auto',
+                      color: '#a29bfe',
+                      fontSize: '0.85rem',
+                      fontFamily: 'monospace',
+                      maxHeight: '400px'
+                    }}>
+                      {JSON.stringify(selectedEvent.resource, null, 2)}
+                    </pre>
                   </div>
                 )}
-
-                <div className="detail-item">
-                  <Users className="icon" size={20} />
-                  <div>
-                    <label>Organizer</label>
-                    <p>{selectedEvent.resource?.organizer?.emailAddress?.name || 'Unknown'}</p>
-                    <span className="email-sub">
-                      {selectedEvent.resource?.organizer?.emailAddress?.address}
-                    </span>
-                  </div>
-                </div>
               </div>
 
               {/* Footer */}
@@ -251,6 +364,6 @@ export default function Calendar() {
         )}
       </AnimatePresence>
 
-    </div>
+    </div >
   )
 }

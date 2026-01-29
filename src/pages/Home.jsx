@@ -23,45 +23,31 @@ export default function Home() {
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       <div className="orb orb-3" />
-      
+
       <motion.div
         className="home-card"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
       >
         <motion.div
           className="success-icon"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
         >
           <CheckCircle size={64} />
         </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
+        <h1>
           Welcome to <span className="text-gradient">EXZY</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="welcome-message"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
+        <p className="welcome-message">
           You have successfully logged in!
-        </motion.p>
+        </p>
 
-        <motion.div
-          className="user-info-card"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
+        <div className="user-info-card">
           <div className="user-avatar-large">
             {user?.profilePicture ? (
               <img
@@ -77,23 +63,18 @@ export default function Home() {
               <span>{user?.displayName?.[0] || 'U'}</span>
             )}
           </div>
-          
+
           {/* แก้ไขให้แสดง displayName ถ้ามี */}
-          <h2>{user?.displayName || user?.name}</h2> 
+          <h2>{user?.displayName || user?.name}</h2>
           <p>{user?.email}</p>
-          
+
           <span className={`role-badge ${user?.role}`}>
             {getRoleLabel(user?.role)}
           </span>
-        </motion.div>
+        </div>
 
         {/* ปุ่ม Actions */}
-        <motion.div 
-          className="action-buttons"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-        >
+        <div className="action-buttons">
           {/* [เพิ่ม] ปุ่ม Manage Users (แสดงเฉพาะ Admin/SuperAdmin) */}
           {isAdmin && (
             <Link to="/users" className="action-btn admin-btn">
@@ -109,7 +90,7 @@ export default function Home() {
             <LogOut size={20} />
             <span>Logout</span>
           </button>
-        </motion.div>
+        </div>
 
       </motion.div>
     </div>

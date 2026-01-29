@@ -1,6 +1,8 @@
 /* --- Container หลัก --- */
 .calendar-page {
-  padding: 20px;
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
   width: 100%;
   color: white;
   min-height: 100vh;
@@ -109,7 +111,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 12px 32px;
+  /* ปรับขนาดให้เท่า Input */
+  padding: 12px 20px;
 
   /* ปุ่มสีไล่ระดับ */
   background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
@@ -119,9 +122,11 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  height: 48px;
+  /* เอา height fix ออกเพื่อให้สูงเท่า input ตาม padding */
+  /* height: 48px; */
   transition: all 0.3s;
-  min-width: 140px;
+  min-width: 100px;
+  /* ลดความกว้างลง */
   box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
 }
 
@@ -136,6 +141,12 @@
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
+  opacity: 0.7;
+}
+
+.search-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* --- Calendar Wrapper (กรอบปฏิทินแบบแก้ว) --- */
@@ -349,7 +360,8 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 24px;
   width: 100%;
-  max-width: 500px;
+  max-width: 700px;
+  /* Widened from 500px */
   box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
@@ -515,9 +527,167 @@
   border: 1px solid rgba(0, 184, 148, 0.3);
 }
 
-.status-badge.cancelled {
-  background: rgba(255, 118, 117, 0.2);
-  color: #ff7675;
-  border: 1px solid rgba(255, 118, 117, 0.3);
-  text-decoration: none;
+
+
+/* --- Responsive Styles for Calendar --- */
+@media (max-width: 768px) {
+  .calendar-page {
+    padding: 8px;
+    /* Maximize screen width usage */
+    padding-top: 16px;
+  }
+
+  .calendar-header-control {
+    padding-left: 56px;
+    /* Precise alignment with burger */
+    min-height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .calendar-header-control h1 {
+    font-size: 1.25rem;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .calendar-header-control p {
+    font-size: 0.8rem;
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  /* Compact Search Bar */
+  .search-bar-container {
+    padding: 16px;
+    /* Internal spacing */
+    margin-bottom: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    /* Slightly more transparent */
+  }
+
+  .search-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .form-group-inline {
+    min-width: 100%;
+    gap: 6px;
+  }
+
+  .form-group-inline label {
+    font-size: 0.85rem;
+  }
+
+  .custom-input {
+    padding: 10px 14px;
+    /* Comfortable touch target */
+    font-size: 0.95rem;
+  }
+
+  .search-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 1rem;
+    margin-top: 8px;
+  }
+
+  /* Calendar Card */
+  .calendar-wrapper {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .rbc-calendar {
+    height: 550px !important;
+    /* Taller for better visibility */
+  }
+
+  /* Toolbar */
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .rbc-toolbar-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 4px 0;
+  }
+
+  .rbc-btn-group {
+    width: 100%;
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .rbc-btn-group button {
+    flex: 1;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 6px !important;
+    margin: 0 2px;
+  }
+
+  .rbc-btn-group button.rbc-active {
+    background: #6c5ce7 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .rbc-header {
+    padding: 8px 0;
+    font-size: 0.8rem;
+  }
+
+  .rbc-event {
+    padding: 2px 6px !important;
+    font-size: 0.8rem;
+  }
+
+  /* Modal Overlay */
+  .event-modal-overlay {
+    padding: 8px;
+    /* Minimized padding to maximize space */
+    align-items: center;
+    /* Center vertically for better focus */
+  }
+
+  .event-modal-content {
+    max-width: 100%;
+    width: 100%;
+    /* Full width */
+    max-height: 92vh;
+    /* Taller */
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .detail-item {
+    flex-direction: row;
+    /* Keep row unless very narrow */
+    align-items: center;
+    gap: 12px;
+  }
+
+  .detail-item .icon {
+    width: 32px;
+    height: 32px;
+  }
 }

@@ -14,17 +14,16 @@ const CalendarService = {
           endDate
         },
         // 👇 [สำคัญมาก] ต้องใส่บรรทัดนี้ ไม่งั้น Backend จะมองว่าไม่ได้ Login
-        withCredentials: true 
+        withCredentials: true
       });
-      
+
       return response.data;
     } catch (error) {
       throw error;
     }
-  }
-}
+  },
 
-deleteEvent: async (eventId) => {
+  deleteEvent: async (eventId) => {
     try {
       // ยิง DELETE ไปที่ /api/calendar/events/:id
       const response = await axios.delete(`${API_BASE_URL}/calendar/events/${eventId}`, {
@@ -35,5 +34,6 @@ deleteEvent: async (eventId) => {
       throw error;
     }
   }
+}
 
 export default CalendarService

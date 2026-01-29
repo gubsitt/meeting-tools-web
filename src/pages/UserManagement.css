@@ -2,7 +2,9 @@
 .page-container {
   min-height: 100vh;
   background: transparent;
-  padding: 20px;
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
   color: white;
   font-family: 'Inter', sans-serif;
   position: relative;
@@ -204,4 +206,66 @@ td {
 
 .error {
   color: #ff6b6b;
+}
+
+/* --- Responsive Styles for User Management --- */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 8px;
+    padding-top: 16px;
+    /* Space for hamburger */
+  }
+
+  .header-section {
+    padding-left: 56px;
+    /* Indent header text */
+    min-height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .header-section h1 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .header-section p {
+    font-size: 0.85rem;
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  .search-bar {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .search-bar input {
+    padding: 12px 12px 12px 40px;
+    font-size: 0.95rem;
+  }
+
+  .table-card {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Table Adjustments */
+  th,
+  td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+
+  .user-info {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
 }

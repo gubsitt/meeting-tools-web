@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { motion } from 'framer-motion'
 import { Trash2, User, Shield, ShieldAlert, Search } from 'lucide-react'
+import toast from 'react-hot-toast'
 import './UserManagement.css' // เดี๋ยวสร้างไฟล์นี้ต่อ
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
@@ -21,6 +22,7 @@ export default function UserManagement() {
       }
     } catch (err) {
       console.error(err)
+      toast.error('Failed to fetch users')
       setError('Failed to fetch users. You might not have permission.')
     } finally {
       setLoading(false)
@@ -36,9 +38,9 @@ export default function UserManagement() {
       )
       // อัปเดตข้อมูลใน State ทันทีไม่ต้องโหลดใหม่
       setUsers(users.map(u => u._id === userId ? { ...u, role: newRole } : u))
-      alert(`Updated role to ${newRole}`)
+      toast.success(`Updated role to ${newRole}`)
     } catch (err) {
-      alert(err.response?.data?.message || 'Update failed')
+      toast.error(err.response?.data?.message || 'Update failed')
     }
   }
 
@@ -49,8 +51,9 @@ export default function UserManagement() {
     try {
       await axios.delete(`${API_URL}/api/auth/users/${userId}`, { withCredentials: true })
       setUsers(users.filter(u => u._id !== userId))
+      toast.success('User deleted successfully')
     } catch (err) {
-      alert(err.response?.data?.message || 'Delete failed')
+      toast.error(err.response?.data?.message || 'Delete failed')
     }
   }
 

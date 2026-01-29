@@ -5,6 +5,7 @@ import CalendarService from '../services/CalendarService'
 import { motion, AnimatePresence } from 'framer-motion'
 import Loading from '../components/Loading'
 // ✅ รวม Import ไว้ในบรรทัดเดียว (มี Trash2 เรียบร้อย)
+import toast from 'react-hot-toast'
 import { Search, X, MapPin, Clock, Users, FileText, Trash2, Code, Copy, Check } from 'lucide-react'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import './Calendar.css'
@@ -44,6 +45,8 @@ export default function Calendar() {
 
     setLoading(true)
     try {
+      // ... existing imports
+
       const res = await CalendarService.getEvents(roomEmail, dateRange.start, dateRange.end)
 
       if (res.success && res.data) {
@@ -63,12 +66,21 @@ export default function Calendar() {
 
         setEvents(formattedEvents)
         setCurrentDate(new Date(dateRange.start))
+
+        if (formattedEvents.length > 0) {
+          toast.success(`Found ${formattedEvents.length} events`)
+        } else {
+          toast('No events found')
+        }
+
       } else {
         setEvents([])
+        toast.error('No events found or Room not available')
       }
     } catch (error) {
       console.error("Failed to fetch calendar events", error)
       setEvents([])
+      toast.error('Error fetching events')
     } finally {
       setLoading(false)
     }

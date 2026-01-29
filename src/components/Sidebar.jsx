@@ -8,7 +8,8 @@ import {
   Calendar,
   LogOut,
   Menu,
-  UserCircle2
+  UserCircle2,
+  History
 } from 'lucide-react'
 import './Sidebar.css'
 
@@ -23,6 +24,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, set
   const menuItems = [
     { path: '/calendar', icon: Calendar, label: 'Calendar' },
     { path: '/user-events', icon: UserCircle2, label: 'User Events' },
+    { path: '/cancelled-events', icon: History, label: 'Cancelled' },
     ...(isAdmin ? [{ path: '/users', icon: Users, label: 'User Management' }] : []),
     { path: '/settings', icon: Settings, label: 'Settings' },
   ]

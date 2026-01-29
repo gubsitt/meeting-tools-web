@@ -4,6 +4,7 @@ import moment from 'moment'
 import UserEventService from '../services/UserEventService'
 import { motion, AnimatePresence } from 'framer-motion'
 import Loading from '../components/Loading'
+import toast from 'react-hot-toast'
 import { Search, X, MapPin, Clock, Users, FileText, User, Box, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check } from 'lucide-react'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import './UserEvents.css'
@@ -80,6 +81,8 @@ export default function UserEvents() {
 
     const fetchEvents = async (userId) => {
         setLoading(true)
+        // ... existing imports
+
         try {
             const res = await UserEventService.getUserEvents(userId)
 
@@ -104,13 +107,18 @@ export default function UserEvents() {
                 // Jump to the latest event date if available
                 if (formattedEvents.length > 0) {
                     setCurrentDate(formattedEvents[0].start);
+                    toast.success(`Found ${formattedEvents.length} events`)
+                } else {
+                    toast('No events found for this user')
                 }
             } else {
                 setEvents([])
+                toast.error('No data returned')
             }
         } catch (error) {
             console.error("Failed to fetch user events", error)
             setEvents([])
+            toast.error('Failed to fetch user events')
         } finally {
             setLoading(false)
         }
@@ -246,8 +254,18 @@ export default function UserEvents() {
                     </div>
 
                     {events.length === 0 ? (
-                        <div style={{ textAlign: 'center', opacity: 0.5, padding: '20px' }}>
-                            No events found.
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '40px 20px',
+                            opacity: 0.6,
+                            gap: '12px'
+                        }}>
+                            <CalendarPlus size={48} style={{ opacity: 0.5, strokeWidth: 1.5 }} />
+                            <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>No events found</span>
+                            <span style={{ fontSize: '0.8rem', textAlign: 'center', maxWidth: '200px' }}>Try selecting a different user or date range.</span>
                         </div>
                     ) : (
                         events.map(event => (

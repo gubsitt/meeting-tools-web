@@ -1,22 +1,17 @@
 import { useState, useEffect } from 'react'
 import CancelledEventService from '../services/CancelledEventService'
 import toast from 'react-hot-toast'
-import { Search, Calendar as CalendarIcon, User, Mail, Info, X, ExternalLink, Clock, MapPin, FileText, Users, Eye } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Search, Eye } from 'lucide-react'
+import { motion } from 'framer-motion'
 import dayjs from 'dayjs'
 import Loading from '../components/Loading'
-import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
-import moment from 'moment'
-import 'react-big-calendar/lib/css/react-big-calendar.css'
+import CancelledEventModal from '../components/CancelledEventModal'
 import './CancelledEvents.css'
-
-const localizer = momentLocalizer(moment)
 
 export default function CancelledEvents() {
     const [transactions, setTransactions] = useState([])
-    const [events, setEvents] = useState([])
     const [loading, setLoading] = useState(false)
-    const [currentDate, setCurrentDate] = useState(new Date())
+    const [hasSearched, setHasSearched] = useState(false) // Track if search has been performed
 
     // Filter State
     const [startDate, setStartDate] = useState(dayjs().startOf('month').format('YYYY-MM-DD'))
@@ -27,58 +22,38 @@ export default function CancelledEvents() {
     const [modalLoading, setModalLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    useEffect(() => {
-        // Initial fetch
+    // Removed initial useEffect to prevent auto-fetch
+    /* useEffect(() => {
         handleSearch()
-    }, [])
+    }, []) */
 
     const handleSearch = async (e) => {
         if (e) e.preventDefault()
         setLoading(true)
+        setHasSearched(true) // Mark as searched
         try {
             const startTimestamp = dayjs(startDate).startOf('day').valueOf()
             const endTimestamp = dayjs(endDate).endOf('day').valueOf()
 
-            // ... existing imports
-
             const response = await CancelledEventService.getCancelledTransactions(startTimestamp, endTimestamp)
             if (response.success) {
                 setTransactions(response.data)
-                // Map to Calendar Events
-                const mappedEvents = response.data.map(t => ({
-                    id: t.eventId,
-                    title: `Cancelled: ${t.roomId.split('@')[0]}`,
-                    start: new Date(t.startTime),
-                    end: new Date(t.endTime),
-                    resource: t
-                }))
-                setEvents(mappedEvents)
-
-                // Jump to the first event's date if exists
-                if (mappedEvents.length > 0) {
-                    // Sort to find the absolute earliest
-                    const sortedEvents = [...mappedEvents].sort((a, b) => a.start - b.start)
-                    setCurrentDate(sortedEvents[0].start)
-                    toast.success(`Found ${mappedEvents.length} cancelled events`)
+                if (response.data.length > 0) {
+                    toast.success(`Found ${response.data.length} cancelled events`)
                 } else {
-                    setCurrentDate(new Date(startDate))
                     toast('No cancelled events found')
                 }
             } else {
-                setEvents([])
+                setTransactions([])
                 toast.error('Failed to fetch data')
             }
         } catch (error) {
             console.error("Failed to fetch cancelled events", error)
-            setEvents([])
+            setTransactions([])
             toast.error('Error fetching cancelled events')
         } finally {
             setLoading(false)
         }
-    }
-
-    const handleSelectEvent = (event) => {
-        handleViewDetails(event.id)
     }
 
     const handleViewDetails = async (eventId) => {
@@ -92,6 +67,7 @@ export default function CancelledEvents() {
             }
         } catch (error) {
             console.error("Failed to fetch event details", error)
+            toast.error("Failed to load details")
         } finally {
             setModalLoading(false)
         }
@@ -102,19 +78,6 @@ export default function CancelledEvents() {
         setSelectedEvent(null)
     }
 
-    const eventStyleGetter = (event) => {
-        return {
-            style: {
-                backgroundColor: 'rgba(255, 107, 107, 0.2)', // Red background
-                color: '#ff6b6b',
-                border: '1px solid #ff6b6b',
-                borderRadius: '6px',
-                display: 'block',
-                textDecoration: 'line-through'
-            }
-        }
-    }
-
     return (
         <div className="cancelled-events-page">
             {/* Orbs Background */}
@@ -123,15 +86,24 @@ export default function CancelledEvents() {
             <div className="orb orb-3" />
 
             {/* Header */}
-            <div className="cancelled-header-control">
+            <motion.div
+                className="cancelled-header-control"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
                 <div>
                     <h1>Cancelled History</h1>
                     <p>View history of cancelled meeting room reservations</p>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Filter Section (Glass Style) */}
-            <div className="search-bar-container">
+            <motion.div
+                className="search-bar-container"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+            >
                 <form onSubmit={handleSearch} className="search-form">
                     <div className="form-group-inline">
                         <label>Start Date</label>
@@ -158,123 +130,96 @@ export default function CancelledEvents() {
                         </button>
                     </div>
                 </form>
-            </div>
+            </motion.div>
 
-            {/* Calendar Wrapper */}
-            <div className="calendar-wrapper">
-                {loading && <div className="calendar-loading-overlay"><Loading /></div>}
-
-                <BigCalendar
-                    localizer={localizer}
-                    events={events}
-                    startAccessor="start"
-                    endAccessor="end"
-                    style={{ height: '75vh', minHeight: '600px' }}
-                    eventPropGetter={eventStyleGetter}
-                    views={['month', 'week', 'day', 'agenda']}
-                    defaultView="month"
-                    date={currentDate}
-                    onNavigate={(date) => setCurrentDate(date)}
-                    onSelectEvent={handleSelectEvent}
-                    popup
-                />
-            </div>
-
-            {/* Modal */}
-            <AnimatePresence>
-                {isModalOpen && (
-                    <motion.div
-                        className="event-modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={closeModal}
-                    >
-                        <motion.div
-                            className="event-modal-content"
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <h2>Cancelled Event Details</h2>
-                                <button className="close-btn" onClick={closeModal}>
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <div className="modal-body">
-                                {modalLoading ? (
-                                    <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Loading />
-                                    </div>
-                                ) : selectedEvent ? (
-                                    <>
-                                        {/* Event Info */}
-                                        <div className="detail-item">
-                                            <Clock className="icon" size={20} />
-                                            <div>
-                                                <label>Subject</label>
-                                                <p>{selectedEvent.event.title}</p>
-                                            </div>
+            {/* Table Listing */}
+            <motion.div
+                className="cancelled-events-content-wrapper"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+            >
+                {loading ? (
+                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <Loading />
+                    </div>
+                ) : !hasSearched ? (
+                    <div className="no-data">
+                        <p>Please select a date range and click Search to view cancelled events.</p>
+                    </div>
+                ) : transactions.length === 0 ? (
+                    <div className="no-data">
+                        <p>No cancelled events found in this period.</p>
+                    </div>
+                ) : (
+                    <table className="cancelled-table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: '60px' }}>No.</th>
+                                <th>Subject</th>
+                                <th>Room</th>
+                                <th>Event Time</th>
+                                <th>Cancelled At</th>
+                                <th>Detail</th>
+                                <th style={{ textAlign: 'center' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {transactions.map((t, index) => (
+                                <tr key={t._id || index}>
+                                    <td style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600, color: '#fff' }}>
+                                            {t.subject || '-'}
                                         </div>
-
-                                        <div className="detail-item">
-                                            <MapPin className="icon" size={20} />
-                                            <div>
-                                                <label>Room</label>
-                                                <p>{selectedEvent.event.resourceId}</p>
-                                            </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>
+                                            {t.roomId ? t.roomId.split('@')[0] : '-'}
                                         </div>
-
-                                        <div className="detail-item">
-                                            <CalendarIcon className="icon" size={20} />
-                                            <div>
-                                                <label>Original Time</label>
-                                                <p>
-                                                    {dayjs(selectedEvent.event.startTime.unix).format('DD MMM YYYY, HH:mm')} -
-                                                    {dayjs(selectedEvent.event.endTime.unix).format('HH:mm')}
-                                                </p>
-                                            </div>
+                                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                            {t.roomId}
                                         </div>
-
-                                        {/* Owner Info */}
-                                        <div className="detail-item">
-                                            <User className="icon" size={20} />
-                                            <div>
-                                                <label>Booked By</label>
-                                                {selectedEvent.owner ? (
-                                                    <>
-                                                        <p>{selectedEvent.owner.name} ({selectedEvent.owner.initial})</p>
-                                                        <span className="email-sub">{selectedEvent.owner.email}</span>
-                                                    </>
-                                                ) : (
-                                                    <p style={{ color: '#ff7675' }}>Owner profile not found</p>
-                                                )}
-                                            </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontSize: '0.9rem' }}>
+                                            {dayjs(t.startTime).format('DD MMM YYYY')}
                                         </div>
-
-                                        {selectedEvent.owner?.division && (
-                                            <div className="detail-item">
-                                                <Users className="icon" size={20} />
-                                                <div>
-                                                    <label>Division</label>
-                                                    <p>{selectedEvent.owner.division}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <div style={{ textAlign: 'center', color: '#ff7675' }}>
-                                        Failed to load event details.
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                                        <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                            {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {t.time && t.time.unix ? (
+                                            <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
+                                                {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
+                                            </span>
+                                        ) : '-'}
+                                    </td>
+                                    <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {t.detail || '-'}
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <button
+                                            className="view-btn"
+                                            onClick={() => handleViewDetails(t.eventId)}
+                                        >
+                                            <Eye size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
-            </AnimatePresence>
+            </motion.div>
+
+            <CancelledEventModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                event={selectedEvent}
+                loading={modalLoading}
+            />
         </div>
     )
 }

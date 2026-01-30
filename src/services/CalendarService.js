@@ -4,14 +4,15 @@ import axios from 'axios'
 const API_BASE_URL = 'http://localhost:5000/api'
 
 const CalendarService = {
-  getEvents: async (roomEmail, startDate, endDate) => {
+  getEvents: async (roomEmail, startDate, endDate, search) => {
     try {
       // ยิง Axios ตรงๆ
       const response = await axios.get(`${API_BASE_URL}/calendar/events`, {
         params: {
           roomEmail,
           startDate,
-          endDate
+          endDate,
+          search
         },
         // 👇 [สำคัญมาก] ต้องใส่บรรทัดนี้ ไม่งั้น Backend จะมองว่าไม่ได้ Login
         withCredentials: true

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
@@ -88,12 +88,21 @@ export default function Settings() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      <div className="settings-header"> {/* เปลี่ยนจาก motion.div เป็น div ธรรมดา */}
+      <motion.div
+        className="settings-header"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <h1>Account Settings</h1>
         <p>Manage your profile and security preferences</p>
-      </div>
+      </motion.div>
 
-      <div className="settings-layout">
+      <motion.div
+        className="settings-layout"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+      >
         {/* --- Sidebar Tabs --- */}
         <div className="settings-sidebar">
           <button
@@ -225,7 +234,7 @@ export default function Settings() {
           )}
 
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

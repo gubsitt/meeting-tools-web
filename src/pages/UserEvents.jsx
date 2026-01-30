@@ -1,15 +1,12 @@
-import { useState, useCallback, useEffect } from 'react'
-import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
+import { useState, useEffect } from 'react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Loading from '../components/Loading'
 import toast from 'react-hot-toast'
-import { Search, X, MapPin, Clock, Users, FileText, User, Box, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check } from 'lucide-react'
-import 'react-big-calendar/lib/css/react-big-calendar.css'
+import { Search, X, Eye } from 'lucide-react'
+import UserEventModal from '../components/UserEventModal'
 import './UserEvents.css'
-
-const localizer = momentLocalizer(moment)
 
 export default function UserEvents() {
     const [events, setEvents] = useState([])
@@ -21,25 +18,8 @@ export default function UserEvents() {
     const [selectedUser, setSelectedUser] = useState(null)
     const [showDropdown, setShowDropdown] = useState(false)
 
-    const [dateRange, setDateRange] = useState({
-        start: moment().startOf('month').format('YYYY-MM-DD'),
-        end: moment().endOf('month').format('YYYY-MM-DD')
-    })
-
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null)
-
-    // State for Modal View Mode (Detail vs JSON)
-    const [viewMode, setViewMode] = useState('detail')
-    const [copied, setCopied] = useState(false)
-
-    const handleCopyJson = () => {
-        if (!selectedEvent) return
-        const jsonString = JSON.stringify(selectedEvent.resource, null, 2)
-        navigator.clipboard.writeText(jsonString)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-    }
 
     // Debounce Search
     useEffect(() => {
@@ -130,7 +110,6 @@ export default function UserEvents() {
 
     const closeModal = () => {
         setSelectedEvent(null)
-        setViewMode('detail')
     }
 
     const eventStyleGetter = (event) => {
@@ -158,12 +137,21 @@ export default function UserEvents() {
             <div className="orb orb-2" />
             <div className="orb orb-3" />
 
-            <div className="calendar-header-control">
+            <motion.div
+                className="calendar-header-control"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
                 <h1>User Events</h1>
                 <p>Search for a user to view their scheduled events.</p>
-            </div>
+            </motion.div>
 
-            <div className="search-bar-container">
+            <motion.div
+                className="search-bar-container"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+            >
                 <div className="search-form">
                     <div className="form-group-inline">
                         <label>Search User (Email, Name)</label>
@@ -222,305 +210,91 @@ export default function UserEvents() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="user-events-content-wrapper">
-                <div className="calendar-wrapper">
-                    {loading && <div className="calendar-loading-overlay"><Loading /></div>}
-
-                    <BigCalendar
-                        localizer={localizer}
-                        events={events}
-                        startAccessor="start"
-                        endAccessor="end"
-                        style={{ height: '75vh', minHeight: '600px' }}
-                        eventPropGetter={eventStyleGetter}
-                        views={['month', 'week', 'day', 'agenda']}
-                        defaultView="month"
-                        date={currentDate}
-                        onNavigate={(date) => setCurrentDate(date)}
-                        popup
-                        onSelectEvent={handleSelectEvent}
-                    />
-                </div>
-
-                {/* --- Events Sidebar List --- */}
-                <div className="events-list-sidebar">
-                    <div className="events-list-header">
-                        User Events
-                        <span style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: 'normal' }}>
-                            {events.length} found
-                        </span>
+            {/* Table Listing */}
+            <motion.div
+                className="user-events-content-wrapper"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+            >
+                {loading ? (
+                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <Loading />
                     </div>
-
-                    {events.length === 0 ? (
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '40px 20px',
-                            opacity: 0.6,
-                            gap: '12px'
-                        }}>
-                            <CalendarPlus size={48} style={{ opacity: 0.5, strokeWidth: 1.5 }} />
-                            <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>No events found</span>
-                            <span style={{ fontSize: '0.8rem', textAlign: 'center', maxWidth: '200px' }}>Try selecting a different user or date range.</span>
-                        </div>
-                    ) : (
-                        events.map(event => (
-                            <div
-                                key={event.id}
-                                className="event-list-item"
-                                onClick={() => {
-                                    setCurrentDate(event.start);
-                                    setSelectedEvent(event);
-                                }}
-                            >
-                                <div className="event-list-date">
-                                    {moment(event.start).format('DD MMM YYYY')}
-                                </div>
-                                <div className="event-list-title">
-                                    {event.title}
-                                </div>
-                                <div className="event-list-time">
-                                    <Clock size={12} style={{ marginRight: 4 }} />
-                                    {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {selectedEvent && (
-                    <motion.div
-                        className="event-modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={closeModal}
-                    >
-                        <motion.div
-                            className="event-modal-content"
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Header */}
-                            <div className="modal-header">
-                                <div>
-                                    <h2>{selectedEvent.title}</h2>
-                                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                                        <button
-                                            onClick={() => setViewMode('detail')}
-                                            style={{
-                                                background: viewMode === 'detail' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                color: 'white',
-                                                padding: '4px 12px',
-                                                borderRadius: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.8rem',
-                                                transition: 'all 0.2s'
-                                            }}
-                                        >
-                                            Details
-                                        </button>
-                                        <button
-                                            onClick={() => setViewMode('json')}
-                                            style={{
-                                                background: viewMode === 'json' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                color: 'white',
-                                                padding: '4px 12px',
-                                                borderRadius: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.8rem',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                transition: 'all 0.2s'
-                                            }}
-                                        >
-                                            <Code size={14} /> JSON
-                                        </button>
-                                    </div>
-                                </div>
-                                <button className="close-btn" onClick={closeModal}>
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            {/* Body */}
-                            <div className="modal-body">
-                                {viewMode === 'detail' ? (
-                                    <>
-                                        <div className="detail-item">
-                                            <Clock className="icon" size={20} />
-                                            <div>
-                                                <label>Time</label>
-                                                <p>
-                                                    {moment(selectedEvent.start).format('DD MMM YYYY, HH:mm')} - {moment(selectedEvent.end).format('HH:mm')}
-                                                </p>
-                                            </div>
+                ) : !selectedUser ? (
+                    <div className="no-data">
+                        <p>Search for a user to see their event history.</p>
+                    </div>
+                ) : events.length === 0 ? (
+                    <div className="no-data">
+                        <p>No events found for {selectedUser.name}.</p>
+                    </div>
+                ) : (
+                    <table className="user-events-table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: '60px' }}>No.</th>
+                                <th>Subject</th>
+                                <th>Room / Location</th>
+                                <th>Time</th>
+                                <th style={{ textAlign: 'center' }}>Status</th>
+                                <th style={{ textAlign: 'center' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {events.map((event, index) => (
+                                <tr key={event.id || index}>
+                                    <td style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600, color: '#fff' }}>
+                                            {event.title}
                                         </div>
-
-                                        <div className="detail-item">
-                                            <MapPin className="icon" size={20} />
-                                            <div>
-                                                <label>Location / Resource</label>
-                                                <p>{selectedEvent.location}</p>
-                                                {selectedEvent.resource.roomType && (
-                                                    <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                                                        Type: {selectedEvent.resource.roomType}
-                                                    </span>
-                                                )}
-                                            </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>
+                                            {event.location}
                                         </div>
-
-                                        {/* Custom Field for Car (Start -> Destination) */}
-                                        {selectedEvent.resource.customField && (selectedEvent.resource.customField.start || selectedEvent.resource.customField.destination) && (
-                                            <div className="detail-item">
-                                                <Car className="icon" size={20} />
-                                                <div>
-                                                    <label>Route (Car)</label>
-                                                    <p>
-                                                        {selectedEvent.resource.customField.start || '?'} <span style={{ color: '#a29bfe' }}>➜</span> {selectedEvent.resource.customField.destination || '?'}
-                                                    </p>
-                                                </div>
+                                        {event.resource.roomType && (
+                                            <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                                {event.resource.roomType}
                                             </div>
                                         )}
-
-                                        <div className="detail-item">
-                                            <User className="icon" size={20} />
-                                            <div>
-                                                <label>Owner</label>
-                                                <p>{selectedEvent.resource.owner}</p>
-                                            </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontSize: '0.9rem' }}>
+                                            {moment(event.start).format('DD MMM YYYY')}
                                         </div>
-
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                            {selectedEvent.resource.checkInPin && (
-                                                <div className="detail-item">
-                                                    <KeyRound className="icon" size={20} />
-                                                    <div>
-                                                        <label>Check-in PIN</label>
-                                                        <p style={{ fontFamily: 'monospace', fontSize: '1.2rem', color: '#55efc4' }}>
-                                                            {selectedEvent.resource.checkInPin}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {selectedEvent.resource.objectiveId && (
-                                                <div className="detail-item">
-                                                    <Info className="icon" size={20} />
-                                                    <div>
-                                                        <label>Objective ID</label>
-                                                        <p>{selectedEvent.resource.objectiveId}</p>
-                                                    </div>
-                                                </div>
-                                            )}
+                                        <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                            {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}
                                         </div>
-
-                                        {selectedEvent.resource.attendees && selectedEvent.resource.attendees.length > 0 && (
-                                            <div className="detail-item">
-                                                <Users className="icon" size={20} />
-                                                <div>
-                                                    <label>Attendees</label>
-                                                    <p>{selectedEvent.resource.attendees.length} people</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="detail-item">
-                                            <CalendarPlus className="icon" size={20} />
-                                            <div>
-                                                <label>Created At</label>
-                                                <p>{moment(selectedEvent.resource.createdTime).format('DD MMM YYYY, HH:mm:ss')}</p>
-                                            </div>
-                                        </div>
-
-                                        {/* --- Transaction Timeline --- */}
-                                        {selectedEvent.resource.transactions && selectedEvent.resource.transactions.length > 0 && (
-                                            <div className="transaction-section">
-                                                <h3>History</h3>
-                                                <div className="timeline">
-                                                    {[...selectedEvent.resource.transactions]
-                                                        .sort((a, b) => (b.time?.unix || 0) - (a.time?.unix || 0)) // Sort desc
-                                                        .map((trans, index) => (
-                                                            <div key={trans._id || index} className="timeline-item">
-                                                                <div className={`timeline-dot ${trans.action}`} />
-                                                                <div className="timeline-content">
-                                                                    <div className="timeline-action">
-                                                                        {trans.action} by User
-                                                                    </div>
-                                                                    <div className="timeline-date">
-                                                                        <Clock size={12} />
-                                                                        <span>
-                                                                            {trans.time?.day}/{trans.time?.month}/{trans.time?.year} {String(trans.time?.hour).padStart(2, '0')}.{String(trans.time?.minute).padStart(2, '0')}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <div style={{ position: 'relative' }}>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
+                                            {event.isCancelled ? 'Cancelled' : 'Scheduled'}
+                                        </span>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
                                         <button
-                                            onClick={handleCopyJson}
-                                            style={{
-                                                position: 'absolute',
-                                                top: '10px',
-                                                right: '10px',
-                                                background: 'rgba(255, 255, 255, 0.1)',
-                                                border: 'none',
-                                                color: 'white',
-                                                padding: '6px',
-                                                borderRadius: '6px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px'
-                                            }}
+                                            className="view-btn"
+                                            onClick={() => setSelectedEvent(event)}
                                         >
-                                            {copied ? <Check size={16} color="#55efc4" /> : <Copy size={16} />}
-                                            {copied && <span style={{ fontSize: '0.8rem', color: '#55efc4' }}>Copied!</span>}
+                                            <Eye size={16} />
                                         </button>
-                                        <pre style={{
-                                            background: 'rgba(0, 0, 0, 0.3)',
-                                            padding: '16px',
-                                            borderRadius: '12px',
-                                            overflowX: 'auto',
-                                            color: '#a29bfe',
-                                            fontSize: '0.85rem',
-                                            fontFamily: 'monospace',
-                                            maxHeight: '400px'
-                                        }}>
-                                            {JSON.stringify(selectedEvent.resource, null, 2)}
-                                        </pre>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Footer */}
-                            <div className="modal-footer">
-                                <div />
-                                <span className={`status-badge ${selectedEvent.isCancelled ? 'cancelled' : 'active'}`}>
-                                    {selectedEvent.isCancelled ? 'Cancelled' : 'Scheduled'}
-                                </span>
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
-            </AnimatePresence>
-        </div >
+            </motion.div>
+
+            <UserEventModal
+                isOpen={!!selectedEvent}
+                event={selectedEvent}
+                onClose={closeModal}
+            />
+        </div>
     )
 }
-

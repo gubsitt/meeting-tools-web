@@ -8,6 +8,7 @@ import Settings from './pages/Settings'
 import Calendar from './pages/Calendar'
 import UserEvents from './pages/UserEvents'
 import CancelledEvents from './pages/CancelledEvents'
+import MissSyncEvents from './pages/MissSyncEvents'
 
 // Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Calendar)
 function LoginRoute() {
@@ -138,6 +139,15 @@ function App() {
           element={
             <PrivateRoute>
               <CancelledEvents />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/miss-sync-events"
+          element={
+            <PrivateRoute>
+              <MissSyncEvents />
             </PrivateRoute>
           }
         />

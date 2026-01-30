@@ -1,0 +1,292 @@
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download } from 'lucide-react'
+import moment from 'moment'
+
+export default function UserEventModal({ isOpen, onClose, event }) {
+    const [viewMode, setViewMode] = useState('detail')
+    const [copied, setCopied] = useState(false)
+
+    if (!isOpen || !event) return null
+
+    const handleCopyJson = () => {
+        if (!event) return
+        const jsonString = JSON.stringify(event.resource, null, 2)
+        navigator.clipboard.writeText(jsonString)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    const handleDownloadJson = () => {
+        if (!event) return
+        const jsonString = JSON.stringify(event.resource, null, 2)
+        const blob = new Blob([jsonString], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `${event.title || 'event'}.json`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+    }
+
+    // Reset view mode when modal opens/changes
+    // React's key prop on the component instance in parent can handle reset, 
+    // or we can use useEffect here. 
+    // For simplicity, we'll let the user manage it or default to 'detail' on mount.
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className="event-modal-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={onClose}
+                >
+                    <motion.div
+                        className="event-modal-content"
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="modal-header">
+                            <div>
+                                <h2>{event.title}</h2>
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                    <button
+                                        onClick={() => setViewMode('detail')}
+                                        style={{
+                                            background: viewMode === 'detail' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            color: 'white',
+                                            padding: '4px 12px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8rem',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Details
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('json')}
+                                        style={{
+                                            background: viewMode === 'json' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            color: 'white',
+                                            padding: '4px 12px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <Code size={14} /> JSON
+                                    </button>
+                                </div>
+                            </div>
+                            <button className="close-btn" onClick={onClose}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="modal-body">
+                            {viewMode === 'detail' ? (
+                                <>
+                                    <div className="detail-item">
+                                        <Clock className="icon" size={20} />
+                                        <div>
+                                            <label>Time</label>
+                                            <p>
+                                                {moment(event.start).format('DD MMM YYYY, HH:mm')} - {moment(event.end).format('HH:mm')}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-item">
+                                        <MapPin className="icon" size={20} />
+                                        <div>
+                                            <label>Location / Resource</label>
+                                            <p>{event.location}</p>
+                                            {event.resource.roomType && (
+                                                <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+                                                    Type: {event.resource.roomType}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Custom Field for Car (Start -> Destination) */}
+                                    {event.resource.customField && (event.resource.customField.start || event.resource.customField.destination) && (
+                                        <div className="detail-item">
+                                            <Car className="icon" size={20} />
+                                            <div>
+                                                <label>Route (Car)</label>
+                                                <p>
+                                                    {event.resource.customField.start || '?'} <span style={{ color: '#a29bfe' }}>➜</span> {event.resource.customField.destination || '?'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="detail-item">
+                                        <User className="icon" size={20} />
+                                        <div>
+                                            <label>Owner</label>
+                                            <p>{event.resource.owner}</p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        {event.resource.checkInPin && (
+                                            <div className="detail-item">
+                                                <KeyRound className="icon" size={20} />
+                                                <div>
+                                                    <label>Check-in PIN</label>
+                                                    <p style={{ fontFamily: 'monospace', fontSize: '1.2rem', color: '#55efc4' }}>
+                                                        {event.resource.checkInPin}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {event.resource.objectiveId && (
+                                            <div className="detail-item">
+                                                <Info className="icon" size={20} />
+                                                <div>
+                                                    <label>Objective ID</label>
+                                                    <p>{event.resource.objectiveId}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {event.resource.attendees && event.resource.attendees.length > 0 && (
+                                        <div className="detail-item">
+                                            <Users className="icon" size={20} />
+                                            <div>
+                                                <label>Attendees</label>
+                                                <p>{event.resource.attendees.length} people</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="detail-item">
+                                        <CalendarPlus className="icon" size={20} />
+                                        <div>
+                                            <label>Created At</label>
+                                            <p>{moment(event.resource.createdTime).format('DD MMM YYYY, HH:mm:ss')}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* --- Transaction Timeline --- */}
+                                    {event.resource.transactions && event.resource.transactions.length > 0 && (
+                                        <div className="transaction-section" style={{ gridColumn: '1 / -1' }}>
+                                            <h3>History</h3>
+                                            <div className="timeline">
+                                                {[...event.resource.transactions]
+                                                    .sort((a, b) => (b.time?.unix || 0) - (a.time?.unix || 0)) // Sort desc
+                                                    .map((trans, index) => (
+                                                        <div key={trans._id || index} className="timeline-item">
+                                                            <div className={`timeline-dot ${trans.action}`} />
+                                                            <div className="timeline-content">
+                                                                <div className="timeline-action">
+                                                                    {trans.action} by User
+                                                                </div>
+                                                                <div className="timeline-date">
+                                                                    <Clock size={12} />
+                                                                    <span>
+                                                                        {trans.time?.day}/{trans.time?.month}/{trans.time?.year} {String(trans.time?.hour).padStart(2, '0')}.{String(trans.time?.minute).padStart(2, '0')}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div style={{ position: 'relative', gridColumn: '1 / -1' }}>
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '10px',
+                                        right: '10px',
+                                        display: 'flex',
+                                        gap: '8px'
+                                    }}>
+                                        <button
+                                            onClick={handleDownloadJson}
+                                            style={{
+                                                background: 'rgba(255, 255, 255, 0.1)',
+                                                border: 'none',
+                                                color: 'white',
+                                                padding: '6px',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px'
+                                            }}
+                                            title="Download JSON"
+                                        >
+                                            <Download size={16} />
+                                        </button>
+                                        <button
+                                            onClick={handleCopyJson}
+                                            style={{
+                                                background: 'rgba(255, 255, 255, 0.1)',
+                                                border: 'none',
+                                                color: 'white',
+                                                padding: '6px',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px'
+                                            }}
+                                            title="Copy to Clipboard"
+                                        >
+                                            {copied ? <Check size={16} color="#55efc4" /> : <Copy size={16} />}
+                                            {copied && <span style={{ fontSize: '0.8rem', color: '#55efc4' }}>Copied!</span>}
+                                        </button>
+                                    </div>
+                                    <pre style={{
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        padding: '16px',
+                                        borderRadius: '12px',
+                                        overflowX: 'auto',
+                                        color: '#a29bfe',
+                                        fontSize: '0.85rem',
+                                        fontFamily: 'monospace',
+                                        maxHeight: '400px',
+                                        marginTop: '0'
+                                    }}>
+                                        {JSON.stringify(event.resource, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="modal-footer">
+                            <div />
+                            <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
+                                {event.isCancelled ? 'Cancelled' : 'Scheduled'}
+                            </span>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    )
+}

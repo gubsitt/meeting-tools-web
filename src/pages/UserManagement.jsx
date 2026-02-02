@@ -130,7 +130,7 @@ export default function UserManagement() {
                 <tbody>
                   {filteredUsers.map(user => (
                     <tr key={user._id}>
-                      <td>
+                      <td data-label="User">
                         <div className="user-info">
                           <img
                             src={user.profilePicture || `https://ui-avatars.com/api/?name=${user.displayName}`}
@@ -140,13 +140,13 @@ export default function UserManagement() {
                           <span>{user.displayName}</span>
                         </div>
                       </td>
-                      <td>{user.email}</td>
-                      <td>
+                      <td data-label="Email">{user.email}</td>
+                      <td data-label="Provider">
                         <span className={`provider-badge ${user.provider}`}>
                           {user.provider}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Role">
                         <div className="role-selector">
                           {getRoleIcon(user.role)}
                           <select
@@ -161,7 +161,7 @@ export default function UserManagement() {
                           </select>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Actions">
                         {user.role !== 'superadmin' && (
                           <button
                             className="delete-btn"

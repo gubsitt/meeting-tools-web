@@ -30,7 +30,8 @@
 .settings-layout {
   display: flex;
   gap: 32px;
-  align-items: flex-start;
+  align-items: stretch;
+  justify-content: center;
 }
 
 /* Sidebar Tabs */
@@ -69,7 +70,8 @@
 
 /* Content Area */
 .settings-content {
-  flex: 1;
+  width: 100%;
+  max-width: 600px;
   position: relative;
   z-index: 10;
   /* Glassmorphism เข้มขึ้นเหมือน Login */
@@ -227,89 +229,121 @@
   color: #ff6b6b;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .settings-container {
-    padding: 8px;
-    padding-top: 16px;
-    /* Space for hamburger */
-  }
+/* ========================================
+   📱 MOBILE RESPONSIVE STYLES
+   ======================================== */
 
+@media screen and (max-width: 768px) {
+  /* Layout */
+  .settings-container { padding: 12px; }
+  
+  /* Header */
   .settings-header {
-    padding-left: 56px;
-    min-height: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-bottom: 16px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-left: 60px !important;
+    min-height: 50px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .settings-header h1 { 
+    font-size: 1.5rem !important; 
+    margin: 0 !important;
+    line-height: 1 !important;
   }
 
-  .settings-header h1 {
-    font-size: 1.25rem;
-    margin: 0;
-  }
+  .settings-header p { display: none !important; }
 
-  .settings-header p {
-    font-size: 0.85rem;
-    margin: 0;
-    opacity: 0.8;
-  }
-
+  /* Layout - Stack vertically */
   .settings-layout {
     flex-direction: column;
     gap: 16px;
   }
 
+  /* Sidebar - Horizontal tabs */
   .settings-sidebar {
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    gap: 8px;
     padding-bottom: 8px;
-    /* space for scrollbar */
-    gap: 12px;
+  }
+
+  .settings-sidebar::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .settings-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .settings-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
   }
 
   .tab-btn {
     white-space: nowrap;
-    background: rgba(255, 255, 255, 0.08);
     padding: 10px 16px;
-    border-radius: 20px;
     font-size: 0.9rem;
   }
 
-  .tab-btn.active {
-    background: #6c5ce7;
-    color: white;
-  }
-
+  /* Content */
   .settings-content {
-    padding: 20px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.08);
-    /* Unified glass style */
+    padding: 20px 16px;
+    max-width: 100%; /* ให้เต็มความกว้างบนมือถือ */
+    margin: 0; /* ไม่ต้องจัดกึ่งกลางบนมือถือ */
   }
 
+  .form-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .input-field {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+
+  /* Profile Upload - Stack vertically */
   .profile-upload {
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 16px;
+    margin-bottom: 24px;
   }
 
-  .upload-btn-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .avatar-preview {
+    width: 70px;
+    height: 70px;
   }
 
-  .form-actions {
-    display: flex;
-    justify-content: center;
-  }
-
+  /* Buttons */
   .btn-primary {
     width: 100%;
     justify-content: center;
-    padding: 12px;
+    padding: 14px 24px;
+  }
+
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 20px;
+  }
+
+  .alert-box {
+    font-size: 0.9rem;
+    padding: 10px 14px;
   }
 }

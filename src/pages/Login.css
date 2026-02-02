@@ -74,7 +74,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: radial-gradient(circle at top right, #2a2a4a, #1a1a2e);
+  background: transparent;
   overflow: hidden;
 }
 
@@ -119,18 +119,17 @@
 }
 
 @keyframes float {
-
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   33% {
-    transform: translate(50px, -50px) scale(1.1);
+    transform: translate3d(50px, -50px, 0) scale(1.1);
   }
 
   66% {
-    transform: translate(-50px, 50px) scale(0.9);
+    transform: translate3d(-50px, 50px, 0) scale(0.9);
   }
 }
 

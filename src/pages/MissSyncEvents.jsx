@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MissSyncService from '../services/MissSyncService';
-import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Copy, Check } from 'lucide-react';
+import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Copy, Check, Filter, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import moment from 'moment';
 import { motion } from 'framer-motion';
@@ -13,11 +13,13 @@ const MissSyncEvents = () => {
     const [startDate, setStartDate] = useState(moment().startOf('month').format('YYYY-MM-DD'));
     const [endDate, setEndDate] = useState(moment().endOf('month').format('YYYY-MM-DD'));
     const [copiedId, setCopiedId] = useState(null);
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
     const fetchEvents = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
         setHasSearched(true);
+        setIsMobileFilterOpen(false);
         try {
             // Send ISO strings with start/end of day times
             const start = moment(startDate).startOf('day').toISOString();
@@ -69,37 +71,49 @@ const MissSyncEvents = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
             >
-                <form className="search-form" onSubmit={fetchEvents}>
-                    <div className="form-group-inline">
-                        <label>Start Date</label>
-                        <input
-                            type="date"
-                            className="custom-input date-input"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-group-inline">
-                        <label>End Date</label>
-                        <input
-                            type="date"
-                            className="custom-input date-input"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
-                        <label style={{ opacity: 0 }}>Search</label>
-                        <button
-                            type="submit"
-                            className="search-btn"
-                            disabled={loading}
-                        >
-                            {loading ? <RefreshCw className="spin" size={18} /> : <Search size={18} />}
-                            Search
-                        </button>
-                    </div>
-                </form>
+                {/* Mobile Filter Header */}
+                <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+                    <span><Search size={16} /> Filters & Search</span>
+                    <button type="button" className="icon-btn">
+                        {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+                    </button>
+                </div>
+
+                <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+                    <form className="search-form" onSubmit={fetchEvents}>
+                        <div className="date-group-row">
+                            <div className="form-group-inline">
+                                <label>Start Date</label>
+                                <input
+                                    type="date"
+                                    className="custom-input date-input"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group-inline">
+                                <label>End Date</label>
+                                <input
+                                    type="date"
+                                    className="custom-input date-input"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group-inline">
+                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
+                            <button
+                                type="submit"
+                                className="search-btn"
+                                disabled={loading}
+                            >
+                                {loading ? <RefreshCw className="spin" size={18} /> : <Search size={18} />}
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </motion.div>
 
             <motion.div
@@ -143,9 +157,9 @@ const MissSyncEvents = () => {
 
                                 return (
                                     <tr key={event._id}>
-                                        <td style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
-                                        <td style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
-                                        <td>
+                                        <td data-label="Subject" style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
+                                        <td data-label="Room" style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
+                                        <td data-label="Time">
                                             <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
                                                 <span style={{ color: '#fff' }}>
                                                     {moment(event.startTime?.unix || event.startTime).format('DD MMM YYYY')}
@@ -156,7 +170,7 @@ const MissSyncEvents = () => {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td style={{ textAlign: 'center' }}>
+                                        <td data-label="Global ID" style={{ textAlign: 'center' }}>
                                             <span
                                                 className={`status-badge ${!isGlobalMissing ? 'active' : 'cancelled'}`}
                                                 title="Global Sync ID"
@@ -166,7 +180,7 @@ const MissSyncEvents = () => {
                                                 {!isGlobalMissing ? 'Synced' : 'Missing'}
                                             </span>
                                         </td>
-                                        <td style={{ textAlign: 'center' }}>
+                                        <td data-label="Resource ID" style={{ textAlign: 'center' }}>
                                             <span
                                                 className={`status-badge ${!isResourceMissing ? 'active' : 'cancelled'}`}
                                                 title="Resource Sync ID"
@@ -176,7 +190,7 @@ const MissSyncEvents = () => {
                                                 {!isResourceMissing ? 'Synced' : 'Missing'}
                                             </span>
                                         </td>
-                                        <td style={{ textAlign: 'center' }}>
+                                        <td data-label="Sync ID" style={{ textAlign: 'center' }}>
                                             <span
                                                 className={`status-badge ${!isSyncIdMissing ? 'active' : 'cancelled'}`}
                                                 title="Sync ID"
@@ -186,7 +200,7 @@ const MissSyncEvents = () => {
                                                 {!isSyncIdMissing ? 'Synced' : 'Missing'}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Action">
                                             <button
                                                 className="view-btn"
                                                 onClick={() => handleCopy(JSON.stringify(event, null, 2), event._id)}

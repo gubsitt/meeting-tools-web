@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import CancelledEventService from '../services/CancelledEventService'
 import toast from 'react-hot-toast'
-import { Search, Eye } from 'lucide-react'
+import { Search, Eye, Filter, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import dayjs from 'dayjs'
 import Loading from '../components/Loading'
@@ -12,6 +12,7 @@ export default function CancelledEvents() {
     const [transactions, setTransactions] = useState([])
     const [loading, setLoading] = useState(false)
     const [hasSearched, setHasSearched] = useState(false) // Track if search has been performed
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
     // Filter State
     const [startDate, setStartDate] = useState(dayjs().startOf('month').format('YYYY-MM-DD'))
@@ -31,6 +32,7 @@ export default function CancelledEvents() {
         if (e) e.preventDefault()
         setLoading(true)
         setHasSearched(true) // Mark as searched
+        setIsMobileFilterOpen(false) // ปิด filter เมื่อกด search
         try {
             const startTimestamp = dayjs(startDate).startOf('day').valueOf()
             const endTimestamp = dayjs(endDate).endOf('day').valueOf()
@@ -104,32 +106,44 @@ export default function CancelledEvents() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
             >
-                <form onSubmit={handleSearch} className="search-form">
-                    <div className="form-group-inline">
-                        <label>Start Date</label>
-                        <input
-                            type="date"
-                            className="custom-input date-input"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
+                {/* Mobile Filter Header */}
+                <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+                    <span><Search size={16} /> Filters </span>
+                    <button type="button" className="icon-btn">
+                        {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+                    </button>
+                </div>
+
+                <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+                    <form onSubmit={handleSearch} className="search-form">
+                    <div className="date-group-row">
+                        <div className="form-group-inline">
+                            <label>Start Date</label>
+                            <input
+                                type="date"
+                                className="custom-input date-input"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group-inline">
+                            <label>End Date</label>
+                            <input
+                                type="date"
+                                className="custom-input date-input"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
                     </div>
                     <div className="form-group-inline">
-                        <label>End Date</label>
-                        <input
-                            type="date"
-                            className="custom-input date-input"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
-                        <label style={{ opacity: 0 }}>Search</label>
+                        <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
                         <button type="submit" className="search-btn" disabled={loading}>
                             <Search size={18} /> {loading ? 'Searching...' : 'Search'}
                         </button>
                     </div>
                 </form>
+                </div>
             </motion.div>
 
             {/* Table Listing */}
@@ -167,13 +181,13 @@ export default function CancelledEvents() {
                         <tbody>
                             {transactions.map((t, index) => (
                                 <tr key={t._id || index}>
-                                    <td style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
-                                    <td>
+                                    <td data-label="No." style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td data-label="Subject">
                                         <div style={{ fontWeight: 600, color: '#fff' }}>
                                             {t.subject || '-'}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Room">
                                         <div style={{ fontWeight: 500 }}>
                                             {t.roomId ? t.roomId.split('@')[0] : '-'}
                                         </div>
@@ -181,7 +195,7 @@ export default function CancelledEvents() {
                                             {t.roomId}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Event Time">
                                         <div style={{ fontSize: '0.9rem' }}>
                                             {dayjs(t.startTime).format('DD MMM YYYY')}
                                         </div>
@@ -189,17 +203,17 @@ export default function CancelledEvents() {
                                             {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Cancelled At">
                                         {t.time && t.time.unix ? (
                                             <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
                                                 {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
                                             </span>
                                         ) : '-'}
                                     </td>
-                                    <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    <td data-label="Detail" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         {t.detail || '-'}
                                     </td>
-                                    <td style={{ textAlign: 'center' }}>
+                                    <td data-label="Action" style={{ textAlign: 'center' }}>
                                         <button
                                             className="view-btn"
                                             onClick={() => handleViewDetails(t.eventId)}

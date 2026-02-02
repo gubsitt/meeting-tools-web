@@ -4,7 +4,7 @@ import UserEventService from '../services/UserEventService'
 import { motion } from 'framer-motion'
 import Loading from '../components/Loading'
 import toast from 'react-hot-toast'
-import { Search, X, Eye } from 'lucide-react'
+import { Search, X, Eye, Filter } from 'lucide-react'
 import UserEventModal from '../components/UserEventModal'
 import './UserEvents.css'
 
@@ -17,6 +17,7 @@ export default function UserEvents() {
     const [searchResults, setSearchResults] = useState([])
     const [selectedUser, setSelectedUser] = useState(null)
     const [showDropdown, setShowDropdown] = useState(false)
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -47,6 +48,7 @@ export default function UserEvents() {
         setSelectedUser(user);
         setSearchQuery(user.email); // Show email or name in input
         setShowDropdown(false);
+        setIsMobileFilterOpen(false); // ปิด filter บนมือถือ
 
         // Fetch Events immediately
         fetchEvents(user._id);
@@ -57,6 +59,7 @@ export default function UserEvents() {
         setSelectedUser(null);
         setEvents([]);
         setSearchResults([]);
+        setIsMobileFilterOpen(true); // เปิด filter กลับมาเมื่อ clear
     }
 
     const fetchEvents = async (userId) => {
@@ -152,7 +155,16 @@ export default function UserEvents() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
             >
-                <div className="search-form">
+                {/* Mobile Filter Header */}
+                <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+                    <span><Search size={16} /> Search User</span>
+                    <button type="button" className="icon-btn">
+                        {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+                    </button>
+                </div>
+
+                <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+                    <div className="search-form">
                     <div className="form-group-inline">
                         <label>Search User (Email, Name)</label>
                         <div style={{ position: 'relative', width: '100%' }}>
@@ -204,11 +216,12 @@ export default function UserEvents() {
                     </div>
                     {/* Placeholder for alignment, similar to Calendar search button */}
                     <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
-                        <label style={{ opacity: 0 }}>Search</label>
+                        <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
                         <div className="search-btn" style={{ cursor: 'default' }}>
                             <Search size={18} />
                         </div>
                     </div>
+                </div>
                 </div>
             </motion.div>
 
@@ -246,13 +259,13 @@ export default function UserEvents() {
                         <tbody>
                             {events.map((event, index) => (
                                 <tr key={event.id || index}>
-                                    <td style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
-                                    <td>
+                                    <td data-label="No." style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td data-label="Subject">
                                         <div style={{ fontWeight: 600, color: '#fff' }}>
                                             {event.title}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Room / Location">
                                         <div style={{ fontWeight: 500 }}>
                                             {event.location}
                                         </div>
@@ -262,7 +275,7 @@ export default function UserEvents() {
                                             </div>
                                         )}
                                     </td>
-                                    <td>
+                                    <td data-label="Time">
                                         <div style={{ fontSize: '0.9rem' }}>
                                             {moment(event.start).format('DD MMM YYYY')}
                                         </div>
@@ -270,12 +283,12 @@ export default function UserEvents() {
                                             {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}
                                         </div>
                                     </td>
-                                    <td style={{ textAlign: 'center' }}>
+                                    <td data-label="Status" style={{ textAlign: 'center' }}>
                                         <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
                                             {event.isCancelled ? 'Cancelled' : 'Scheduled'}
                                         </span>
                                     </td>
-                                    <td style={{ textAlign: 'center' }}>
+                                    <td data-label="Action" style={{ textAlign: 'center' }}>
                                         <button
                                             className="view-btn"
                                             onClick={() => setSelectedEvent(event)}

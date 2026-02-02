@@ -527,9 +527,11 @@
   background: rgba(0, 0, 0, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
-  justify-content: space-between;
-  /* ดันปุ่มลบไปซ้าย Badge ไปขวา */
+  justify-content: flex-end;
+  /* ดันทุกอย่างไปขวา */
   align-items: center;
+  gap: 12px;
+  /* เว้นระยะระหว่างปุ่มกับ badge */
 }
 
 /* ปุ่ม Delete */
@@ -756,5 +758,31 @@
   .detail-item label { font-size: 0.7rem !important; }
   .detail-item p { font-size: 0.9rem !important; word-break: break-word; }
 
-  .modal-footer { padding: 12px 16px !important; flex-shrink: 0; background: rgba(0, 0, 0, 0.3); }
+  /* Modal Footer - ปรับให้ปุ่มและ badge สวยงาม */
+  .modal-footer { 
+    padding: 12px 16px !important; 
+    flex-shrink: 0; 
+    background: rgba(0, 0, 0, 0.3);
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Delete Button - ลดขนาด */
+  .delete-btn {
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  /* Status Badge - ขยายเต็มความกว้าง */
+  .status-badge {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+    display: block !important;
+  }
 }

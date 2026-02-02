@@ -1,3 +1,6 @@
+/* =========================================
+   Reset & Base Styles
+   ========================================= */
 * {
   margin: 0;
   padding: 0;
@@ -5,40 +8,53 @@
 }
 
 :root {
-  /* Exzy Metropolis Color Palette */
+  /* --- Exzy Metropolis Color Palette --- */
   --color-primary: #6C5CE7;
+  /* ม่วงหลัก */
   --color-primary-light: #A29BFE;
+  /* ม่วงอ่อน */
   --color-primary-dark: #5849C4;
+  /* ม่วงเข้ม */
   --color-secondary: #00CEC9;
+  /* เขียวน้ำทะเล */
   --color-accent: #FD79A8;
+  /* ชมพู */
   --color-warning: #FDCB6E;
+  /* เหลือง */
   --color-success: #00B894;
+  /* เขียว */
   --color-error: #FF7675;
-  
-  /* Dark Theme */
+  /* แดง */
+
+  /* --- Dark Theme Backgrounds --- */
+  /* สีเดียวกับหน้า Login */
   --color-bg-primary: #0F0F1E;
+  /* พื้นหลังเข้มสุด */
   --color-bg-secondary: #1A1A2E;
+  /* พื้นหลังรอง */
   --color-bg-tertiary: #16213E;
-  --color-bg-glass: rgba(26, 26, 46, 0.8);
-  
-  /* Text Colors */
+  /* สีน้ำเงินเข้ม */
+  --color-bg-glass: rgba(255, 255, 255, 0.05);
+  /* กระจกใส */
+
+  /* --- Text Colors --- */
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: #B8B8D4;
-  --color-text-muted: #7E7E9A;
-  
-  /* Border & Shadow */
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+
+  /* --- Border & Shadow --- */
   --color-border: rgba(255, 255, 255, 0.1);
   --color-border-focus: rgba(108, 92, 231, 0.5);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.3);
-  
-  /* Fonts */
-  --font-primary: 'Inter', sans-serif;
+  --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.15);
+
+  /* --- Fonts --- */
+  --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Space Grotesk', sans-serif;
-  
-  /* Transitions */
+
+  /* --- Transitions --- */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;
@@ -46,16 +62,19 @@
 
 body {
   font-family: var(--font-primary);
-  background: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 50%, #16213E 100%);
+  /* พื้นหลัง Gradient เหมือนหน้า Login */
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   background-attachment: fixed;
+  /* ให้พื้นหลังนิ่งเวลาเลื่อน */
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-/* Animated background grid */
+/* --- Animated Background Grid (Cyberpunk Feel) --- */
 body::before {
   content: '';
   position: fixed;
@@ -63,19 +82,24 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    linear-gradient(rgba(108, 92, 231, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(108, 92, 231, 0.05) 1px, transparent 1px);
+  /* ตารางจางๆ สีม่วง */
+  background-image:
+    linear-gradient(rgba(108, 92, 231, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 92, 231, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
-  z-index: 0;
+  z-index: -1;
+  /* สำคัญ: ต้องอยู่หลังสุด */
   pointer-events: none;
-  animation: gridMove 20s linear infinite;
+  /* animation: gridMove 60s linear infinite; */
+  /* ปิดไว้ก่อนกันเวียนหัว ถ้าชอบเปิดได้ครับ */
 }
 
+/* Animation เผื่ออยากเปิดใช้ */
 @keyframes gridMove {
   0% {
     transform: translate(0, 0);
   }
+
   100% {
     transform: translate(50px, 50px);
   }
@@ -85,33 +109,37 @@ body::before {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+  /* เนื้อหาหลักอยู่หน้า Grid */
 }
 
-/* Scrollbar Styling */
+/* --- Scrollbar Styling --- */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: #1a1a2e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 5px;
+  background: #444;
+  border-radius: 4px;
+  border: 2px solid #1a1a2e;
+  /* สร้างขอบให้ดูเล็กลง */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-light);
-}
-
-/* Selection */
-::selection {
   background: var(--color-primary);
-  color: var(--color-text-primary);
 }
 
-/* Focus Styles */
+/* --- Selection --- */
+::selection {
+  background: rgba(108, 92, 231, 0.3);
+  color: #fff;
+}
+
+/* --- Focus Styles --- */
 *:focus {
   outline: none;
 }
@@ -121,7 +149,7 @@ body::before {
   outline-offset: 2px;
 }
 
-/* Utility Classes */
+/* --- Utility Classes --- */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -134,3 +162,80 @@ body::before {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* --- Common Card Style (ใช้ร่วมกันทุกหน้า) --- */
+.glass-card {
+  background: rgba(26, 26, 46, 0.95);
+  /* ใช้สีทึบแทน glass effect */
+  /* backdrop-filter: blur(10px); */
+  /* ปิดเพื่อประสิทธิภาพ */
+  /* -webkit-backdrop-filter: blur(10px); */
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* =========================================
+   Floating Orbs Animation (Global)
+   ========================================= */
+/* ปิดลูกบอลลอยเพื่อประสิทธิภาพสูงสุด */
+.orb {
+  display: none;
+  /* ปิดการแสดงผลทั้งหมด */
+}
+
+/* เก็บ code ไว้เผื่อต้องการเปิดกลับมา
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.5;
+  animation: float 20s infinite ease-in-out;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(108, 92, 231, 0.5), transparent);
+  top: -10%;
+  right: -10%;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 206, 201, 0.4), transparent);
+  bottom: -20%;
+  left: -20%;
+  animation-delay: 7s;
+}
+
+.orb-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(253, 121, 168, 0.4), transparent);
+  top: 40%;
+  right: 10%;
+  animation-delay: 14s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate3d(50px, -50px, 0) scale(1.1);
+  }
+
+  66% {
+    transform: translate3d(-50px, 50px, 0) scale(0.9);
+  }
+}
+*/

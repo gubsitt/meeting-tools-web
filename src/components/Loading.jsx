@@ -4,21 +4,12 @@ import './Loading.css'
 export default function Loading() {
   return (
     <div className="loading-container">
-      <motion.div
-        className="loading-spinner"
-        animate={{
-          rotate: 360
-        }}
-        transition={{
-          duration: 1,
-          repeat: Infinity,
-          ease: 'linear'
-        }}
-      >
+      {/* ลบ framer-motion animate ออก ใช้แค่ CSS animation */}
+      <div className="loading-spinner">
         <div className="spinner-ring"></div>
         <div className="spinner-ring"></div>
         <div className="spinner-ring"></div>
-      </motion.div>
+      </div>
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -1,0 +1,225 @@
+import { useState, useEffect } from 'react'
+import CancelledEventService from '../services/CancelledEventService'
+import toast from 'react-hot-toast'
+import { Search, Eye } from 'lucide-react'
+import { motion } from 'framer-motion'
+import dayjs from 'dayjs'
+import Loading from '../components/Loading'
+import CancelledEventModal from '../components/CancelledEventModal'
+import './CancelledEvents.css'
+
+export default function CancelledEvents() {
+    const [transactions, setTransactions] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [hasSearched, setHasSearched] = useState(false) // Track if search has been performed
+
+    // Filter State
+    const [startDate, setStartDate] = useState(dayjs().startOf('month').format('YYYY-MM-DD'))
+    const [endDate, setEndDate] = useState(dayjs().endOf('month').format('YYYY-MM-DD'))
+
+    // Modal State
+    const [selectedEvent, setSelectedEvent] = useState(null)
+    const [modalLoading, setModalLoading] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
+    // Removed initial useEffect to prevent auto-fetch
+    /* useEffect(() => {
+        handleSearch()
+    }, []) */
+
+    const handleSearch = async (e) => {
+        if (e) e.preventDefault()
+        setLoading(true)
+        setHasSearched(true) // Mark as searched
+        try {
+            const startTimestamp = dayjs(startDate).startOf('day').valueOf()
+            const endTimestamp = dayjs(endDate).endOf('day').valueOf()
+
+            const response = await CancelledEventService.getCancelledTransactions(startTimestamp, endTimestamp)
+            if (response.success) {
+                setTransactions(response.data)
+                if (response.data.length > 0) {
+                    toast.success(`Found ${response.data.length} cancelled events`)
+                } else {
+                    toast('No cancelled events found')
+                }
+            } else {
+                setTransactions([])
+                toast.error('Failed to fetch data')
+            }
+        } catch (error) {
+            console.error("Failed to fetch cancelled events", error)
+            setTransactions([])
+            toast.error('Error fetching cancelled events')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleViewDetails = async (eventId) => {
+        setIsModalOpen(true)
+        setModalLoading(true)
+        setSelectedEvent(null)
+        try {
+            const response = await CancelledEventService.getEventOwner(eventId)
+            if (response.success) {
+                setSelectedEvent(response.data)
+            }
+        } catch (error) {
+            console.error("Failed to fetch event details", error)
+            toast.error("Failed to load details")
+        } finally {
+            setModalLoading(false)
+        }
+    }
+
+    const closeModal = () => {
+        setIsModalOpen(false)
+        setSelectedEvent(null)
+    }
+
+    return (
+        <div className="cancelled-events-page">
+            {/* Orbs Background */}
+            <div className="orb orb-1" />
+            <div className="orb orb-2" />
+            <div className="orb orb-3" />
+
+            {/* Header */}
+            <motion.div
+                className="cancelled-header-control"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div>
+                    <h1>Cancelled History</h1>
+                    <p>View history of cancelled meeting room reservations</p>
+                </div>
+            </motion.div>
+
+            {/* Filter Section (Glass Style) */}
+            <motion.div
+                className="search-bar-container"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+            >
+                <form onSubmit={handleSearch} className="search-form">
+                    <div className="form-group-inline">
+                        <label>Start Date</label>
+                        <input
+                            type="date"
+                            className="custom-input date-input"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group-inline">
+                        <label>End Date</label>
+                        <input
+                            type="date"
+                            className="custom-input date-input"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
+                        <label style={{ opacity: 0 }}>Search</label>
+                        <button type="submit" className="search-btn" disabled={loading}>
+                            <Search size={18} /> {loading ? 'Searching...' : 'Search'}
+                        </button>
+                    </div>
+                </form>
+            </motion.div>
+
+            {/* Table Listing */}
+            <motion.div
+                className="cancelled-events-content-wrapper"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+            >
+                {loading ? (
+                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <Loading />
+                    </div>
+                ) : !hasSearched ? (
+                    <div className="no-data">
+                        <p>Please select a date range and click Search to view cancelled events.</p>
+                    </div>
+                ) : transactions.length === 0 ? (
+                    <div className="no-data">
+                        <p>No cancelled events found in this period.</p>
+                    </div>
+                ) : (
+                    <table className="cancelled-table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: '60px' }}>No.</th>
+                                <th>Subject</th>
+                                <th>Room</th>
+                                <th>Event Time</th>
+                                <th>Cancelled At</th>
+                                <th>Detail</th>
+                                <th style={{ textAlign: 'center' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {transactions.map((t, index) => (
+                                <tr key={t._id || index}>
+                                    <td style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600, color: '#fff' }}>
+                                            {t.subject || '-'}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>
+                                            {t.roomId ? t.roomId.split('@')[0] : '-'}
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                            {t.roomId}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontSize: '0.9rem' }}>
+                                            {dayjs(t.startTime).format('DD MMM YYYY')}
+                                        </div>
+                                        <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                            {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {t.time && t.time.unix ? (
+                                            <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
+                                                {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
+                                            </span>
+                                        ) : '-'}
+                                    </td>
+                                    <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {t.detail || '-'}
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <button
+                                            className="view-btn"
+                                            onClick={() => handleViewDetails(t.eventId)}
+                                        >
+                                            <Eye size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </motion.div>
+
+            <CancelledEventModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                event={selectedEvent}
+                loading={modalLoading}
+            />
+        </div>
+    )
+}

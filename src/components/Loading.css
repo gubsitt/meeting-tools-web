@@ -20,6 +20,10 @@
   border: 3px solid transparent;
   border-radius: 50%;
   animation: spin 2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  will-change: transform;
+  /* เพิ่ม performance hint */
+  transform: translateZ(0);
+  /* บังคับให้ใช้ GPU */
 }
 
 .spinner-ring:nth-child(1) {
@@ -41,6 +45,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -58,13 +63,18 @@
 }
 
 @keyframes blink {
-  0%, 20% {
+
+  0%,
+  20% {
     opacity: 0;
   }
+
   40% {
     opacity: 1;
   }
-  60%, 100% {
+
+  60%,
+  100% {
     opacity: 0;
   }
 }

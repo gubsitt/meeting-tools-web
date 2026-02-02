@@ -1,0 +1,756 @@
+/* --- Container หลัก --- */
+.calendar-page {
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  /* ให้พื้นหลังใส เพื่อโชว์ Gradient ของ Body */
+  background: transparent;
+}
+
+.calendar-header-control {
+  margin-bottom: 24px;
+}
+
+.calendar-header-control h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: white;
+  font-weight: 700;
+}
+
+.calendar-header-control p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+}
+
+/* --- Search Bar (กล่องค้นหาแบบแก้ว) --- */
+.search-bar-container {
+  position: relative;
+  z-index: 10;
+  /* ✨ Glassmorphism เข้มขึ้นเหมือน Login */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+  padding: 24px;
+  border-radius: 20px;
+  margin-bottom: 32px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar-container:hover {
+  /* เมาส์ชี้แล้วลอยขึ้นนิดนึง + เงาฟุ้ง */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.form-group-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.form-group-inline label {
+  font-size: 0.9rem;
+  color: #a29bfe;
+  /* สีม่วงอ่อนๆ */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.custom-input {
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.custom-input:focus {
+  border-color: #6c5ce7;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  /* ปรับขนาดให้เท่า Input */
+  padding: 12px 20px;
+
+  /* ปุ่มสีไล่ระดับ */
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* เอา height fix ออกเพื่อให้สูงเท่า input ตาม padding */
+  /* height: 48px; */
+  transition: all 0.3s;
+  min-width: 100px;
+  /* ลดความกว้างลง */
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
+  filter: brightness(1.1);
+}
+
+.search-btn:disabled {
+  background: #4a4a4a;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
+}
+
+.search-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- Mobile Filter Toggle --- */
+.mobile-filter-header {
+  display: none; /* ซ่อนใน Desktop */
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  margin-bottom: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mobile-filter-header span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #a29bfe;
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Search Form Wrapper */
+.search-form-wrapper {
+  width: 100%;
+}
+
+.desktop-only-label {
+  display: block; /* แสดงใน Desktop */
+}
+
+.date-group-row {
+  display: contents; /* ใน Desktop ไม่มีผล */
+}
+
+/* --- Calendar Wrapper (กรอบปฏิทินแบบแก้ว) --- */
+.calendar-wrapper {
+  position: relative;
+  z-index: 10;
+  /* ✨ Glassmorphism เข้มขึ้นเหมือน Login */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 40px;
+}
+
+/* Loading Overlay */
+.calendar-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(22, 33, 62, 0.7);
+  /* พื้นหลังสี Theme เข้มๆ โปร่งแสง */
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+}
+
+/* --- Override React Big Calendar --- */
+.rbc-calendar {
+  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Toolbar Buttons */
+.rbc-toolbar button {
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px !important;
+  /* บังคับมน */
+  margin-left: 4px;
+  transition: all 0.2s;
+}
+
+.rbc-toolbar button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.rbc-toolbar button.rbc-active {
+  background: linear-gradient(135deg, #6c5ce7 0%, #5f4dd0 100%);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 2px 10px rgba(108, 92, 231, 0.4);
+}
+
+/* Toolbar Title */
+.rbc-toolbar-label {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: white;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+}
+
+/* Grid Lines */
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.rbc-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 0;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.02);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: #a29bfe;
+}
+
+.rbc-day-bg+.rbc-day-bg {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rbc-month-row+.rbc-month-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Cell Colors */
+.rbc-off-range-bg {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.rbc-today {
+  background: linear-gradient(180deg, rgba(108, 92, 231, 0.15) 0%, transparent 100%);
+}
+
+/* Events Styling */
+.rbc-event {
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2px 6px !important;
+}
+
+/* Popup Overlay */
+.rbc-overlay {
+  background: rgba(22, 33, 62, 0.95);
+  /* สี Theme เข้มๆ */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  padding: 16px;
+  z-index: 1000;
+  animation: fadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.rbc-overlay-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: -8px -8px 12px -8px;
+  padding: 10px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px 12px 0 0;
+}
+
+.rbc-overlay .rbc-event {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  font-size: 0.95rem;
+  transition: transform 0.2s;
+}
+
+.rbc-overlay .rbc-event:hover {
+  transform: translateX(4px);
+  filter: brightness(1.2);
+}
+
+/* Show More Button */
+.rbc-show-more {
+  background-color: rgba(108, 92, 231, 0.15);
+  color: #a29bfe !important;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 4px;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+}
+
+.rbc-show-more:hover {
+  background-color: #6c5ce7;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.4);
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.event-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  /* เบลอฉากหลัง */
+  z-index: 2000;
+  /* อยู่บนสุด */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* กล่อง Modal */
+.event-modal-content {
+  background: rgba(22, 33, 62, 0.85);
+  /* สี Theme เข้มๆ โปร่งแสง */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 700px;
+  /* Widened from 500px */
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  /* ขอบเรืองแสงด้านใน */
+  overflow: hidden;
+  color: white;
+}
+
+/* Modal Header */
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.3;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.close-btn:hover {
+  background: #ff6b6b;
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.detail-item .icon {
+  color: #a29bfe;
+  /* สีม่วงไอคอน */
+  margin-top: 2px;
+  background: rgba(108, 92, 231, 0.15);
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.detail-item label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.detail-item p {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+}
+
+.description-text {
+  font-size: 0.95rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  white-space: pre-wrap;
+  /* เพื่อให้ขึ้นบรรทัดใหม่ตามข้อมูล */
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.email-sub {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Modal Footer */
+.modal-footer {
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  /* ดันปุ่มลบไปซ้าย Badge ไปขวา */
+  align-items: center;
+}
+
+/* ปุ่ม Delete */
+.delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 107, 107, 0.1);
+  /* สีแดงจางๆ */
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: #ff6b6b;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  transform: translateY(-1px);
+}
+
+.delete-btn:active {
+  transform: scale(0.98);
+}
+
+.delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: rgba(0, 184, 148, 0.2);
+  color: #55efc4;
+  border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+/* ========================================
+   📱 MOBILE RESPONSIVE STYLES (แก้ Header หุบ + ปฏิทินยาว)
+   ======================================== */
+
+@media screen and (max-width: 768px) {
+  /* ลด Padding ขอบจอลงเล็กน้อยเพื่อให้มีพื้นที่มากขึ้น */
+  .calendar-page { padding: 12px; }
+  
+  /* --- 1. แก้ Header หุบ --- */
+.calendar-header-control {
+    display: flex !important;
+    flex-direction: row !important; /* ✅ กลับมาเป็นแนวนอน */
+    align-items: center !important; /* ✅ สั่งจัดกึ่งกลางแนวตั้ง (สำคัญมาก) */
+    justify-content: flex-start !important;
+    
+    padding-left: 60px !important; /* เว้นที่ทางซ้ายให้ปุ่ม 3 ขีด */
+    min-height: 50px !important;   /* ความสูงขั้นต่ำให้พอดีกับปุ่ม */
+    margin-bottom: 12px !important;
+    width: 100%;
+  }
+.calendar-header-control h1 { 
+    font-size: 1.5rem !important; 
+    margin: 0 !important; /* ✅ ลบ Margin ทิ้ง เพื่อไม่ให้ดันขึ้น/ลง */
+    line-height: 1 !important;
+    
+    /* 👇 ถ้ายังรู้สึกสูงไป ให้เพิ่ม padding-top ตรงนี้เพื่อดันลงนิดนึง */
+    padding-top: 4px; 
+  }
+
+  .calendar-header-control p {
+    display: none !important; 
+  }
+  /* --- 2. Search Bar --- */
+  .search-bar-container { padding: 16px; margin-bottom: 16px; }
+  .mobile-filter-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; color: #fff; cursor: pointer;
+  }
+  .mobile-filter-header span { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+  .icon-btn {
+    background: rgba(255, 255, 255, 0.1); border: none; border-radius: 8px;
+    padding: 6px; color: #a29bfe; display: flex;
+  }
+
+  /* Form Layout */
+  .search-form-wrapper {
+    display: none; margin-top: 15px; padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .search-form-wrapper.open { display: block; animation: slideDown 0.3s ease-out; }
+
+  .search-form { flex-direction: column; gap: 12px; }
+  .form-group-inline, .search-input-wrapper, .search-email-wrapper {
+    width: 100%; flex: none; min-width: 0;
+  }
+
+  /* วันที่ Start/End กลับมาเรียงแนวนอน (คู่กัน) */
+  .date-group-row {
+    display: flex;
+    flex-direction: row !important; 
+    gap: 10px;
+    width: 100%;
+  }
+  .date-group-row .form-group-inline { flex: 1; }
+
+  .search-btn { width: 100%; margin-top: 5px; height: 45px; }
+  .desktop-only-label { display: none !important; }
+
+  /* --- 3. แก้ปฏิทินยาวเกินไป (Compact Calendar) --- */
+  .calendar-wrapper { 
+    padding: 10px; /* ลด padding ภายใน */
+  }
+  
+  .rbc-calendar { 
+    min-height: 400px !important; /* ✅ ลดความสูงลงจาก 500px ให้ดันขึ้นมา */
+    height: auto !important;
+  }
+
+  /* จัด Toolbar ให้กระชับขึ้น */
+  .rbc-toolbar { 
+    flex-direction: column; 
+    gap: 8px; /* ลดช่องว่างระหว่างบรรทัด */
+    margin-bottom: 10px !important; 
+  }
+  .rbc-toolbar-label { 
+    order: -1; 
+    font-size: 1.1rem; /* ลดขนาดฟอนต์หัวข้อเดือน */
+    margin-bottom: 4px !important; 
+    font-weight: 700;
+  }
+  
+  .rbc-btn-group { display: flex; width: 100%; }
+  
+  /* แก้สีปุ่มกด */
+  .rbc-btn-group button.rbc-active,
+  .rbc-btn-group button:active,
+  .rbc-btn-group button:hover,
+  .rbc-btn-group button:focus {
+    background: #6c5ce7 !important;
+    color: white !important;
+    box-shadow: 0 2px 10px rgba(108, 92, 231, 0.4) !important;
+    border-color: transparent !important;
+    outline: none !important;
+  }
+
+  /* ===========================
+     ✅ MODAL FIX
+     =========================== */
+  .event-modal-content {
+    width: 90% !important; max-height: 80vh !important;
+    display: flex !important; flex-direction: column !important;
+    margin: auto; position: relative;
+  }
+  .modal-header { padding: 16px !important; flex-shrink: 0; }
+  .modal-header h2 { font-size: 1.2rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  
+  .modal-body {
+    padding: 16px !important; overflow-y: auto !important; flex: 1;
+    display: flex !important; flex-direction: column !important; gap: 16px !important;
+  }
+  
+  .detail-item {
+    width: 100% !important; gap: 12px !important;
+    display: flex !important; align-items: flex-start !important;
+  }
+  .detail-item .icon { width: 32px !important; height: 32px !important; padding: 6px !important; flex-shrink: 0; }
+  .detail-item label { font-size: 0.7rem !important; }
+  .detail-item p { font-size: 0.9rem !important; word-break: break-word; }
+
+  .modal-footer { padding: 12px 16px !important; flex-shrink: 0; background: rgba(0, 0, 0, 0.3); }
+
+  /* ปรับขนาด Task (Event) ให้กะทัดรัด */
+  .rbc-event {
+    padding: 1px 4px !important;   /* ลดช่องว่างขอบ (เดิม 2px 6px) */
+    font-size: 0.7rem !important;  /* ลดขนาดตัวหนังสือ (ให้เล็กพอมองเห็น) */
+    line-height: 1.2 !important;   /* ลดความสูงบรรทัด */
+    border-radius: 3px !important; /* ลดความโค้งมนให้สมส่วน */
+    min-height: auto !important;   /* ปลดล็อคความสูง */
+    margin-bottom: 1px !important; /* ลดระยะห่างระหว่าง Event */
+  }
+
+  /* ปรับตัวหนังสือข้างใน */
+  .rbc-event-content {
+    font-size: 0.7rem !important;
+    white-space: nowrap !important; /* บังคับบรรทัดเดียว */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* ถ้าชื่อยาวเกินให้ขึ้น ... */
+  }
+  
+  /* ลดความสูงของช่องวัน (Row) นิดหน่อยเพื่อให้แสดง Event ได้มากขึ้น */
+  .rbc-month-row {
+    min-height: 80px !important; /* ปรับลดหรือเพิ่มตามต้องการ */
+  }
+  /* ปรับปุ่ม +X more ให้เล็กและกระชับ */
+  .rbc-show-more {
+    font-size: 0.7rem !important;        /* ลดขนาดตัวหนังสือเท่า Event */
+    padding: 1px 4px !important;         /* ลดช่องว่างภายใน */
+    margin-top: 1px !important;          /* ลดระยะห่างด้านบน */
+    line-height: 1.2 !important;         /* ลดความสูงบรรทัด */
+    border-radius: 3px !important;       /* ความมนเท่า Event */
+    background-color: rgba(108, 92, 231, 0.1) !important; /* สีพื้นจางๆ */
+    border: 1px solid rgba(108, 92, 231, 0.2) !important; /* ขอบบางๆ */
+    color: #a29bfe !important;           /* สีตัวหนังสือ */
+    display: block !important;           /* ให้แสดงเป็นก้อน */
+    text-align: center !important;       /* จัดกึ่งกลาง */
+    white-space: nowrap !important;      /* ห้ามขึ้นบรรทัดใหม่ */
+  }
+
+  /* ปรับสีตอนกดปุ่ม More */
+  .rbc-show-more:hover, 
+  .rbc-show-more:active {
+    background-color: #6c5ce7 !important;
+    color: white !important;
+  }
+}

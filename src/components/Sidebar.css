@@ -2,9 +2,11 @@
 .sidebar {
   width: 260px;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(26, 26, 46, 0.98);
+  /* ใช้สีทึบแทน glass effect */
+  /* backdrop-filter: blur(12px); */
+  /* ปิดเพื่อประสิทธิภาพสูงสุด */
+  /* -webkit-backdrop-filter: blur(12px); */
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
@@ -19,7 +21,8 @@
 
 .sidebar.collapsed {
   width: 80px;
-  padding: 24px 12px; /* ลด padding ด้านข้างลงเพื่อให้ดูสมดุล */
+  padding: 24px 12px;
+  /* ลด padding ด้านข้างลงเพื่อให้ดูสมดุล */
 }
 
 .sidebar.collapsed .sidebar-header {
@@ -31,17 +34,18 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 50px; /* ปรับความสูงให้พอดี */
-  margin-bottom: 24px; 
+  height: 50px;
+  /* ปรับความสูงให้พอดี */
+  margin-bottom: 24px;
   padding-left: 8px;
 }
 
 /* --- [แก้ไข] จัดการรูปโลโก้ --- */
 .sidebar-header img {
-  height: 100%; 
-  max-width: 140px; 
-  object-fit: contain; 
-  
+  height: 100%;
+  max-width: 140px;
+  object-fit: contain;
+
   /* ✅ ใช้สูตรเดียวกับหน้า Login: เร่งแสงและสีให้สว่างชัด */
   filter: brightness(2.5) saturate(1.5);
 }
@@ -54,39 +58,12 @@
   letter-spacing: 1px;
 }
 
-/* Back Button */
-.back-btn-container {
-  margin-bottom: 24px;
-}
-
-.back-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px; 
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
 /* Navigation */
 .sidebar-nav {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px; 
+  gap: 8px;
 }
 
 .nav-item {
@@ -95,24 +72,26 @@
   align-items: center;
   gap: 14px;
   padding: 12px 16px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.85);
+  /* เพิ่มจาก 0.6 เป็น 0.85 ให้ชัดขึ้น */
   text-decoration: none;
   border-radius: 12px;
   transition: all 0.2s;
   font-size: 1rem;
+  font-weight: 500;
 }
 
 .nav-item:hover {
   color: white;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* Active State */
 .nav-item.active {
   color: white;
   font-weight: 600;
-  background: linear-gradient(90deg, rgba(108, 92, 231, 0.2) 0%, rgba(108, 92, 231, 0.05) 100%);
-  border: 1px solid rgba(108, 92, 231, 0.3);
+  background: linear-gradient(90deg, rgba(108, 92, 231, 0.25) 0%, rgba(108, 92, 231, 0.08) 100%);
+  border: 1px solid rgba(108, 92, 231, 0.4);
 }
 
 /* Active Indicator Bar */
@@ -154,7 +133,7 @@
 }
 
 .avatar-small {
-  width: 36px; 
+  width: 36px;
   height: 36px;
   border-radius: 50%;
   background: #6c5ce7;
@@ -162,7 +141,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .avatar-small img {
@@ -178,8 +157,16 @@
   white-space: nowrap;
 }
 
-.user-name { font-weight: 600; color: white; }
-.user-role { font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); text-transform: capitalize; }
+.user-name {
+  font-weight: 600;
+  color: white;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: capitalize;
+}
 
 .logout-btn-sidebar {
   background: none;
@@ -198,8 +185,14 @@
   background: rgba(255, 107, 107, 0.15);
 }
 
-.sidebar.collapsed .user-details { display: none; }
-.sidebar.collapsed .sidebar-footer { flex-direction: column; gap: 16px; }
+.sidebar.collapsed .user-details {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  flex-direction: column;
+  gap: 16px;
+}
 
 /* Collapse Toggle */
 .collapse-toggle {
@@ -223,4 +216,65 @@
 .collapse-toggle:hover {
   background: #6c5ce7;
   border-color: #6c5ce7;
+}
+
+/* --- Mobile Drawer Styles --- */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px !important;
+    transform: translateX(-100%);
+    /* Hidden by default */
+    background: #1a1a2e;
+    /* Solid background for mobile */
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    /* Slide in */
+  }
+
+  /* Override collapsed state on mobile - always full width when open */
+  .sidebar.collapsed {
+    width: 280px !important;
+  }
+
+  .sidebar.collapsed .sidebar-header,
+  .sidebar.collapsed .nav-item span,
+  .sidebar.collapsed .user-details {
+    display: flex !important;
+    /* Force show content */
+  }
+
+  .sidebar.collapsed .user-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sidebar.collapsed .nav-item {
+    justify-content: flex-start;
+  }
+
+  /* Hide Desktop Collapse Toggle */
+  .collapse-toggle {
+    display: none;
+  }
+}
+
+/* Backdrop for Mobile */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
 }

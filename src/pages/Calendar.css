@@ -149,6 +149,58 @@
   height: 18px;
 }
 
+/* --- Mobile Filter Toggle --- */
+.mobile-filter-header {
+  display: none; /* ซ่อนใน Desktop */
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  margin-bottom: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mobile-filter-header span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #a29bfe;
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Search Form Wrapper */
+.search-form-wrapper {
+  width: 100%;
+}
+
+.desktop-only-label {
+  display: block; /* แสดงใน Desktop */
+}
+
+.date-group-row {
+  display: contents; /* ใน Desktop ไม่มีผล */
+}
+
 /* --- Calendar Wrapper (กรอบปฏิทินแบบแก้ว) --- */
 .calendar-wrapper {
   position: relative;
@@ -527,167 +579,178 @@
   border: 1px solid rgba(0, 184, 148, 0.3);
 }
 
+/* ========================================
+   📱 MOBILE RESPONSIVE STYLES (แก้ Header หุบ + ปฏิทินยาว)
+   ======================================== */
 
-
-/* --- Responsive Styles for Calendar --- */
-@media (max-width: 768px) {
-  .calendar-page {
-    padding: 8px;
-    /* Maximize screen width usage */
-    padding-top: 16px;
+@media screen and (max-width: 768px) {
+  /* ลด Padding ขอบจอลงเล็กน้อยเพื่อให้มีพื้นที่มากขึ้น */
+  .calendar-page { padding: 12px; }
+  
+  /* --- 1. แก้ Header หุบ --- */
+.calendar-header-control {
+    display: flex !important;
+    flex-direction: row !important; /* ✅ กลับมาเป็นแนวนอน */
+    align-items: center !important; /* ✅ สั่งจัดกึ่งกลางแนวตั้ง (สำคัญมาก) */
+    justify-content: flex-start !important;
+    
+    padding-left: 60px !important; /* เว้นที่ทางซ้ายให้ปุ่ม 3 ขีด */
+    min-height: 50px !important;   /* ความสูงขั้นต่ำให้พอดีกับปุ่ม */
+    margin-bottom: 12px !important;
+    width: 100%;
   }
-
-  .calendar-header-control {
-    padding-left: 56px;
-    /* Precise alignment with burger */
-    min-height: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-
-  .calendar-header-control h1 {
-    font-size: 1.25rem;
-    margin: 0;
-    line-height: 1.2;
+.calendar-header-control h1 { 
+    font-size: 1.5rem !important; 
+    margin: 0 !important; /* ✅ ลบ Margin ทิ้ง เพื่อไม่ให้ดันขึ้น/ลง */
+    line-height: 1 !important;
+    
+    /* 👇 ถ้ายังรู้สึกสูงไป ให้เพิ่ม padding-top ตรงนี้เพื่อดันลงนิดนึง */
+    padding-top: 4px; 
   }
 
   .calendar-header-control p {
-    font-size: 0.8rem;
-    margin: 0;
-    opacity: 0.8;
+    display: none !important; 
+  }
+  /* --- 2. Search Bar --- */
+  .search-bar-container { padding: 16px; margin-bottom: 16px; }
+  .mobile-filter-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; color: #fff; cursor: pointer;
+  }
+  .mobile-filter-header span { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+  .icon-btn {
+    background: rgba(255, 255, 255, 0.1); border: none; border-radius: 8px;
+    padding: 6px; color: #a29bfe; display: flex;
   }
 
-  /* Compact Search Bar */
-  .search-bar-container {
-    padding: 16px;
-    /* Internal spacing */
-    margin-bottom: 16px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.08);
-    /* Slightly more transparent */
+  /* Form Layout */
+  .search-form-wrapper {
+    display: none; margin-top: 15px; padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .search-form-wrapper.open { display: block; animation: slideDown 0.3s ease-out; }
+
+  .search-form { flex-direction: column; gap: 12px; }
+  .form-group-inline, .search-input-wrapper, .search-email-wrapper {
+    width: 100%; flex: none; min-width: 0;
   }
 
-  .search-form {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .form-group-inline {
-    min-width: 100%;
-    gap: 6px;
-  }
-
-  .form-group-inline label {
-    font-size: 0.85rem;
-  }
-
-  .custom-input {
-    padding: 10px 14px;
-    /* Comfortable touch target */
-    font-size: 0.95rem;
-  }
-
-  .search-btn {
+  /* วันที่ Start/End กลับมาเรียงแนวนอน (คู่กัน) */
+  .date-group-row {
+    display: flex;
+    flex-direction: row !important; 
+    gap: 10px;
     width: 100%;
-    justify-content: center;
-    padding: 12px;
-    font-size: 1rem;
-    margin-top: 8px;
+  }
+  .date-group-row .form-group-inline { flex: 1; }
+
+  .search-btn { width: 100%; margin-top: 5px; height: 45px; }
+  .desktop-only-label { display: none !important; }
+
+  /* --- 3. แก้ปฏิทินยาวเกินไป (Compact Calendar) --- */
+  .calendar-wrapper { 
+    padding: 10px; /* ลด padding ภายใน */
+  }
+  
+  .rbc-calendar { 
+    min-height: 400px !important; /* ✅ ลดความสูงลงจาก 500px ให้ดันขึ้นมา */
+    height: auto !important;
   }
 
-  /* Calendar Card */
-  .calendar-wrapper {
-    padding: 12px;
-    border-radius: 16px;
+  /* จัด Toolbar ให้กระชับขึ้น */
+  .rbc-toolbar { 
+    flex-direction: column; 
+    gap: 8px; /* ลดช่องว่างระหว่างบรรทัด */
+    margin-bottom: 10px !important; 
   }
-
-  .rbc-calendar {
-    height: 550px !important;
-    /* Taller for better visibility */
-  }
-
-  /* Toolbar */
-  .rbc-toolbar {
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .rbc-toolbar-label {
-    font-size: 1.1rem;
+  .rbc-toolbar-label { 
+    order: -1; 
+    font-size: 1.1rem; /* ลดขนาดฟอนต์หัวข้อเดือน */
+    margin-bottom: 4px !important; 
     font-weight: 700;
-    margin: 4px 0;
   }
-
-  .rbc-btn-group {
-    width: 100%;
-    display: flex;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 4px;
-  }
-
-  .rbc-btn-group button {
-    flex: 1;
-    padding: 6px 0;
-    font-size: 0.85rem;
-    border: none !important;
-    background: transparent !important;
-    border-radius: 6px !important;
-    margin: 0 2px;
-  }
-
-  .rbc-btn-group button.rbc-active {
+  
+  .rbc-btn-group { display: flex; width: 100%; }
+  
+  /* แก้สีปุ่มกด */
+  .rbc-btn-group button.rbc-active,
+  .rbc-btn-group button:active,
+  .rbc-btn-group button:hover,
+  .rbc-btn-group button:focus {
     background: #6c5ce7 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: white !important;
+    box-shadow: 0 2px 10px rgba(108, 92, 231, 0.4) !important;
+    border-color: transparent !important;
+    outline: none !important;
   }
 
-  .rbc-header {
-    padding: 8px 0;
-    font-size: 0.8rem;
-  }
-
-  .rbc-event {
-    padding: 2px 6px !important;
-    font-size: 0.8rem;
-  }
-
-  /* Modal Overlay */
-  .event-modal-overlay {
-    padding: 8px;
-    /* Minimized padding to maximize space */
-    align-items: center;
-    /* Center vertically for better focus */
-  }
-
+  /* ===========================
+     ✅ MODAL FIX
+     =========================== */
   .event-modal-content {
-    max-width: 100%;
-    width: 100%;
-    /* Full width */
-    max-height: 92vh;
-    /* Taller */
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
+    width: 90% !important; max-height: 80vh !important;
+    display: flex !important; flex-direction: column !important;
+    margin: auto; position: relative;
   }
-
+  .modal-header { padding: 16px !important; flex-shrink: 0; }
+  .modal-header h2 { font-size: 1.2rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  
   .modal-body {
-    overflow-y: auto;
-    padding: 20px;
+    padding: 16px !important; overflow-y: auto !important; flex: 1;
+    display: flex !important; flex-direction: column !important; gap: 16px !important;
   }
-
+  
   .detail-item {
-    flex-direction: row;
-    /* Keep row unless very narrow */
-    align-items: center;
-    gap: 12px;
+    width: 100% !important; gap: 12px !important;
+    display: flex !important; align-items: flex-start !important;
+  }
+  .detail-item .icon { width: 32px !important; height: 32px !important; padding: 6px !important; flex-shrink: 0; }
+  .detail-item label { font-size: 0.7rem !important; }
+  .detail-item p { font-size: 0.9rem !important; word-break: break-word; }
+
+  .modal-footer { padding: 12px 16px !important; flex-shrink: 0; background: rgba(0, 0, 0, 0.3); }
+
+  /* ปรับขนาด Task (Event) ให้กะทัดรัด */
+  .rbc-event {
+    padding: 1px 4px !important;   /* ลดช่องว่างขอบ (เดิม 2px 6px) */
+    font-size: 0.7rem !important;  /* ลดขนาดตัวหนังสือ (ให้เล็กพอมองเห็น) */
+    line-height: 1.2 !important;   /* ลดความสูงบรรทัด */
+    border-radius: 3px !important; /* ลดความโค้งมนให้สมส่วน */
+    min-height: auto !important;   /* ปลดล็อคความสูง */
+    margin-bottom: 1px !important; /* ลดระยะห่างระหว่าง Event */
   }
 
-  .detail-item .icon {
-    width: 32px;
-    height: 32px;
+  /* ปรับตัวหนังสือข้างใน */
+  .rbc-event-content {
+    font-size: 0.7rem !important;
+    white-space: nowrap !important; /* บังคับบรรทัดเดียว */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* ถ้าชื่อยาวเกินให้ขึ้น ... */
+  }
+  
+  /* ลดความสูงของช่องวัน (Row) นิดหน่อยเพื่อให้แสดง Event ได้มากขึ้น */
+  .rbc-month-row {
+    min-height: 80px !important; /* ปรับลดหรือเพิ่มตามต้องการ */
+  }
+  /* ปรับปุ่ม +X more ให้เล็กและกระชับ */
+  .rbc-show-more {
+    font-size: 0.7rem !important;        /* ลดขนาดตัวหนังสือเท่า Event */
+    padding: 1px 4px !important;         /* ลดช่องว่างภายใน */
+    margin-top: 1px !important;          /* ลดระยะห่างด้านบน */
+    line-height: 1.2 !important;         /* ลดความสูงบรรทัด */
+    border-radius: 3px !important;       /* ความมนเท่า Event */
+    background-color: rgba(108, 92, 231, 0.1) !important; /* สีพื้นจางๆ */
+    border: 1px solid rgba(108, 92, 231, 0.2) !important; /* ขอบบางๆ */
+    color: #a29bfe !important;           /* สีตัวหนังสือ */
+    display: block !important;           /* ให้แสดงเป็นก้อน */
+    text-align: center !important;       /* จัดกึ่งกลาง */
+    white-space: nowrap !important;      /* ห้ามขึ้นบรรทัดใหม่ */
+  }
+
+  /* ปรับสีตอนกดปุ่ม More */
+  .rbc-show-more:hover, 
+  .rbc-show-more:active {
+    background-color: #6c5ce7 !important;
+    color: white !important;
   }
 }

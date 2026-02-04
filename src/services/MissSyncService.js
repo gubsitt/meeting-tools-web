@@ -23,6 +23,16 @@ const MissSyncService = {
             console.error('Error updating miss sync event:', error);
             throw error;
         }
+    },
+
+    syncMissingSyncIds: async (eventId) => {
+        try {
+            const response = await api.post(`/api/events/miss-sync/sync/${eventId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error syncing missing sync IDs:', error);
+            throw error;
+        }
     }
 };
 

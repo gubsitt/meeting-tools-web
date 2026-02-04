@@ -9,6 +9,7 @@ import Calendar from './pages/Calendar'
 import UserEvents from './pages/UserEvents'
 import CancelledEvents from './pages/CancelledEvents'
 import MissSyncEvents from './pages/MissSyncEvents'
+import ConfigFile from './pages/ConfigFile'
 
 // Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Calendar)
 function LoginRoute() {
@@ -148,6 +149,15 @@ function App() {
           element={
             <PrivateRoute>
               <MissSyncEvents />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/config-file"
+          element={
+            <PrivateRoute>
+              <ConfigFile />
             </PrivateRoute>
           }
         />

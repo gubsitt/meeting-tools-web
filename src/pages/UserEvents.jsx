@@ -18,6 +18,7 @@ export default function UserEvents() {
     const [selectedUser, setSelectedUser] = useState(null)
     const [showDropdown, setShowDropdown] = useState(false)
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+    const [searchEventId, setSearchEventId] = useState('')
 
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -71,7 +72,6 @@ export default function UserEvents() {
 
             if (res.success && res.data) {
                 const formattedEvents = res.data
-                    .filter(item => !item.cancelled)
                     .map(item => ({
                         id: item._id, // Use _id from transaction or event
                         title: item.title || 'Untitled Event',
@@ -214,6 +214,16 @@ export default function UserEvents() {
                             )}
                         </div>
                     </div>
+                    <div className="form-group-inline" style={{ marginTop: '10px' }}>
+                        <label>Event ID (Optional)</label>
+                        <input
+                            type="text"
+                            placeholder="Filter by Event ID..."
+                            value={searchEventId}
+                            onChange={(e) => setSearchEventId(e.target.value)}
+                            className="custom-input"
+                        />
+                    </div>
                     {/* Placeholder for alignment, similar to Calendar search button */}
                     <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
                         <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
@@ -248,18 +258,22 @@ export default function UserEvents() {
                     <table className="user-events-table">
                         <thead>
                             <tr>
-                                <th style={{ width: '60px' }}>No.</th>
+                                <th>Event ID</th>
                                 <th>Subject</th>
                                 <th>Room / Location</th>
-                                <th>Time</th>
+                                <th>Event Time</th>
                                 <th style={{ textAlign: 'center' }}>Status</th>
                                 <th style={{ textAlign: 'center' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {events.map((event, index) => (
+                            {events.filter(event => !searchEventId || event.id?.toLowerCase().includes(searchEventId.toLowerCase())).map((event, index) => (
                                 <tr key={event.id || index}>
-                                    <td data-label="No." style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td data-label="Event ID">
+                                        <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                            {event.id || '-'}
+                                        </div>
+                                    </td>
                                     <td data-label="Subject">
                                         <div style={{ fontWeight: 600, color: '#fff' }}>
                                             {event.title}

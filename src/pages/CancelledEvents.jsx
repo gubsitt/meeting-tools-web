@@ -17,6 +17,7 @@ export default function CancelledEvents() {
     // Filter State
     const [startDate, setStartDate] = useState(dayjs().startOf('month').format('YYYY-MM-DD'))
     const [endDate, setEndDate] = useState(dayjs().endOf('month').format('YYYY-MM-DD'))
+    const [searchEventId, setSearchEventId] = useState('')
 
     // Modal State
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -94,7 +95,7 @@ export default function CancelledEvents() {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <div>
-                    <h1>Cancelled History</h1>
+                    <h1>Cancelled by MIT</h1>
                     <p>View history of cancelled meeting room reservations</p>
                 </div>
             </motion.div>
@@ -136,6 +137,18 @@ export default function CancelledEvents() {
                             />
                         </div>
                     </div>
+                    <div className="date-group-row">
+                        <div className="form-group-inline" style={{ flex: 1 }}>
+                            <label>Event ID (Optional)</label>
+                            <input
+                                type="text"
+                                className="custom-input"
+                                placeholder="Search by Event ID..."
+                                value={searchEventId}
+                                onChange={(e) => setSearchEventId(e.target.value)}
+                            />
+                        </div>
+                    </div>
                     <div className="form-group-inline">
                         <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
                         <button type="submit" className="search-btn" disabled={loading}>
@@ -169,7 +182,7 @@ export default function CancelledEvents() {
                     <table className="cancelled-table">
                         <thead>
                             <tr>
-                                <th style={{ width: '60px' }}>No.</th>
+                                <th>Event ID</th>
                                 <th>Subject</th>
                                 <th>Room</th>
                                 <th>Event Time</th>
@@ -179,9 +192,13 @@ export default function CancelledEvents() {
                             </tr>
                         </thead>
                         <tbody>
-                            {transactions.map((t, index) => (
+                            {transactions.filter(t => !searchEventId || t.eventId?.toLowerCase().includes(searchEventId.toLowerCase())).map((t, index) => (
                                 <tr key={t._id || index}>
-                                    <td data-label="No." style={{ textAlign: 'center', opacity: 0.7 }}>{index + 1}</td>
+                                    <td data-label="Event ID">
+                                        <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                            {t.eventId || '-'}
+                                        </div>
+                                    </td>
                                     <td data-label="Subject">
                                         <div style={{ fontWeight: 600, color: '#fff' }}>
                                             {t.subject || '-'}

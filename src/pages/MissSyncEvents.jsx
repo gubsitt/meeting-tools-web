@@ -4,7 +4,7 @@ import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Filter, X } from 'lu
 import { toast } from 'react-hot-toast';
 import moment from 'moment';
 import { motion } from 'framer-motion';
-import './UserEvents.css'; // Reusing UserEvents styles for consistency
+import './MissSyncEvents.css';
 
 const MissSyncEvents = () => {
     const [events, setEvents] = useState([]);
@@ -14,7 +14,8 @@ const MissSyncEvents = () => {
     const [endDate, setEndDate] = useState(moment().endOf('month').format('YYYY-MM-DD'));
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
     const [syncingEventId, setSyncingEventId] = useState(null);
-    const [syncResults, setSyncResults] = useState({});
+    const [syncAlert, setSyncAlert] = useState(null);
+    const [searchEventId, setSearchEventId] = useState('');
 
     const fetchEvents = async (e) => {
         if (e) e.preventDefault();
@@ -53,8 +54,18 @@ const MissSyncEvents = () => {
             const syncData = response.data || response;
             
             if (isSuccess) {
-                // Store sync result
-                setSyncResults(prev => ({ ...prev, [eventId]: syncData }));
+                // Show success alert
+                const updatedFields = syncData.updated ? Object.keys(syncData.updated) : [];
+                setSyncAlert({
+                    type: 'success',
+                    message: 'Sync completed successfully!',
+                    details: updatedFields.length > 0 ? `Updated: ${updatedFields.join(', ')}` : null
+                });
+                
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    setSyncAlert(null);
+                }, 5000);
                 
                 // Update event in the list
                 if (syncData.updated) {
@@ -73,32 +84,38 @@ const MissSyncEvents = () => {
                     );
                 }
                 
-                const updatedFields = syncData.updated ? Object.keys(syncData.updated) : [];
-                toast.success(`✅ Synced${updatedFields.length > 0 ? ': ' + updatedFields.join(', ') : ''}`, { duration: 4000 });
             } else {
-                // Store failed sync result
-                setSyncResults(prev => ({ ...prev, [eventId]: syncData }));
-                
-                // Get error messages from response.data.errors
+                // Show error alert
                 const errors = syncData.errors || [];
                 const errorMsg = errors.length > 0 ? errors.join(' | ') : (response.message || 'Sync failed');
-                toast.error(`❌ Sync Failed: ${errorMsg}`, { duration: 6000 });
+                setSyncAlert({
+                    type: 'error',
+                    message: 'Sync failed!',
+                    details: errorMsg
+                });
+                
+                // Auto hide after 8 seconds for errors
+                setTimeout(() => {
+                    setSyncAlert(null);
+                }, 8000);
             }
         } catch (error) {
-            // Store error in syncResults
+            // Show error alert
             const errorData = error.response?.data?.data || error.response?.data;
             const errorMessages = errorData?.errors || [error.response?.data?.message || error.message || 'Unknown error'];
-            
-            setSyncResults(prev => ({ 
-                ...prev, 
-                [eventId]: { 
-                    success: false, 
-                    errors: errorMessages
-                } 
-            }));
-            
             const errorMsg = Array.isArray(errorMessages) ? errorMessages.join(' | ') : errorMessages;
-            toast.error(`❌ Sync Failed: ${errorMsg}`, { duration: 6000 });
+            
+            setSyncAlert({
+                type: 'error',
+                message: 'Sync failed!',
+                details: errorMsg
+            });
+            
+            // Auto hide after 8 seconds for errors
+            setTimeout(() => {
+                setSyncAlert(null);
+            }, 8000);
+            
             console.error(error);
         } finally {
             setSyncingEventId(null);
@@ -156,6 +173,18 @@ const MissSyncEvents = () => {
                                     onChange={(e) => setEndDate(e.target.value)}
                                 />
                             </div>
+                        </div>       
+                        <div className="date-group-row">
+                            <div className="form-group-inline" style={{ flex: 1 }}>
+                                <label>Event ID (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="custom-input"
+                                    placeholder="Filter by Event ID..."
+                                    value={searchEventId}
+                                    onChange={(e) => setSearchEventId(e.target.value)}
+                                />
+                            </div>
                         </div>
                         <div className="form-group-inline">
                             <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
@@ -171,6 +200,75 @@ const MissSyncEvents = () => {
                     </form>
                 </div>
             </motion.div>
+
+            {/* Sync Alert Banner */}
+            {syncAlert && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    style={{
+                        padding: '20px',
+                        borderRadius: '12px',
+                        marginBottom: '20px',
+                        background: syncAlert.type === 'success' 
+                            ? 'linear-gradient(135deg, rgba(46, 213, 115, 0.2), rgba(46, 213, 115, 0.05))'
+                            : 'linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.05))',
+                        border: `2px solid ${syncAlert.type === 'success' ? 'rgba(46, 213, 115, 0.5)' : 'rgba(255, 107, 107, 0.5)'}`,
+                        boxShadow: syncAlert.type === 'success'
+                            ? '0 4px 20px rgba(46, 213, 115, 0.3)'
+                            : '0 4px 20px rgba(255, 107, 107, 0.3)',
+                        position: 'relative',
+                        zIndex: 10
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ 
+                            fontSize: '32px',
+                            lineHeight: 1
+                        }}>
+                            {syncAlert.type === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '600',
+                                color: syncAlert.type === 'success' ? '#00ff88' : '#ff6b6b',
+                                marginBottom: '6px'
+                            }}>
+                                {syncAlert.message}
+                            </div>
+                            {syncAlert.details && (
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    color: 'rgba(255,255,255,0.8)',
+                                    lineHeight: 1.4
+                                }}>
+                                    {syncAlert.details}
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => setSyncAlert(null)}
+                            style={{
+                                background: 'rgba(255,255,255,0.1)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: 'rgba(255,255,255,0.7)',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                </motion.div>
+            )}
 
             <motion.div
                 className="user-events-content-wrapper"
@@ -196,6 +294,7 @@ const MissSyncEvents = () => {
                     <table className="user-events-table">
                         <thead>
                             <tr>
+                                <th>Event ID</th>
                                 <th>Subject</th>
                                 <th>Room</th>
                                 <th>Time</th>
@@ -206,13 +305,18 @@ const MissSyncEvents = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {events.map((event) => {
+                            {events.filter(event => !searchEventId || event._id?.toLowerCase().includes(searchEventId.toLowerCase())).map((event) => {
                                 const isGlobalMissing = !event.globalSyncId;
                                 const isResourceMissing = !event.resourceSyncId;
                                 const isSyncIdMissing = !event.syncId;
 
                                 return (
                                     <tr key={event._id}>
+                                        <td data-label="Event ID">
+                                            <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                {event._id || '-'}
+                                            </div>
+                                        </td>
                                         <td data-label="Subject" style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
                                         <td data-label="Room" style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
                                         <td data-label="Time">
@@ -273,35 +377,6 @@ const MissSyncEvents = () => {
                                                 )}
                                                 {syncingEventId === event._id ? 'Syncing...' : 'Sync'}
                                             </button>
-                                            {syncResults[event._id] && (
-                                                <div style={{ 
-                                                    marginTop: '8px', 
-                                                    fontSize: '0.75rem', 
-                                                    padding: '6px 8px', 
-                                                    borderRadius: '4px',
-                                                    background: syncResults[event._id].success 
-                                                        ? 'rgba(46, 213, 115, 0.1)' 
-                                                        : 'rgba(255, 71, 87, 0.1)',
-                                                    color: syncResults[event._id].success ? '#2ed573' : '#ff4757',
-                                                    border: `1px solid ${syncResults[event._id].success ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 71, 87, 0.3)'}`
-                                                }}>
-                                                    {syncResults[event._id].success ? (
-                                                        <>
-                                                            <div><strong>✅ Updated:</strong></div>
-                                                            {syncResults[event._id].updated && Object.entries(syncResults[event._id].updated).map(([key, value]) => (
-                                                                <div key={key}>• {key}: {value?.substring(0, 20)}...</div>
-                                                            ))}
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div><strong>❌ Errors:</strong></div>
-                                                            {syncResults[event._id].errors && Array.isArray(syncResults[event._id].errors) && syncResults[event._id].errors.map((err, idx) => (
-                                                                <div key={idx}>• {err}</div>
-                                                            ))}
-                                                        </>
-                                                    )}
-                                                </div>
-                                            )}
                                         </td>
                                     </tr>
                                 );

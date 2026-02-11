@@ -25,7 +25,7 @@ export default function CancelledEventModal({ isOpen, onClose, event, loading })
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `cancelled_event_${event.event?.eventId || 'data'}.json`
+        link.download = `cancelled_event_${event.event?._id || 'data'}.json`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -101,6 +101,22 @@ export default function CancelledEventModal({ isOpen, onClose, event, loading })
                             ) : event ? (
                                 viewMode === 'detail' ? (
                                     <>
+                                        {/* IDs */}
+                                        <div className="detail-item">
+                                            <Code className="icon" size={20} />
+                                            <div>
+                                                <label>Event IDs</label>
+                                                <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                                    <span style={{ opacity: 0.7 }}>ID:</span> {event.event?._id || '-'}
+                                                </p>
+                                                {(event.event?.iCalUId || event.event?.globalSyncId || event.event?.resourceSyncId) && (
+                                                    <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all', marginTop: '4px' }}>
+                                                        <span style={{ opacity: 0.7 }}>iCalUID:</span> {event.event?.iCalUId || event.event?.globalSyncId || event.event?.resourceSyncId}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
                                         {/* Event Info */}
                                         <div className="detail-item">
                                             <Clock className="icon" size={20} />

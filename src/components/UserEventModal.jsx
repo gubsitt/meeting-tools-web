@@ -103,6 +103,21 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                             {viewMode === 'detail' ? (
                                 <>
                                     <div className="detail-item">
+                                        <Code className="icon" size={20} />
+                                        <div>
+                                            <label>Event IDs</label>
+                                            <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                                <span style={{ opacity: 0.7 }}>ID:</span> {event.id}
+                                            </p>
+                                            {event.resource?.iCalUId && (
+                                                <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all', marginTop: '4px' }}>
+                                                    <span style={{ opacity: 0.7 }}>iCalUID:</span> {event.resource.iCalUId}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-item">
                                         <Clock className="icon" size={20} />
                                         <div>
                                             <label>Time</label>

@@ -165,73 +165,73 @@ export default function UserEvents() {
 
                 <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
                     <div className="search-form">
-                    <div className="form-group-inline">
-                        <label>Search User (Email, Name)</label>
-                        <div style={{ position: 'relative', width: '100%' }}>
+                        <div className="form-group-inline">
+                            <label>Search User (Email, Name)</label>
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Type to search..."
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
+                                        if (selectedUser) setSelectedUser(null);
+                                    }}
+                                    className="custom-input"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={handleClearSearch}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '10px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            color: '#ccc',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                )}
+
+                                {/* Dropdown Results */}
+                                {showDropdown && searchResults.length > 0 && (
+                                    <div className="user-dropdown">
+                                        {searchResults.map(user => (
+                                            <div key={user._id} className="user-item" onClick={() => handleSelectUser(user)}>
+                                                <div className="user-avatar-small">
+                                                    {user.imgUrl ? <img src={user.imgUrl} alt="avatar" /> : user.name.charAt(0)}
+                                                </div>
+                                                <div className="user-info-text">
+                                                    <h4>{user.name}</h4>
+                                                    <p>{user.email}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="form-group-inline" style={{ marginTop: '10px' }}>
+                            <label>Event ID (Optional)</label>
                             <input
                                 type="text"
-                                placeholder="Type to search..."
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    if (selectedUser) setSelectedUser(null);
-                                }}
+                                placeholder="Filter by Event ID..."
+                                value={searchEventId}
+                                onChange={(e) => setSearchEventId(e.target.value)}
                                 className="custom-input"
                             />
-                            {searchQuery && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    style={{
-                                        position: 'absolute',
-                                        right: '10px',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'none',
-                                        border: 'none',
-                                        color: '#ccc',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-
-                            {/* Dropdown Results */}
-                            {showDropdown && searchResults.length > 0 && (
-                                <div className="user-dropdown">
-                                    {searchResults.map(user => (
-                                        <div key={user._id} className="user-item" onClick={() => handleSelectUser(user)}>
-                                            <div className="user-avatar-small">
-                                                {user.imgUrl ? <img src={user.imgUrl} alt="avatar" /> : user.name.charAt(0)}
-                                            </div>
-                                            <div className="user-info-text">
-                                                <h4>{user.name}</h4>
-                                                <p>{user.email}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                        </div>
+                        {/* Placeholder for alignment, similar to Calendar search button */}
+                        <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
+                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
+                            <div className="search-btn" style={{ cursor: 'default' }}>
+                                <Search size={18} />
+                            </div>
                         </div>
                     </div>
-                    <div className="form-group-inline" style={{ marginTop: '10px' }}>
-                        <label>Event ID (Optional)</label>
-                        <input
-                            type="text"
-                            placeholder="Filter by Event ID..."
-                            value={searchEventId}
-                            onChange={(e) => setSearchEventId(e.target.value)}
-                            className="custom-input"
-                        />
-                    </div>
-                    {/* Placeholder for alignment, similar to Calendar search button */}
-                    <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
-                        <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
-                        <div className="search-btn" style={{ cursor: 'default' }}>
-                            <Search size={18} />
-                        </div>
-                    </div>
-                </div>
                 </div>
             </motion.div>
 
@@ -280,14 +280,14 @@ export default function UserEvents() {
                                         </div>
                                     </td>
                                     <td data-label="Room / Location">
-                                        <div style={{ fontWeight: 500 }}>
-                                            {event.location}
-                                        </div>
-                                        {event.resource.roomType && (
-                                            <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                                                {event.resource.roomType}
+                                        {event.resource.resourceName && (
+                                            <div style={{ fontWeight: 600, color: '#fff' }}>
+                                                {event.resource.resourceName}
                                             </div>
                                         )}
+                                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                            {event.location}
+                                        </div>
                                     </td>
                                     <td data-label="Time">
                                         <div style={{ fontSize: '0.9rem' }}>

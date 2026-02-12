@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext'
 import { useState } from 'react'
 import {
   Users,
-  Settings,
   Calendar,
   LogOut,
   Menu,
@@ -30,7 +29,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, set
     { path: '/miss-sync-events', icon: AlertCircle, label: 'Miss Sync' },
     { path: '/config-file', icon: FileText, label: 'Config File' },
     ...(isAdmin ? [{ path: '/users', icon: Users, label: 'User Management' }] : []),
-    { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 
   return (

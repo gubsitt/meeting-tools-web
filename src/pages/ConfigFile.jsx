@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import ConfigFileService from '../services/ConfigFileService';
-import { FileText, Copy, Download, RefreshCw, AlertCircle, Check, Filter, X } from 'lucide-react';
+import { FileText, Copy, Download, RefreshCw, AlertCircle, Check, Filter, X, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 import './UserEvents.css';
 import './ConfigFile.css';
 
 const ConfigFile = () => {
+    const { user, loading: authLoading } = useAuth();
     const [fileData, setFileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,8 +16,24 @@ const ConfigFile = () => {
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
     useEffect(() => {
-        fetchFileContent();
-    }, []);
+        // Wait for auth to finish loading
+        if (authLoading) {
+            return;
+        }
+
+        // Check if user is authenticated and is admin or superadmin
+        if (user && (user.role === 'admin' || user.role === 'superadmin')) {
+            fetchFileContent();
+        } else if (user) {
+            // User is authenticated but not admin
+            setLoading(false);
+            setError('Access denied. Admin privileges required.');
+        } else {
+            // User is not authenticated
+            setLoading(false);
+            setError('Please login to access this page.');
+        }
+    }, [user, authLoading]);
 
     const fetchFileContent = async () => {
         setLoading(true);
@@ -159,11 +177,27 @@ const ConfigFile = () => {
                     </div>
                 ) : error ? (
                     <div className="no-data">
-                        <AlertCircle size={32} className="config-error-icon" />
-                        <div className="config-error-container">
-                            <div className="config-error-title">Error loading file</div>
-                            <div className="config-error-message">{error}</div>
-                        </div>
+                        {error.includes('Admin privileges') ? (
+                            <>
+                                <ShieldAlert size={48} className="config-error-icon" />
+                                <div className="config-error-container">
+                                    <div className="config-error-title">Access Denied</div>
+                                    <div className="config-error-message">
+                                        This page requires administrator privileges.
+                                        <br />
+                                        Please contact your system administrator for access.
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <AlertCircle size={32} className="config-error-icon" />
+                                <div className="config-error-container">
+                                    <div className="config-error-title">Error loading file</div>
+                                    <div className="config-error-message">{error}</div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 ) : fileData ? (
                     <div className="config-content-box">

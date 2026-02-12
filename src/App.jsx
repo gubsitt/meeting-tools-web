@@ -4,7 +4,6 @@ import Login from './pages/Login'
 import UserManagement from './pages/UserManagement'
 import Loading from './components/Loading'
 import Layout from './components/Layout'
-import Settings from './pages/Settings'
 import Calendar from './pages/Calendar'
 import UserEvents from './pages/UserEvents'
 import CancelledEvents from './pages/CancelledEvents'
@@ -95,16 +94,6 @@ function App() {
         <Route
           path="/login"
           element={<LoginRoute />}
-        />
-
-        {/* Route สำหรับหน้า Settings */}
-        <Route
-          path="/settings"
-          element={
-            <PrivateRoute>
-              <Settings />
-            </PrivateRoute>
-          }
         />
 
         {/* Admin Route (จัดการ User) */}

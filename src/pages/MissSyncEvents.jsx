@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MissSyncService from '../services/MissSyncService';
 import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Filter, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import moment from 'moment';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import './MissSyncEvents.css';
 
 const MissSyncEvents = () => {
@@ -16,6 +16,16 @@ const MissSyncEvents = () => {
     const [syncingEventId, setSyncingEventId] = useState(null);
     const [syncAlert, setSyncAlert] = useState(null);
     const [searchEventId, setSearchEventId] = useState('');
+    const alertTimeoutRef = useRef(null);
+
+    // Clear timeout when component unmounts
+    useEffect(() => {
+        return () => {
+            if (alertTimeoutRef.current) {
+                clearTimeout(alertTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const fetchEvents = async (e) => {
         if (e) e.preventDefault();
@@ -46,6 +56,12 @@ const MissSyncEvents = () => {
 
     const syncEvent = async (eventId) => {
         setSyncingEventId(eventId);
+        
+        // Clear any existing timeout
+        if (alertTimeoutRef.current) {
+            clearTimeout(alertTimeoutRef.current);
+        }
+        
         try {
             const response = await MissSyncService.syncMissingSyncIds(eventId);
             
@@ -62,10 +78,11 @@ const MissSyncEvents = () => {
                     details: updatedFields.length > 0 ? `Updated: ${updatedFields.join(', ')}` : null
                 });
                 
-                // Auto hide after 5 seconds
-                setTimeout(() => {
+                // Auto hide after 8 seconds
+                alertTimeoutRef.current = setTimeout(() => {
                     setSyncAlert(null);
-                }, 5000);
+                    alertTimeoutRef.current = null;
+                }, 8000);
                 
                 // Update event in the list
                 if (syncData.updated) {
@@ -94,10 +111,11 @@ const MissSyncEvents = () => {
                     details: errorMsg
                 });
                 
-                // Auto hide after 8 seconds for errors
-                setTimeout(() => {
+                // Auto hide after 10 seconds for errors
+                alertTimeoutRef.current = setTimeout(() => {
                     setSyncAlert(null);
-                }, 8000);
+                    alertTimeoutRef.current = null;
+                }, 10000);
             }
         } catch (error) {
             // Show error alert
@@ -111,10 +129,11 @@ const MissSyncEvents = () => {
                 details: errorMsg
             });
             
-            // Auto hide after 8 seconds for errors
-            setTimeout(() => {
+            // Auto hide after 10 seconds for errors
+            alertTimeoutRef.current = setTimeout(() => {
                 setSyncAlert(null);
-            }, 8000);
+                alertTimeoutRef.current = null;
+            }, 10000);
             
             console.error(error);
         } finally {
@@ -124,6 +143,52 @@ const MissSyncEvents = () => {
 
     return (
         <div className="user-events-page">
+            {/* Sync Alert Modal */}
+            <AnimatePresence>
+                {syncAlert && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => {
+                            if (alertTimeoutRef.current) {
+                                clearTimeout(alertTimeoutRef.current);
+                                alertTimeoutRef.current = null;
+                            }
+                            setSyncAlert(null);
+                        }}
+                    >
+                        <motion.div
+                            className="sync-alert-modal"
+                            initial={{ opacity: 0, scale: 0.8, y: -50 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, y: -50 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h2 className={`alert-title ${syncAlert.type}`}>
+                                {syncAlert.message}
+                            </h2>
+                            {syncAlert.details && (
+                                <p className="alert-details">{syncAlert.details}</p>
+                            )}
+                            <button
+                                className="alert-close-btn"
+                                onClick={() => {
+                                    if (alertTimeoutRef.current) {
+                                        clearTimeout(alertTimeoutRef.current);
+                                        alertTimeoutRef.current = null;
+                                    }
+                                    setSyncAlert(null);
+                                }}
+                            >
+                                Close
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Floating Orbs */}
             <div className="orb orb-1" />
             <div className="orb orb-2" />

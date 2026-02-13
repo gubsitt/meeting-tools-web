@@ -94,100 +94,111 @@ export default function CalendarEventModal({ isOpen, onClose, event, onDelete, l
                         </div>
 
                         {/* Body */}
-                        <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
                             {viewMode === 'detail' ? (
                                 <>
-                                    {/* Time */}
-                                    <div className="detail-item">
-                                        <Clock className="icon" size={20} />
-                                        <div>
-                                            <label>Time</label>
-                                            <p>
-                                                {moment(event.start).format('DD MMM YYYY, HH:mm')} -
-                                                {moment(event.end).format('HH:mm')}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Location */}
-                                    <div className="detail-item">
-                                        <MapPin className="icon" size={20} />
-                                        <div>
-                                            <label>Location</label>
-                                            <p>{event.resource?.location?.displayName || 'Unknown'}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Organizer */}
-                                    <div className="detail-item">
-                                        <Users className="icon" size={20} />
-                                        <div>
-                                            <label>Organizer</label>
-                                            <p>{event.resource?.organizer?.emailAddress?.name || 'Unknown'}</p>
-                                            <span className="email-sub">
-                                                {event.resource?.organizer?.emailAddress?.address}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Event IDs */}
-                                    <div className="detail-item">
-                                        <Code className="icon" size={20} />
-                                        <div>
-                                            <label>Event IDs</label>
-                                            <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                                                <span style={{ opacity: 0.7 }}>ID:</span> {event.id}
-                                            </p>
-                                            {event.resource?.iCalUId && (
-                                                <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all', marginTop: '4px' }}>
-                                                    <span style={{ opacity: 0.7 }}>iCalUID:</span> {event.resource.iCalUId}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Description - Full Width */}
-                                    {event.resource?.bodyPreview && (
-                                        <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
-                                            <FileText className="icon" size={20} />
+                                    {/* Left Column */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        {/* Time */}
+                                        <div className="detail-item">
+                                            <Clock className="icon" size={20} />
                                             <div>
-                                                <label>Description</label>
-                                                <p className="description-text">{event.resource.bodyPreview}</p>
+                                                <label>Time</label>
+                                                <p>
+                                                    {moment(event.start).format('DD MMM YYYY, HH:mm')} -
+                                                    {moment(event.end).format('HH:mm')}
+                                                </p>
                                             </div>
                                         </div>
-                                    )}
 
-                                    {/* Attendees - Full Width */}
-                                    {event.resource?.attendees && event.resource?.attendees.length > 0 && (
-                                        <div className="detail-item" style={{ alignItems: 'flex-start', gridColumn: '1 / -1' }}>
-                                            <div className="icon" style={{ marginTop: 2 }}>
-                                                <Users size={20} />
+                                        {/* Location */}
+                                        <div className="detail-item">
+                                            <MapPin className="icon" size={20} />
+                                            <div>
+                                                <label>Location</label>
+                                                <p>{event.resource?.location?.displayName || 'Unknown'}</p>
                                             </div>
-                                            <div style={{ width: '100%' }}>
-                                                <label>Attendees ({event.resource.attendees.length})</label>
-                                                <div className="attendees-list" style={{
-                                                    marginTop: '8px',
-                                                    maxHeight: '150px',
-                                                    overflowY: 'auto',
-                                                    paddingRight: '4px',
-                                                    display: 'grid',
-                                                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                                                    gap: '8px'
-                                                }}>
-                                                    {event.resource.attendees.map((attendee, index) => (
-                                                        <div key={index} style={{ marginBottom: '0', border: '1px solid rgba(255,255,255,0.1)', padding: '6px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)', overflow: 'hidden', minWidth: 0 }}>
-                                                            <p style={{ fontSize: '0.9rem', marginBottom: '2px', wordBreak: 'break-word' }} title={attendee.emailAddress?.name}>
-                                                                {attendee.emailAddress?.name || 'Unknown'}
-                                                            </p>
-                                                            <span className="email-sub" style={{ fontSize: '0.85rem', display: 'block', wordBreak: 'break-all', opacity: 0.7 }} title={attendee.emailAddress?.address}>
-                                                                {attendee.emailAddress?.address}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                        </div>
+
+                                        {/* Description */}
+                                        {event.resource?.bodyPreview && (
+                                            <div className="detail-item">
+                                                <FileText className="icon" size={20} />
+                                                <div>
+                                                    <label>Description</label>
+                                                    <p className="description-text">{event.resource.bodyPreview}</p>
                                                 </div>
                                             </div>
+                                        )}
+
+                                        {/* Organizer */}
+                                        <div className="detail-item">
+                                            <Users className="icon" size={20} />
+                                            <div>
+                                                <label>Organizer</label>
+                                                <p>{event.resource?.organizer?.emailAddress?.name || 'Unknown'}</p>
+                                                <span className="email-sub">
+                                                    {event.resource?.organizer?.emailAddress?.address}
+                                                </span>
+                                            </div>
                                         </div>
-                                    )}
+                                    </div>
+
+                                    {/* Right Column */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        {/* Event IDs */}
+                                        <div className="detail-item">
+                                            <Code className="icon" size={20} />
+                                            <div>
+                                                <label>Event IDs</label>
+                                                <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                                    <span style={{ opacity: 0.7 }}>ID:</span> {event.id}
+                                                </p>
+                                                {event.resource?.iCalUId && (
+                                                    <p style={{ fontSize: '0.8rem', fontFamily: 'monospace', wordBreak: 'break-all', marginTop: '4px' }}>
+                                                        <span style={{ opacity: 0.7 }}>iCalUID:</span> {event.resource.iCalUId}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Attendees */}
+                                        {event.resource?.attendees && event.resource?.attendees.length > 0 && (
+                                            <div className="detail-item" style={{ alignItems: 'flex-start' }}>
+                                                <div className="icon" style={{ marginTop: 2 }}>
+                                                    <Users size={20} />
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <label>Attendees ({event.resource.attendees.length})</label>
+                                                    <div className="attendees-list" style={{
+                                                        marginTop: '8px',
+                                                        maxHeight: '300px',
+                                                        overflowY: 'auto',
+                                                        paddingRight: '8px',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: '6px'
+                                                    }}>
+                                                        {event.resource.attendees.map((attendee, index) => (
+                                                            <div key={index} style={{ 
+                                                                border: '1px solid rgba(255,255,255,0.1)', 
+                                                                padding: '8px', 
+                                                                borderRadius: '6px', 
+                                                                background: 'rgba(255,255,255,0.03)' 
+                                                            }}>
+                                                                <p style={{ fontSize: '0.9rem', marginBottom: '2px', wordBreak: 'break-word' }}>
+                                                                    {attendee.emailAddress?.name || 'Unknown'}
+                                                                </p>
+                                                                <span className="email-sub" style={{ fontSize: '0.85rem', display: 'block', wordBreak: 'break-all', opacity: 0.7 }}>
+                                                                    {attendee.emailAddress?.address}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             ) : (
                                 <div style={{ position: 'relative', gridColumn: '1 / -1' }}>
@@ -258,9 +269,11 @@ export default function CalendarEventModal({ isOpen, onClose, event, onDelete, l
                                     <Trash2 size={16} /> Delete
                                 </button>
                             )}
-                            <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
-                                {event.isCancelled ? 'Cancelled' : 'Scheduled'}
-                            </span>
+                            {event.isCancelled && (
+                                <span className="status-badge cancelled">
+                                    Cancelled
+                                </span>
+                            )}
                         </div>
                     </motion.div>
                 </motion.div>

@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download } from 'lucide-react'
+import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download, Eye, EyeOff, UserCheck, ChevronDown } from 'lucide-react'
 import moment from 'moment'
 
 export default function UserEventModal({ isOpen, onClose, event }) {
     const [viewMode, setViewMode] = useState('detail')
     const [copied, setCopied] = useState(false)
+    const [showAllHistory, setShowAllHistory] = useState(false)
 
     if (!isOpen || !event) return null
 
@@ -174,15 +175,33 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                             </div>
                                         )}
 
-                                        {event.resource.objectiveId && (
-                                            <div className="detail-item">
-                                                <Info className="icon" size={20} />
-                                                <div>
-                                                    <label>Objective ID</label>
-                                                    <p>{event.resource.objectiveId}</p>
-                                                </div>
+                                        <div className="detail-item">
+                                            <UserCheck className="icon" size={20} />
+                                            <div>
+                                                <label>Checked In</label>
+                                                <p style={{ color: event.resource.checkedIn ? '#55efc4' : '#ff6b6b' }}>
+                                                    {event.resource.checkedIn ? 'Yes' : 'No'}
+                                                </p>
                                             </div>
-                                        )}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        <div className="detail-item">
+                                            {event.resource.private ? <EyeOff className="icon" size={20} /> : <Eye className="icon" size={20} />}
+                                            <div>
+                                                <label>Private Event</label>
+                                                <p>{event.resource.private ? 'Yes' : 'No'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="detail-item">
+                                            <User className="icon" size={20} />
+                                            <div>
+                                                <label>Impersonate</label>
+                                                <p>{event.resource.impersonate ? 'Yes' : 'No'}</p>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {event.resource.attendees && event.resource.attendees.length > 0 && (
@@ -195,12 +214,24 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                         </div>
                                     )}
 
-                                    <div className="detail-item">
-                                        <CalendarPlus className="icon" size={20} />
-                                        <div>
-                                            <label>Created At</label>
-                                            <p>{moment(event.resource.createdTime).format('DD MMM YYYY, HH:mm:ss')}</p>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        <div className="detail-item">
+                                            <CalendarPlus className="icon" size={20} />
+                                            <div>
+                                                <label>Created At</label>
+                                                <p>{moment(event.resource.createdTime).format('DD MMM YYYY, HH:mm:ss')}</p>
+                                            </div>
                                         </div>
+
+                                        {event.resource.updateTime && (
+                                            <div className="detail-item">
+                                                <Clock className="icon" size={20} />
+                                                <div>
+                                                    <label>Updated At</label>
+                                                    <p>{moment(event.resource.updateTime).format('DD MMM YYYY, HH:mm:ss')}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* --- Transaction Timeline --- */}
@@ -210,23 +241,50 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                             <div className="timeline">
                                                 {[...event.resource.transactions]
                                                     .sort((a, b) => (b.time?.unix || 0) - (a.time?.unix || 0)) // Sort desc
-                                                    .map((trans, index) => (
-                                                        <div key={trans._id || index} className="timeline-item">
-                                                            <div className={`timeline-dot ${trans.action}`} />
-                                                            <div className="timeline-content">
-                                                                <div className="timeline-action">
-                                                                    {trans.action} by User
-                                                                </div>
-                                                                <div className="timeline-date">
-                                                                    <Clock size={12} />
-                                                                    <span>
-                                                                        {trans.time?.day}/{trans.time?.month}/{trans.time?.year} {String(trans.time?.hour).padStart(2, '0')}.{String(trans.time?.minute).padStart(2, '0')}
-                                                                    </span>
+                                                    .slice(0, showAllHistory ? undefined : 2)
+                                                    .map((trans, index) => {
+                                                        const transDate = moment.unix(trans.time?.unix || 0)
+                                                        return (
+                                                            <div key={trans._id || index} className="timeline-item">
+                                                                <div className={`timeline-dot ${trans.action}`} />
+                                                                <div className="timeline-content">
+                                                                    <div className="timeline-action">
+                                                                        {trans.action} By User
+                                                                    </div>
+                                                                    <div className="timeline-date">
+                                                                        <Clock size={12} />
+                                                                        <span>
+                                                                            {transDate.format('DD/MM/YYYY HH:mm')}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        )
+                                                    })}
                                             </div>
+                                            {event.resource.transactions.length > 2 && !showAllHistory && (
+                                                <button
+                                                    onClick={() => setShowAllHistory(true)}
+                                                    style={{
+                                                        marginTop: '12px',
+                                                        background: 'rgba(108, 92, 231, 0.2)',
+                                                        border: '1px solid rgba(108, 92, 231, 0.3)',
+                                                        color: 'white',
+                                                        padding: '6px 16px',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        width: '100%',
+                                                        justifyContent: 'center'
+                                                    }}
+                                                >
+                                                    <ChevronDown size={14} />
+                                                    +{event.resource.transactions.length - 2} more
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </>

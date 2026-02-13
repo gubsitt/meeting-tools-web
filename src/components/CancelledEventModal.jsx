@@ -137,7 +137,7 @@ export default function CancelledEventModal({ isOpen, onClose, event, loading })
                                         <div className="detail-item">
                                             <CalendarIcon className="icon" size={20} />
                                             <div>
-                                                <label>Original Time</label>
+                                                <label>Time</label>
                                                 <p>
                                                     {dayjs(event.event.startTime.unix).format('DD MMM YYYY, HH:mm')} -
                                                     {dayjs(event.event.endTime.unix).format('HH:mm')}

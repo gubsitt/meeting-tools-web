@@ -145,7 +145,7 @@ export default function UserEvents() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <h1>User Events</h1>
+                <h1>Events</h1>
                 <p>Search for a user to view their scheduled events.</p>
             </motion.div>
 
@@ -243,7 +243,7 @@ export default function UserEvents() {
                 transition={{ delay: 0.2 }}
             >
                 {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', width: '100%' }}>
                         <Loading />
                     </div>
                 ) : !selectedUser ? (

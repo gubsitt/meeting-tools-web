@@ -39,9 +39,13 @@ const MissSyncEvents = () => {
 
             const response = await MissSyncService.getMissSyncEvents(start, end);
             if (response.success) {
-                setEvents(response.data);
-                if (response.data.length > 0) {
-                    toast.success(`Found ${response.count} events`);
+                // Filter out cancelled events
+                const activeEvents = response.data.filter(event => 
+                    !event.title?.startsWith('Canceled:') && !event.isCancelled
+                );
+                setEvents(activeEvents);
+                if (activeEvents.length > 0) {
+                    toast.success(`Found ${activeEvents.length} events`);
                 } else {
                     toast('No miss sync events found');
                 }

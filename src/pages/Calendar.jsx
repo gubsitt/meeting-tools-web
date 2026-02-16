@@ -2,11 +2,14 @@ import { useState, useCallback } from 'react'
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import CalendarService from '../services/CalendarService'
-import { motion, AnimatePresence } from 'framer-motion' // ✅ เพิ่ม AnimatePresence
+import { motion, AnimatePresence } from 'framer-motion'
 import Loading from '../components/Loading'
 import toast from 'react-hot-toast'
-import { Search, Filter, X } from 'lucide-react' // ✅ เพิ่ม Icon Filter, X
+import { Search, Filter, X } from 'lucide-react'
 import CalendarEventModal from '../components/CalendarEventModal'
+import useMobileFilter from '../hooks/useMobileFilter'
+import useDateRangeFilter from '../hooks/useDateRangeFilter'
+import useSearchFilter from '../hooks/useSearchFilter'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import './Calendar.css'
 
@@ -16,15 +19,11 @@ export default function Calendar() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
   const [roomEmail, setRoomEmail] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
 
-  // ✅ เพิ่ม State สำหรับเปิด/ปิด Filter บนมือถือ
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-
-  const [dateRange, setDateRange] = useState({
-    start: '',
-    end: ''
-  })
+  // Custom Hooks
+  const mobileFilter = useMobileFilter(false)
+  const dateFilter = useDateRangeFilter('', '')
+  const searchFilter = useSearchFilter(500)
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -34,11 +33,10 @@ export default function Calendar() {
     if (!roomEmail) return;
 
     setLoading(true)
-    // ปิด Filter บนมือถือเมื่อกดค้นหา เพื่อให้เห็นผลลัพธ์ทันที
-    setIsMobileFilterOpen(false);
+    mobileFilter.close()
 
     try {
-      const res = await CalendarService.getEvents(roomEmail, dateRange.start, dateRange.end, searchQuery)
+      const res = await CalendarService.getEvents(roomEmail, dateFilter.startDate, dateFilter.endDate, searchFilter.searchQuery)
 
       if (res.success && res.data) {
         const activeEvents = res.data.filter(item => !item.subject.startsWith('Canceled:'))
@@ -59,8 +57,8 @@ export default function Calendar() {
           setCurrentDate(formattedEvents[0].start);
           toast.success(`Found ${formattedEvents.length} events`)
         } else {
-          if (!searchQuery) {
-            setCurrentDate(new Date(dateRange.start))
+          if (!searchFilter.searchQuery) {
+            setCurrentDate(new Date(dateFilter.startDate))
           }
           toast('No events found')
         }
@@ -76,6 +74,14 @@ export default function Calendar() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleClear = () => {
+    setRoomEmail('')
+    dateFilter.resetDates()
+    searchFilter.clearSearch()
+    setEvents([])
+    mobileFilter.open()
   }
 
   const handleSelectEvent = (event) => {
@@ -147,15 +153,15 @@ export default function Calendar() {
         transition={{ delay: 0.1 }}
       >
         {/* ✅ Mobile Header: ปุ่มเปิด/ปิด Filter */}
-        <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+        <div className="mobile-filter-header" onClick={mobileFilter.toggle}>
           <span><Search size={16} /> Filters & Search</span>
           <button type="button" className="icon-btn">
-            {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+            {mobileFilter.isOpen ? <X size={20} /> : <Filter size={20} />}
           </button>
         </div>
 
         {/* ✅ Form Logic: Desktop เห็นตลอด, Mobile ต้องกดเปิดก่อน */}
-        <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+        <div className={`search-form-wrapper ${mobileFilter.isOpen ? 'open' : ''}`}>
           <form onSubmit={handleSearch} className="search-form">
 
             {/* แถว 1: Search & Email */}
@@ -165,8 +171,8 @@ export default function Calendar() {
                 type="text"
                 className="custom-input"
                 placeholder="Paste Event ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchFilter.searchQuery}
+                onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
               />
             </div>
 
@@ -179,11 +185,11 @@ export default function Calendar() {
             <div className="date-group-row">
               <div className="form-group-inline">
                 <label>Start Date</label>
-                <input type="date" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} className="custom-input date-input" />
+                <input type="date" value={dateFilter.startDate} onChange={(e) => dateFilter.setStartDate(e.target.value)} className="custom-input date-input" />
               </div>
               <div className="form-group-inline">
                 <label>End Date</label>
-                <input type="date" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} className="custom-input date-input" />
+                <input type="date" value={dateFilter.endDate} onChange={(e) => dateFilter.setEndDate(e.target.value)} className="custom-input date-input" />
               </div>
             </div>
 

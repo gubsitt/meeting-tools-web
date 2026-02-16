@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
 import { motion } from 'framer-motion'
@@ -7,83 +7,58 @@ import toast from 'react-hot-toast'
 import { Search, X, Eye, Filter } from 'lucide-react'
 import UserEventModal from '../components/UserEventModal'
 import Pagination from '../components/Pagination'
+import usePagination from '../hooks/usePagination'
+import useMobileFilter from '../hooks/useMobileFilter'
+import useDateRangeFilter from '../hooks/useDateRangeFilter'
+import useUserSearch from '../hooks/useUserSearch'
 import './UserEvents.css'
 
 export default function UserEvents() {
     const [events, setEvents] = useState([])
     const [loading, setLoading] = useState(false)
 
-    // Search State
-    const [searchQuery, setSearchQuery] = useState('')
-    const [searchResults, setSearchResults] = useState([])
-    const [selectedUser, setSelectedUser] = useState(null)
-    const [showDropdown, setShowDropdown] = useState(false)
-    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+    // Custom Hooks
+    const userSearch = useUserSearch(UserEventService)
+    const mobileFilter = useMobileFilter(false)
+    const dateFilter = useDateRangeFilter('', '')
 
     // Filter State
     const [eventId, setEventId] = useState('')
     const [resourceId, setResourceId] = useState('')
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
 
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null)
 
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage] = useState(10)
+    // Filter events by event ID before pagination
+    const filteredEvents = events.filter(event =>
+        !eventId || event.id?.toLowerCase().includes(eventId.toLowerCase())
+    )
 
-    // Debounce Search
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(async () => {
-            if (searchQuery.trim().length > 2 && !selectedUser) {
-                try {
-                    const res = await UserEventService.searchUsers(searchQuery);
-                    if (res.success && res.data) {
-                        setSearchResults(res.data);
-                        setShowDropdown(true);
-                    }
-                } catch (error) {
-                    console.error("Search error:", error);
-                }
-            } else {
-                setSearchResults([]);
-                setShowDropdown(false);
-            }
-        }, 500)
+    // Pagination Hook
+    const pagination = usePagination(filteredEvents, 10)
 
-        return () => clearTimeout(delayDebounceFn)
-    }, [searchQuery, selectedUser])
 
-    const handleSelectUser = async (user) => {
-        setSelectedUser(user);
-        setSearchQuery(user.email); // Show email or name in input
-        setShowDropdown(false);
-    }
 
     const handleSearch = () => {
-        if (!eventId && !selectedUser && !resourceId && !startDate && !endDate) {
+        if (!eventId && !userSearch.selectedUser && !resourceId && !dateFilter.startDate && !dateFilter.endDate) {
             toast.error('Please select at least one filter')
             return
         }
-        setIsMobileFilterOpen(false);
-        fetchEvents();
+        mobileFilter.close()
+        fetchEvents()
     }
 
     const handleClearSearch = () => {
-        setSearchQuery('');
-        setSelectedUser(null);
-        setEvents([]);
-        setSearchResults([]);
-        setEventId('');
-        setResourceId('');
-        setStartDate('');
-        setEndDate('');
-        setIsMobileFilterOpen(true); // เปิด filter กลับมาเมื่อ clear
+        userSearch.handleClearSearch()
+        setEvents([])
+        setEventId('')
+        setResourceId('')
+        dateFilter.resetDates()
+        mobileFilter.open()
     }
 
     const fetchEvents = async () => {
-        if (!eventId && !selectedUser && !resourceId && !startDate && !endDate) {
+        if (!eventId && !userSearch.selectedUser && !resourceId && !dateFilter.startDate && !dateFilter.endDate) {
             toast.error('Please select at least one filter (Event ID, User, Resource, or Date Range)')
             return
         }
@@ -98,22 +73,20 @@ export default function UserEvents() {
                 filters.eventId = eventId
             }
 
-            if (selectedUser) {
-                filters.userId = selectedUser._id
+            if (userSearch.selectedUser) {
+                filters.userId = userSearch.selectedUser._id
             }
 
             if (resourceId) {
                 filters.resourceId = resourceId
             }
 
-            if (startDate) {
-                // แปลง date string เป็น unix timestamp (milliseconds)
-                filters.startDate = moment(startDate).startOf('day').valueOf()
+            if (dateFilter.startDate) {
+                filters.startDate = moment(dateFilter.startDate).startOf('day').valueOf()
             }
 
-            if (endDate) {
-                // แปลง date string เป็น unix timestamp (milliseconds, end of day)
-                filters.endDate = moment(endDate).endOf('day').valueOf()
+            if (dateFilter.endDate) {
+                filters.endDate = moment(dateFilter.endDate).endOf('day').valueOf()
             }
 
             const res = await UserEventService.getUserEvents(filters)
@@ -136,7 +109,7 @@ export default function UserEvents() {
                 setEvents(formattedEvents)
 
                 // Reset pagination to first page
-                setCurrentPage(1)
+                pagination.resetPagination()
 
                 // Jump to the latest event date if available
                 if (formattedEvents.length > 0) {
@@ -160,11 +133,6 @@ export default function UserEvents() {
 
     const handleSelectEvent = (event) => {
         setSelectedEvent(event)
-    }
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     const closeModal = () => {
@@ -212,14 +180,14 @@ export default function UserEvents() {
                 transition={{ delay: 0.1 }}
             >
                 {/* Mobile Filter Header */}
-                <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+                <div className="mobile-filter-header" onClick={mobileFilter.toggle}>
                     <span><Search size={16} /> Search User</span>
                     <button type="button" className="icon-btn">
-                        {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+                        {mobileFilter.isOpen ? <X size={20} /> : <Filter size={20} />}
                     </button>
                 </div>
 
-                <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+                <div className={`search-form-wrapper ${mobileFilter.isOpen ? 'open' : ''}`}>
                     <div className="search-form">
                         <div className="form-group-inline">
                             <label>Search User (Email, Name)</label>
@@ -227,15 +195,15 @@ export default function UserEvents() {
                                 <input
                                     type="text"
                                     placeholder="Type to search..."
-                                    value={searchQuery}
+                                    value={userSearch.searchQuery}
                                     onChange={(e) => {
-                                        setSearchQuery(e.target.value);
-                                        if (selectedUser) setSelectedUser(null);
+                                        userSearch.setSearchQuery(e.target.value)
+                                        if (userSearch.selectedUser) userSearch.setSelectedUser(null)
                                     }}
                                     className="custom-input"
-                                    style={{ paddingRight: searchQuery ? '45px' : '18px' }}
+                                    style={{ paddingRight: userSearch.searchQuery ? '45px' : '18px' }}
                                 />
-                                {searchQuery && (
+                                {userSearch.searchQuery && (
                                     <button
                                         onClick={handleClearSearch}
                                         className="clear-search-btn"
@@ -269,10 +237,10 @@ export default function UserEvents() {
                                 )}
 
                                 {/* Dropdown Results */}
-                                {showDropdown && searchResults.length > 0 && (
+                                {userSearch.showDropdown && userSearch.searchResults.length > 0 && (
                                     <div className="user-dropdown">
-                                        {searchResults.map(user => (
-                                            <div key={user._id} className="user-item" onClick={() => handleSelectUser(user)}>
+                                        {userSearch.searchResults.map(user => (
+                                            <div key={user._id} className="user-item" onClick={() => userSearch.handleSelectUser(user)}>
                                                 <div className="user-avatar-small">
                                                     {user.imgUrl ? <img src={user.imgUrl} alt="avatar" /> : user.name.charAt(0)}
                                                 </div>
@@ -315,8 +283,8 @@ export default function UserEvents() {
                                 <label>Start Date</label>
                                 <input
                                     type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
+                                    value={dateFilter.startDate}
+                                    onChange={(e) => dateFilter.setStartDate(e.target.value)}
                                     className="custom-input date-input"
                                 />
                             </div>
@@ -324,8 +292,8 @@ export default function UserEvents() {
                                 <label>End Date</label>
                                 <input
                                     type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
+                                    value={dateFilter.endDate}
+                                    onChange={(e) => dateFilter.setEndDate(e.target.value)}
                                     className="custom-input date-input"
                                 />
                             </div>
@@ -359,90 +327,81 @@ export default function UserEvents() {
                     </div>
                 ) : events.length === 0 ? (
                     <div className="no-data">
-                        <p>{!eventId && !selectedUser && !resourceId && !startDate && !endDate
+                        <p>{!eventId && !userSearch.selectedUser && !resourceId && !dateFilter.startDate && !dateFilter.endDate
                             ? 'Search for events using filters above.'
                             : 'No events found with the selected filters.'}</p>
                     </div>
-                ) : (() => {
-                    // Calculate pagination
-                    const filteredEvents = events.filter(event => !eventId || event.id?.toLowerCase().includes(eventId.toLowerCase()))
-                    const totalPages = Math.ceil(filteredEvents.length / itemsPerPage)
-                    const startIndex = (currentPage - 1) * itemsPerPage
-                    const endIndex = startIndex + itemsPerPage
-                    const paginatedEvents = filteredEvents.slice(startIndex, endIndex)
-
-                    return (
-                        <>
-                            <table className="user-events-table">
-                                <thead>
-                                    <tr>
-                                        <th>Event ID</th>
-                                        <th>Subject</th>
-                                        <th>Room / Location</th>
-                                        <th>Event Time</th>
-                                        <th style={{ textAlign: 'center' }}>Status</th>
-                                        <th style={{ textAlign: 'center' }}>Action</th>
+                ) : (
+                    <>
+                        <table className="user-events-table">
+                            <thead>
+                                <tr>
+                                    <th>Event ID</th>
+                                    <th>Subject</th>
+                                    <th>Room / Location</th>
+                                    <th>Event Time</th>
+                                    <th style={{ textAlign: 'center' }}>Status</th>
+                                    <th style={{ textAlign: 'center' }}>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pagination.paginatedData.map((event, index) => (
+                                    <tr key={event.id || index}>
+                                        <td data-label="Event ID">
+                                            <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                {event.id || '-'}
+                                            </div>
+                                        </td>
+                                        <td data-label="Subject">
+                                            <div style={{ fontWeight: 600, color: '#fff' }}>
+                                                {event.title}
+                                            </div>
+                                        </td>
+                                        <td data-label="Room / Location">
+                                            <div style={{ fontWeight: 500 }}>
+                                                {event.resource?.resourceName || event.resource?.resourceId || event.location}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                                {event.resource?.roomType || ''}
+                                            </div>
+                                        </td>
+                                        <td data-label="Event Time">
+                                            <div style={{ fontSize: '0.9rem' }}>
+                                                {event.start ? new Date(event.start).toLocaleDateString('en-GB') : '-'}
+                                            </div>
+                                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                                {event.start && event.end
+                                                    ? `${new Date(event.start).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+                                                    : '-'}
+                                            </div>
+                                        </td>
+                                        <td data-label="Status" style={{ textAlign: 'center' }}>
+                                            <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
+                                                {event.isCancelled ? 'Cancelled' : 'Scheduled'}
+                                            </span>
+                                        </td>
+                                        <td data-label="Action" style={{ textAlign: 'center' }}>
+                                            <button
+                                                className="view-btn"
+                                                onClick={() => setSelectedEvent(event)}
+                                            >
+                                                <Eye size={16} />
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {paginatedEvents.map((event, index) => (
-                                        <tr key={event.id || index}>
-                                            <td data-label="Event ID">
-                                                <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                                    {event.id || '-'}
-                                                </div>
-                                            </td>
-                                            <td data-label="Subject">
-                                                <div style={{ fontWeight: 600, color: '#fff' }}>
-                                                    {event.title}
-                                                </div>
-                                            </td>
-                                            <td data-label="Room / Location">
-                                                <div style={{ fontWeight: 500 }}>
-                                                    {event.resource?.resourceName || event.resource?.resourceId || event.location}
-                                                </div>
-                                                <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                                                    {event.resource?.roomType || ''}
-                                                </div>
-                                            </td>
-                                            <td data-label="Event Time">
-                                                <div style={{ fontSize: '0.9rem' }}>
-                                                    {event.start ? new Date(event.start).toLocaleDateString('en-GB') : '-'}
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                                                    {event.start && event.end
-                                                        ? `${new Date(event.start).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
-                                                        : '-'}
-                                                </div>
-                                            </td>
-                                            <td data-label="Status" style={{ textAlign: 'center' }}>
-                                                <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
-                                                    {event.isCancelled ? 'Cancelled' : 'Scheduled'}
-                                                </span>
-                                            </td>
-                                            <td data-label="Action" style={{ textAlign: 'center' }}>
-                                                <button
-                                                    className="view-btn"
-                                                    onClick={() => setSelectedEvent(event)}
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                ))}
+                            </tbody>
+                        </table>
 
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={handlePageChange}
-                                itemsPerPage={itemsPerPage}
-                                totalItems={filteredEvents.length}
-                            />
-                        </>
-                    )
-                })()}
+                        <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            onPageChange={pagination.handlePageChange}
+                            itemsPerPage={pagination.itemsPerPage}
+                            totalItems={pagination.totalItems}
+                        />
+                    </>
+                )}
             </motion.div>
 
             <UserEventModal

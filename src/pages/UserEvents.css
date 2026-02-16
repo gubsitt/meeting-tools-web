@@ -10,7 +10,6 @@
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    /* ให้พื้นหลังใส เพื่อโชว์ Gradient ของ Body */
     background: transparent;
 }
 

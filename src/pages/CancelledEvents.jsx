@@ -7,27 +7,34 @@ import dayjs from 'dayjs'
 import Loading from '../components/Loading'
 import CancelledEventModal from '../components/CancelledEventModal'
 import Pagination from '../components/Pagination'
+import usePagination from '../hooks/usePagination'
+import useMobileFilter from '../hooks/useMobileFilter'
+import useDateRangeFilter from '../hooks/useDateRangeFilter'
+import useSearchFilter from '../hooks/useSearchFilter'
 import './CancelledEvents.css'
 
 export default function CancelledEvents() {
     const [transactions, setTransactions] = useState([])
     const [loading, setLoading] = useState(false)
-    const [hasSearched, setHasSearched] = useState(false) // Track if search has been performed
-    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+    const [hasSearched, setHasSearched] = useState(false)
 
-    // Filter State
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
-    const [searchEventId, setSearchEventId] = useState('')
+    // Custom Hooks
+    const mobileFilter = useMobileFilter(false)
+    const dateFilter = useDateRangeFilter('', '')
+    const searchFilter = useSearchFilter(500) // For Event ID search
 
     // Modal State
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [modalLoading, setModalLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage] = useState(10)
+    // Filter transactions by Event ID
+    const filteredTransactions = transactions.filter(t =>
+        !searchFilter.searchQuery || t.eventId?.toLowerCase().includes(searchFilter.searchQuery.toLowerCase())
+    )
+
+    // Pagination Hook
+    const pagination = usePagination(filteredTransactions, 10)
 
     // Removed initial useEffect to prevent auto-fetch
     /* useEffect(() => {
@@ -37,16 +44,18 @@ export default function CancelledEvents() {
     const handleSearch = async (e) => {
         if (e) e.preventDefault()
         setLoading(true)
-        setHasSearched(true) // Mark as searched
-        setIsMobileFilterOpen(false) // ปิด filter เมื่อกด search
+        setHasSearched(true)
+        mobileFilter.close()
+
         try {
-            const startTimestamp = dayjs(startDate).startOf('day').valueOf()
-            const endTimestamp = dayjs(endDate).endOf('day').valueOf()
+            const startTimestamp = dayjs(dateFilter.startDate).startOf('day').valueOf()
+            const endTimestamp = dayjs(dateFilter.endDate).endOf('day').valueOf()
 
             const response = await CancelledEventService.getCancelledTransactions(startTimestamp, endTimestamp)
             if (response.success) {
                 setTransactions(response.data)
-                setCurrentPage(1) // Reset pagination
+                pagination.resetPagination()
+
                 if (response.data.length > 0) {
                     toast.success(`Found ${response.data.length} cancelled events`)
                 } else {
@@ -87,11 +96,6 @@ export default function CancelledEvents() {
         setSelectedEvent(null)
     }
 
-    const handlePageChange = (page) => {
-        setCurrentPage(page)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-
     return (
         <div className="cancelled-events-page">
             {/* Orbs Background */}
@@ -119,14 +123,14 @@ export default function CancelledEvents() {
                 transition={{ delay: 0.1 }}
             >
                 {/* Mobile Filter Header */}
-                <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+                <div className="mobile-filter-header" onClick={mobileFilter.toggle}>
                     <span><Search size={16} /> Filters </span>
                     <button type="button" className="icon-btn">
-                        {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+                        {mobileFilter.isOpen ? <X size={20} /> : <Filter size={20} />}
                     </button>
                 </div>
 
-                <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+                <div className={`search-form-wrapper ${mobileFilter.isOpen ? 'open' : ''}`}>
                     <form onSubmit={handleSearch} className="search-form">
                         <div className="date-group-row">
                             <div className="form-group-inline">
@@ -134,8 +138,8 @@ export default function CancelledEvents() {
                                 <input
                                     type="date"
                                     className="custom-input date-input"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
+                                    value={dateFilter.startDate}
+                                    onChange={(e) => dateFilter.setStartDate(e.target.value)}
                                 />
                             </div>
                             <div className="form-group-inline">
@@ -143,8 +147,8 @@ export default function CancelledEvents() {
                                 <input
                                     type="date"
                                     className="custom-input date-input"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
+                                    value={dateFilter.endDate}
+                                    onChange={(e) => dateFilter.setEndDate(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -155,8 +159,8 @@ export default function CancelledEvents() {
                                     type="text"
                                     className="custom-input"
                                     placeholder="Search by Event ID..."
-                                    value={searchEventId}
-                                    onChange={(e) => setSearchEventId(e.target.value)}
+                                    value={searchFilter.searchQuery}
+                                    onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -189,88 +193,81 @@ export default function CancelledEvents() {
                     <div className="no-data">
                         <p>No cancelled events found in this period.</p>
                     </div>
-                ) : (() => {
-                    const filteredTransactions = transactions.filter(t => !searchEventId || t.eventId?.toLowerCase().includes(searchEventId.toLowerCase()))
-                    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
-                    const startIndex = (currentPage - 1) * itemsPerPage
-                    const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage)
-
-                    return (
-                        <>
-                            <table className="cancelled-table">
-                                <thead>
-                                    <tr>
-                                        <th>Event ID</th>
-                                        <th>Subject</th>
-                                        <th>Room</th>
-                                        <th>Event Time</th>
-                                        <th>Cancelled At</th>
-                                        <th>Detail</th>
-                                        <th style={{ textAlign: 'center' }}>Action</th>
+                ) : (
+                    <>
+                        <table className="cancelled-table">
+                            <thead>
+                                <tr>
+                                    <th>Event ID</th>
+                                    <th>Subject</th>
+                                    <th>Room</th>
+                                    <th>Event Time</th>
+                                    <th>Cancelled At</th>
+                                    <th>Detail</th>
+                                    <th style={{ textAlign: 'center' }}>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pagination.paginatedData.map((t, index) => (
+                                    <tr key={t._id || index}>
+                                        <td data-label="Event ID">
+                                            <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                {t.eventId || '-'}
+                                            </div>
+                                        </td>
+                                        <td data-label="Subject">
+                                            <div style={{ fontWeight: 600, color: '#fff' }}>
+                                                {t.subject || '-'}
+                                            </div>
+                                        </td>
+                                        <td data-label="Room">
+                                            <div style={{ fontWeight: 500 }}>
+                                                {t.roomId ? t.roomId.split('@')[0] : '-'}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                                {t.roomId}
+                                            </div>
+                                        </td>
+                                        <td data-label="Event Time">
+                                            <div style={{ fontSize: '0.9rem' }}>
+                                                {dayjs(t.startTime).format('DD MMM YYYY')}
+                                            </div>
+                                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                                {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
+                                            </div>
+                                        </td>
+                                        <td data-label="Cancelled At">
+                                            {t.time && t.time.unix ? (
+                                                <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
+                                                    {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
+                                                </span>
+                                            ) : '-'}
+                                        </td>
+                                        <td data-label="Detail" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {t.detail || '-'}
+                                        </td>
+                                        <td data-label="Action" style={{ textAlign: 'center' }}>
+                                            <button
+                                                className="view-btn"
+                                                onClick={() => handleViewDetails(t.eventId)}
+                                            >
+                                                <Eye size={16} />
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {paginatedTransactions.map((t, index) => (
-                                        <tr key={t._id || index}>
-                                            <td data-label="Event ID">
-                                                <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                                    {t.eventId || '-'}
-                                                </div>
-                                            </td>
-                                            <td data-label="Subject">
-                                                <div style={{ fontWeight: 600, color: '#fff' }}>
-                                                    {t.subject || '-'}
-                                                </div>
-                                            </td>
-                                            <td data-label="Room">
-                                                <div style={{ fontWeight: 500 }}>
-                                                    {t.roomId ? t.roomId.split('@')[0] : '-'}
-                                                </div>
-                                                <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                                                    {t.roomId}
-                                                </div>
-                                            </td>
-                                            <td data-label="Event Time">
-                                                <div style={{ fontSize: '0.9rem' }}>
-                                                    {dayjs(t.startTime).format('DD MMM YYYY')}
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                                                    {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
-                                                </div>
-                                            </td>
-                                            <td data-label="Cancelled At">
-                                                {t.time && t.time.unix ? (
-                                                    <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
-                                                        {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
-                                                    </span>
-                                                ) : '-'}
-                                            </td>
-                                            <td data-label="Detail" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {t.detail || '-'}
-                                            </td>
-                                            <td data-label="Action" style={{ textAlign: 'center' }}>
-                                                <button
-                                                    className="view-btn"
-                                                    onClick={() => handleViewDetails(t.eventId)}
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                ))}
+                            </tbody>
+                        </table>
 
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={handlePageChange}
-                                itemsPerPage={itemsPerPage}
-                                totalItems={filteredTransactions.length}
-                            />
-                        </>
-                    )
-                })()}
+                        <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            onPageChange={pagination.handlePageChange}
+                            itemsPerPage={pagination.itemsPerPage}
+                            totalItems={pagination.totalItems}
+                        />
+                    </>
+                )}
             </motion.div>
 
             <CancelledEventModal

@@ -4,11 +4,11 @@ import Login from './pages/Login'
 import UserManagement from './pages/UserManagement'
 import Loading from './components/Loading'
 import Layout from './components/Layout'
-import Settings from './pages/Settings'
 import Calendar from './pages/Calendar'
 import UserEvents from './pages/UserEvents'
 import CancelledEvents from './pages/CancelledEvents'
 import MissSyncEvents from './pages/MissSyncEvents'
+import ConfigFile from './pages/ConfigFile'
 
 // Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Calendar)
 function LoginRoute() {
@@ -96,16 +96,6 @@ function App() {
           element={<LoginRoute />}
         />
 
-        {/* Route สำหรับหน้า Settings */}
-        <Route
-          path="/settings"
-          element={
-            <PrivateRoute>
-              <Settings />
-            </PrivateRoute>
-          }
-        />
-
         {/* Admin Route (จัดการ User) */}
         <Route
           path="/users"
@@ -148,6 +138,15 @@ function App() {
           element={
             <PrivateRoute>
               <MissSyncEvents />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/config-file"
+          element={
+            <PrivateRoute>
+              <ConfigFile />
             </PrivateRoute>
           }
         />

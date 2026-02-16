@@ -30,22 +30,164 @@
     font-size: 0.95rem;
 }
 
+/* Calendar Header (สำหรับ MissSyncEvents ที่ใช้ class นี้) */
+.calendar-header-control {
+    margin-bottom: 24px;
+}
+
+.calendar-header-control h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-header-control p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+}
+
 /* --- Search Bar (กล่องค้นหาแบบแก้ว) --- */
-.user-events-search-bar {
+.user-events-search-bar,
+.search-bar-container {
     position: relative;
     z-index: 100;
-    /* Ensure this is significantly higher */
-    /* ✨ Glassmorphism เข้มขึ้นเหมือน Login */
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-
-    padding: 24px;
+    padding: 28px;
     border-radius: 20px;
     margin-bottom: 32px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar-container:hover {
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+}
+
+.search-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.form-group-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+}
+
+.form-group-inline label {
+    font-size: 0.875rem;
+    color: #b39dfe;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.custom-input {
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+
+.custom-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.custom-input:hover {
+    border-color: rgba(108, 92, 231, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.custom-input:focus {
+    border-color: #6c5ce7;
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+    transform: translateY(-1px);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.2s;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 120px;
+    box-shadow: 0 4px 20px rgba(108, 92, 231, 0.35);
+}
+
+.search-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(108, 92, 231, 0.5);
+    filter: brightness(1.15);
+}
+
+.search-btn:active {
+    transform: translateY(-1px);
+}
+
+.search-btn:disabled {
+    background: linear-gradient(135deg, #4a4a4a, #5a5a5a);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.6;
+}
+
+.search-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.desktop-only-label {
+    display: block;
+}
+
+.date-group-row {
+    display: contents;
+}
+
+/* Mobile Filter Toggle - Hidden on Desktop */
+.mobile-filter-header {
+    display: none;
+}
+
+.search-form-wrapper {
+    width: 100%;
 }
 
 
@@ -192,55 +334,119 @@
     }
 }
 
-/* --- User Dropdown Styles (Added) --- */
+/* --- User Dropdown Styles --- */
 .user-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: rgba(30, 30, 40, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    margin-top: 0.5rem;
-    max-height: 200px;
+    background: linear-gradient(145deg, rgba(30, 30, 45, 0.98), rgba(20, 20, 35, 0.98));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(108, 92, 231, 0.25);
+    border-radius: 14px;
+    margin-top: 0;
+    max-height: 280px;
     overflow-y: auto;
-    z-index: 200;
-    /* Extremely high to float above everything */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    animation: dropdownSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom scrollbar for dropdown */
+.user-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.user-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+}
+
+.user-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(108, 92, 231, 0.4);
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+.user-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(108, 92, 231, 0.6);
 }
 
 .user-item {
-    padding: 0.75rem 1rem;
+    padding: 14px 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
-    transition: background 0.2s;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 12px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    position: relative;
 }
 
 .user-item:last-child {
     border-bottom: none;
 }
 
+.user-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
 .user-item:hover {
-    background: rgba(108, 92, 231, 0.2);
+    background: rgba(108, 92, 231, 0.15);
+    padding-left: 20px;
+}
+
+.user-item:hover::before {
+    opacity: 1;
+}
+
+.user-item:active {
+    transform: scale(0.98);
 }
 
 .user-avatar-small {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
     border-radius: 50%;
-    background: #6c5ce7;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 0.8rem;
+    font-weight: 700;
+    font-size: 0.9rem;
     color: white;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+    transition: transform 0.2s;
+}
+
+.user-item:hover .user-avatar-small {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.5);
 }
 
 .user-avatar-small img {
@@ -249,16 +455,36 @@
     object-fit: cover;
 }
 
+.user-info-text {
+    flex: 1;
+    min-width: 0;
+}
+
 .user-info-text h4 {
-    margin: 0;
-    font-size: 0.9rem;
+    margin: 0 0 4px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
     color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-info-text p {
     margin: 0;
-    font-size: 0.75rem;
-    color: #b2bec3;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-item:hover .user-info-text h4 {
+    color: #b39dfe;
+}
+
+.user-item:hover .user-info-text p {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* --- Transaction Timeline Styles --- */
@@ -350,3 +576,259 @@
     gap: 6px;
 }
 
+/* Spin Animation */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background: rgba(0, 184, 148, 0.2);
+    color: #55efc4;
+    border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.status-badge.cancelled {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* ========================================
+   📱 MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+@media screen and (max-width: 768px) {
+
+    /* Layout */
+    .user-events-page {
+        padding: 12px;
+    }
+
+    /* Header */
+    .user-events-header,
+    .calendar-header-control {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding-left: 60px !important;
+        min-height: 50px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .user-events-header h1,
+    .calendar-header-control h1 {
+        font-size: 1.5rem !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+
+    .user-events-header p,
+    .calendar-header-control p {
+        display: none !important;
+    }
+
+    /* Search Bar */
+    .user-events-search-bar,
+    .search-bar-container {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+    .search-input-wrapper input {
+        padding-right: 80px;
+        font-size: 15px;
+    }
+
+    .clear-search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Dropdown stays the same z-index behavior */
+    .user-dropdown {
+        max-height: 250px;
+        font-size: 0.9rem;
+    }
+
+    .user-item {
+        padding: 12px 14px;
+    }
+
+    /* Content Wrapper */
+    .user-events-content-wrapper {
+        padding: 12px;
+        max-height: none;
+        overflow-x: auto;
+    }
+
+    /* Table - Card Style on Mobile */
+    .user-events-table {
+        display: block;
+        min-width: 0;
+    }
+
+    .user-events-table thead {
+        display: none;
+    }
+
+    .user-events-table tbody {
+        display: block;
+    }
+
+    .user-events-table tr {
+        display: block;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        padding: 16px;
+    }
+
+    .user-events-table td {
+        display: block;
+        text-align: left;
+        padding: 8px 0;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    .user-events-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #a29bfe;
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        letter-spacing: 1px;
+    }
+
+    .view-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+    }
+
+    .no-data {
+        height: 200px;
+        font-size: 1rem;
+    }
+
+    /* Mobile Filter Logic (ใช้สำหรับ MissSyncEvents ที่ต้องการ toggle) */
+    .mobile-filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+
+    .mobile-filter-header span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+    }
+
+    .icon-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 8px;
+        padding: 6px;
+        color: #a29bfe;
+        display: flex;
+    }
+
+    /* Form Wrapper Logic */
+    .search-form-wrapper {
+        display: none;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .search-form-wrapper.open {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .search-form {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-group-inline {
+        width: 100%;
+        flex: none;
+        min-width: 0;
+    }
+
+    /* ซ่อนปุ่ม Search placeholder บนมือถือ */
+    .form-group-inline:has(.search-btn[style*="cursor: default"]) {
+        display: none;
+    }
+
+    .date-group-row {
+        display: flex;
+        flex-direction: row !important;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .date-group-row .form-group-inline {
+        flex: 1;
+    }
+
+    .search-btn {
+        width: 100%;
+        margin-top: 5px;
+        height: 45px;
+    }
+
+    .desktop-only-label {
+        display: none !important;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            max-height: 500px;
+            transform: translateY(0);
+        }
+    }
+}

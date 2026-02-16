@@ -3,15 +3,18 @@ import axios from 'axios'
 import { motion } from 'framer-motion'
 import { Trash2, User, Shield, ShieldAlert, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 import './UserManagement.css' // เดี๋ยวสร้างไฟล์นี้ต่อ
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 export default function UserManagement() {
+  const { user, loading: authLoading } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [error, setError] = useState(null)
+  const [accessDenied, setAccessDenied] = useState(false)
 
   // ดึงข้อมูล Users
   const fetchUsers = async () => {
@@ -58,8 +61,26 @@ export default function UserManagement() {
   }
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return
+    }
+
+    // Check if user has admin privileges
+    if (user && (user.role === 'admin' || user.role === 'superadmin')) {
+      fetchUsers()
+    } else if (user) {
+      // User is authenticated but not admin
+      setLoading(false)
+      setAccessDenied(true)
+      setError('Access denied. Admin privileges required.')
+    } else {
+      // User is not authenticated
+      setLoading(false)
+      setAccessDenied(true)
+      setError('Please login to access this page.')
+    }
+  }, [user, authLoading])
 
   // Filter สำหรับช่องค้นหา
   const filteredUsers = users.filter(user =>
@@ -113,6 +134,16 @@ export default function UserManagement() {
         >
           {loading ? (
             <div className="loading">Loading users...</div>
+          ) : accessDenied ? (
+            <div className="error" style={{ textAlign: 'center', padding: '3rem' }}>
+              <ShieldAlert size={48} style={{ color: '#ff6b6b', marginBottom: '1rem' }} />
+              <h3 style={{ marginBottom: '0.5rem' }}>Access Denied</h3>
+              <p style={{ color: '#a4b0be' }}>
+                This page requires administrator privileges.
+                <br />
+                Please contact your system administrator for access.
+              </p>
+            </div>
           ) : error ? (
             <div className="error">{error}</div>
           ) : (
@@ -130,7 +161,7 @@ export default function UserManagement() {
                 <tbody>
                   {filteredUsers.map(user => (
                     <tr key={user._id}>
-                      <td>
+                      <td data-label="User">
                         <div className="user-info">
                           <img
                             src={user.profilePicture || `https://ui-avatars.com/api/?name=${user.displayName}`}
@@ -140,13 +171,13 @@ export default function UserManagement() {
                           <span>{user.displayName}</span>
                         </div>
                       </td>
-                      <td>{user.email}</td>
-                      <td>
+                      <td data-label="Email">{user.email}</td>
+                      <td data-label="Provider">
                         <span className={`provider-badge ${user.provider}`}>
                           {user.provider}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Role">
                         <div className="role-selector">
                           {getRoleIcon(user.role)}
                           <select
@@ -161,7 +192,7 @@ export default function UserManagement() {
                           </select>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Actions">
                         {user.role !== 'superadmin' && (
                           <button
                             className="delete-btn"

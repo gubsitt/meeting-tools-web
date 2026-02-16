@@ -1,23 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MissSyncService from '../services/MissSyncService';
-import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Copy, Check } from 'lucide-react';
+import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Filter, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import moment from 'moment';
-import { motion } from 'framer-motion';
-import './UserEvents.css'; // Reusing UserEvents styles for consistency
+import { motion, AnimatePresence } from 'framer-motion';
+import Pagination from '../components/Pagination';
+import './MissSyncEvents.css';
 
 const MissSyncEvents = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
-    const [startDate, setStartDate] = useState(moment().startOf('month').format('YYYY-MM-DD'));
-    const [endDate, setEndDate] = useState(moment().endOf('month').format('YYYY-MM-DD'));
-    const [copiedId, setCopiedId] = useState(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+    const [syncingEventId, setSyncingEventId] = useState(null);
+    const [syncAlert, setSyncAlert] = useState(null);
+    const [searchEventId, setSearchEventId] = useState('');
+    const alertTimeoutRef = useRef(null);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
+    // Clear timeout when component unmounts
+    useEffect(() => {
+        return () => {
+            if (alertTimeoutRef.current) {
+                clearTimeout(alertTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const fetchEvents = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
         setHasSearched(true);
+        setIsMobileFilterOpen(false);
         try {
             // Send ISO strings with start/end of day times
             const start = moment(startDate).startOf('day').toISOString();
@@ -25,9 +44,14 @@ const MissSyncEvents = () => {
 
             const response = await MissSyncService.getMissSyncEvents(start, end);
             if (response.success) {
-                setEvents(response.data);
-                if (response.data.length > 0) {
-                    toast.success(`Found ${response.count} events`);
+                // Filter out cancelled events
+                const activeEvents = response.data.filter(event =>
+                    !event.title?.startsWith('Canceled:') && !event.isCancelled
+                );
+                setEvents(activeEvents);
+                setCurrentPage(1); // Reset pagination
+                if (activeEvents.length > 0) {
+                    toast.success(`Found ${activeEvents.length} events`);
                 } else {
                     toast('No miss sync events found');
                 }
@@ -40,15 +64,146 @@ const MissSyncEvents = () => {
         }
     };
 
-    const handleCopy = (text, id) => {
-        navigator.clipboard.writeText(text);
-        setCopiedId(id);
-        setTimeout(() => setCopiedId(null), 2000);
-        toast.success('Copied to clipboard');
+    const syncEvent = async (eventId) => {
+        setSyncingEventId(eventId);
+
+        // Clear any existing timeout
+        if (alertTimeoutRef.current) {
+            clearTimeout(alertTimeoutRef.current);
+        }
+
+        try {
+            const response = await MissSyncService.syncMissingSyncIds(eventId);
+
+            // Check if sync was successful (response.data.success or response.success)
+            const isSuccess = response.data?.success || response.success;
+            const syncData = response.data || response;
+
+            if (isSuccess) {
+                // Show success alert
+                const updatedFields = syncData.updated ? Object.keys(syncData.updated) : [];
+                setSyncAlert({
+                    type: 'success',
+                    message: 'Sync completed successfully!',
+                    details: updatedFields.length > 0 ? `Updated: ${updatedFields.join(', ')}` : null
+                });
+
+                // Auto hide after 8 seconds
+                alertTimeoutRef.current = setTimeout(() => {
+                    setSyncAlert(null);
+                    alertTimeoutRef.current = null;
+                }, 8000);
+
+                // Update event in the list
+                if (syncData.updated) {
+                    setEvents(prevEvents =>
+                        prevEvents.map(e => {
+                            if (e._id === eventId) {
+                                return {
+                                    ...e,
+                                    globalSyncId: syncData.updated.globalSyncId || e.globalSyncId,
+                                    resourceSyncId: syncData.updated.resourceSyncId || e.resourceSyncId,
+                                    syncId: syncData.updated.syncId || e.syncId
+                                };
+                            }
+                            return e;
+                        })
+                    );
+                }
+
+            } else {
+                // Show error alert
+                const errors = syncData.errors || [];
+                const errorMsg = errors.length > 0 ? errors.join(' | ') : (response.message || 'Sync failed');
+                setSyncAlert({
+                    type: 'error',
+                    message: 'Sync failed!',
+                    details: errorMsg
+                });
+
+                // Auto hide after 10 seconds for errors
+                alertTimeoutRef.current = setTimeout(() => {
+                    setSyncAlert(null);
+                    alertTimeoutRef.current = null;
+                }, 10000);
+            }
+        } catch (error) {
+            // Show error alert
+            const errorData = error.response?.data?.data || error.response?.data;
+            const errorMessages = errorData?.errors || [error.response?.data?.message || error.message || 'Unknown error'];
+            const errorMsg = Array.isArray(errorMessages) ? errorMessages.join(' | ') : errorMessages;
+
+            setSyncAlert({
+                type: 'error',
+                message: 'Sync failed!',
+                details: errorMsg
+            });
+
+            // Auto hide after 10 seconds for errors
+            alertTimeoutRef.current = setTimeout(() => {
+                setSyncAlert(null);
+                alertTimeoutRef.current = null;
+            }, 10000);
+
+            console.error(error);
+        } finally {
+            setSyncingEventId(null);
+        }
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
         <div className="user-events-page">
+            {/* Sync Alert Modal */}
+            <AnimatePresence>
+                {syncAlert && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => {
+                            if (alertTimeoutRef.current) {
+                                clearTimeout(alertTimeoutRef.current);
+                                alertTimeoutRef.current = null;
+                            }
+                            setSyncAlert(null);
+                        }}
+                    >
+                        <motion.div
+                            className="sync-alert-modal"
+                            initial={{ opacity: 0, scale: 0.8, y: -50 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, y: -50 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h2 className={`alert-title ${syncAlert.type}`}>
+                                {syncAlert.message}
+                            </h2>
+                            {syncAlert.details && (
+                                <p className="alert-details">{syncAlert.details}</p>
+                            )}
+                            <button
+                                className="alert-close-btn"
+                                onClick={() => {
+                                    if (alertTimeoutRef.current) {
+                                        clearTimeout(alertTimeoutRef.current);
+                                        alertTimeoutRef.current = null;
+                                    }
+                                    setSyncAlert(null);
+                                }}
+                            >
+                                Close
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Floating Orbs */}
             <div className="orb orb-1" />
             <div className="orb orb-2" />
@@ -69,38 +224,131 @@ const MissSyncEvents = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
             >
-                <form className="search-form" onSubmit={fetchEvents}>
-                    <div className="form-group-inline">
-                        <label>Start Date</label>
-                        <input
-                            type="date"
-                            className="custom-input date-input"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-group-inline">
-                        <label>End Date</label>
-                        <input
-                            type="date"
-                            className="custom-input date-input"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
-                        <label style={{ opacity: 0 }}>Search</label>
+                {/* Mobile Filter Header */}
+                <div className="mobile-filter-header" onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}>
+                    <span><Search size={16} /> Filters & Search</span>
+                    <button type="button" className="icon-btn">
+                        {isMobileFilterOpen ? <X size={20} /> : <Filter size={20} />}
+                    </button>
+                </div>
+
+                <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
+                    <form className="search-form" onSubmit={fetchEvents}>
+                        <div className="date-group-row">
+                            <div className="form-group-inline">
+                                <label>Start Date</label>
+                                <input
+                                    type="date"
+                                    className="custom-input date-input"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group-inline">
+                                <label>End Date</label>
+                                <input
+                                    type="date"
+                                    className="custom-input date-input"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="date-group-row">
+                            <div className="form-group-inline" style={{ flex: 1 }}>
+                                <label>Event ID</label>
+                                <input
+                                    type="text"
+                                    className="custom-input"
+                                    placeholder="Filter by Event ID..."
+                                    value={searchEventId}
+                                    onChange={(e) => setSearchEventId(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group-inline">
+                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
+                            <button
+                                type="submit"
+                                className="search-btn"
+                                disabled={loading}
+                            >
+                                {loading ? <RefreshCw className="spin" size={18} /> : <Search size={18} />}
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </motion.div>
+
+            {/* Sync Alert Banner */}
+            {syncAlert && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    style={{
+                        padding: '20px',
+                        borderRadius: '12px',
+                        marginBottom: '20px',
+                        background: syncAlert.type === 'success'
+                            ? 'linear-gradient(135deg, rgba(46, 213, 115, 0.2), rgba(46, 213, 115, 0.05))'
+                            : 'linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.05))',
+                        border: `2px solid ${syncAlert.type === 'success' ? 'rgba(46, 213, 115, 0.5)' : 'rgba(255, 107, 107, 0.5)'}`,
+                        boxShadow: syncAlert.type === 'success'
+                            ? '0 4px 20px rgba(46, 213, 115, 0.3)'
+                            : '0 4px 20px rgba(255, 107, 107, 0.3)',
+                        position: 'relative',
+                        zIndex: 10
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                            fontSize: '32px',
+                            lineHeight: 1
+                        }}>
+                            {syncAlert.type === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{
+                                fontSize: '1.1rem',
+                                fontWeight: '600',
+                                color: syncAlert.type === 'success' ? '#00ff88' : '#ff6b6b',
+                                marginBottom: '6px'
+                            }}>
+                                {syncAlert.message}
+                            </div>
+                            {syncAlert.details && (
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    color: 'rgba(255,255,255,0.8)',
+                                    lineHeight: 1.4
+                                }}>
+                                    {syncAlert.details}
+                                </div>
+                            )}
+                        </div>
                         <button
-                            type="submit"
-                            className="search-btn"
-                            disabled={loading}
+                            onClick={() => setSyncAlert(null)}
+                            style={{
+                                background: 'rgba(255,255,255,0.1)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: 'rgba(255,255,255,0.7)',
+                                transition: 'all 0.2s'
+                            }}
                         >
-                            {loading ? <RefreshCw className="spin" size={18} /> : <Search size={18} />}
-                            Search
+                            <X size={18} />
                         </button>
                     </div>
-                </form>
-            </motion.div>
+                </motion.div>
+            )}
 
             <motion.div
                 className="user-events-content-wrapper"
@@ -122,85 +370,117 @@ const MissSyncEvents = () => {
                         <AlertCircle size={32} style={{ marginRight: '10px' }} />
                         No miss sync events found
                     </div>
-                ) : (
-                    <table className="user-events-table">
-                        <thead>
-                            <tr>
-                                <th>Subject</th>
-                                <th>Room</th>
-                                <th>Time</th>
-                                <th style={{ textAlign: 'center' }}>Global ID</th>
-                                <th style={{ textAlign: 'center' }}>Resource ID</th>
-                                <th style={{ textAlign: 'center' }}>Sync ID</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {events.map((event) => {
-                                const isGlobalMissing = !event.globalSyncId;
-                                const isResourceMissing = !event.resourceSyncId;
-                                const isSyncIdMissing = !event.syncId;
+                ) : (() => {
+                    const filteredEvents = events.filter(event => !searchEventId || event._id?.toLowerCase().includes(searchEventId.toLowerCase()))
+                    const totalPages = Math.ceil(filteredEvents.length / itemsPerPage)
+                    const startIndex = (currentPage - 1) * itemsPerPage
+                    const paginatedEvents = filteredEvents.slice(startIndex, startIndex + itemsPerPage)
 
-                                return (
-                                    <tr key={event._id}>
-                                        <td style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
-                                        <td style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
-                                        <td>
-                                            <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
-                                                <span style={{ color: '#fff' }}>
-                                                    {moment(event.startTime?.unix || event.startTime).format('DD MMM YYYY')}
-                                                </span>
-                                                <span style={{ color: 'rgba(255,255,255,0.6)' }}>
-                                                    {moment(event.startTime?.unix || event.startTime).format('HH:mm')} -
-                                                    {moment(event.endTime?.unix || event.endTime).format('HH:mm')}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span
-                                                className={`status-badge ${!isGlobalMissing ? 'active' : 'cancelled'}`}
-                                                title="Global Sync ID"
-                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                            >
-                                                <Globe size={14} />
-                                                {!isGlobalMissing ? 'Synced' : 'Missing'}
-                                            </span>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span
-                                                className={`status-badge ${!isResourceMissing ? 'active' : 'cancelled'}`}
-                                                title="Resource Sync ID"
-                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                            >
-                                                <Smartphone size={14} />
-                                                {!isResourceMissing ? 'Synced' : 'Missing'}
-                                            </span>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span
-                                                className={`status-badge ${!isSyncIdMissing ? 'active' : 'cancelled'}`}
-                                                title="Sync ID"
-                                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                            >
-                                                <RefreshCw size={14} />
-                                                {!isSyncIdMissing ? 'Synced' : 'Missing'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                className="view-btn"
-                                                onClick={() => handleCopy(JSON.stringify(event, null, 2), event._id)}
-                                            >
-                                                {copiedId === event._id ? <Check size={14} /> : <Copy size={14} />}
-                                                {copiedId === event._id ? 'Copied' : 'JSON'}
-                                            </button>
-                                        </td>
+                    return (
+                        <>
+                            <table className="user-events-table">
+                                <thead>
+                                    <tr>
+                                        <th>Event ID</th>
+                                        <th>Subject</th>
+                                        <th>Room</th>
+                                        <th>Time</th>
+                                        <th style={{ textAlign: 'center' }}>Global ID</th>
+                                        <th style={{ textAlign: 'center' }}>Resource ID</th>
+                                        <th style={{ textAlign: 'center' }}>Sync ID</th>
+                                        <th>Action</th>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                )}
+                                </thead>
+                                <tbody>
+                                    {paginatedEvents.map((event) => {
+                                        const isGlobalMissing = !event.globalSyncId;
+                                        const isResourceMissing = !event.resourceSyncId;
+                                        const isSyncIdMissing = !event.syncId;
+
+                                        return (
+                                            <tr key={event._id}>
+                                                <td data-label="Event ID">
+                                                    <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                        {event._id || '-'}
+                                                    </div>
+                                                </td>
+                                                <td data-label="Subject" style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
+                                                <td data-label="Room" style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
+                                                <td data-label="Time">
+                                                    <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
+                                                        <span style={{ color: '#fff' }}>
+                                                            {moment(event.startTime?.unix || event.startTime).format('DD MMM YYYY')}
+                                                        </span>
+                                                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>
+                                                            {moment(event.startTime?.unix || event.startTime).format('HH:mm')} -
+                                                            {moment(event.endTime?.unix || event.endTime).format('HH:mm')}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Global ID" style={{ textAlign: 'center' }}>
+                                                    <span
+                                                        className={`status-badge ${!isGlobalMissing ? 'active' : 'cancelled'}`}
+                                                        title="Global Sync ID"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
+                                                    >
+                                                        <Globe size={14} />
+                                                        {!isGlobalMissing ? 'Synced' : 'Missing'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Resource ID" style={{ textAlign: 'center' }}>
+                                                    <span
+                                                        className={`status-badge ${!isResourceMissing ? 'active' : 'cancelled'}`}
+                                                        title="Resource Sync ID"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
+                                                    >
+                                                        <Smartphone size={14} />
+                                                        {!isResourceMissing ? 'Synced' : 'Missing'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Sync ID" style={{ textAlign: 'center' }}>
+                                                    <span
+                                                        className={`status-badge ${!isSyncIdMissing ? 'active' : 'cancelled'}`}
+                                                        title="Sync ID"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
+                                                    >
+                                                        <RefreshCw size={14} />
+                                                        {!isSyncIdMissing ? 'Synced' : 'Missing'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Action">
+                                                    <button
+                                                        className="view-btn"
+                                                        onClick={() => syncEvent(event._id)}
+                                                        disabled={syncingEventId === event._id}
+                                                        style={{
+                                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                            minWidth: '100px'
+                                                        }}
+                                                    >
+                                                        {syncingEventId === event._id ? (
+                                                            <RefreshCw className="spin" size={14} />
+                                                        ) : (
+                                                            <RefreshCw size={14} />
+                                                        )}
+                                                        {syncingEventId === event._id ? 'Syncing...' : 'Sync'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                                itemsPerPage={itemsPerPage}
+                                totalItems={filteredEvents.length}
+                            />
+                        </>
+                    )
+                })()}
             </motion.div>
         </div>
     );

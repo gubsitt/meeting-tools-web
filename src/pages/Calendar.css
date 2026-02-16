@@ -527,9 +527,11 @@
   background: rgba(0, 0, 0, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
-  justify-content: space-between;
-  /* ดันปุ่มลบไปซ้าย Badge ไปขวา */
+  justify-content: flex-end;
+  /* ดันทุกอย่างไปขวา */
   align-items: center;
+  gap: 12px;
+  /* เว้นระยะระหว่างปุ่มกับ badge */
 }
 
 /* ปุ่ม Delete */
@@ -580,39 +582,37 @@
 }
 
 /* ========================================
-   📱 MOBILE RESPONSIVE STYLES (แก้ Header หุบ + ปฏิทินยาว)
+   📱 MOBILE RESPONSIVE STYLES (ฉบับสมบูรณ์ รวมทุกการแก้)
    ======================================== */
 
 @media screen and (max-width: 768px) {
-  /* ลด Padding ขอบจอลงเล็กน้อยเพื่อให้มีพื้นที่มากขึ้น */
+  /* 1. Layout พื้นฐาน */
   .calendar-page { padding: 12px; }
   
-  /* --- 1. แก้ Header หุบ --- */
-.calendar-header-control {
+  /* --- Header Control (แก้เรื่องทับปุ่ม 3 ขีด) --- */
+  .calendar-header-control {
     display: flex !important;
-    flex-direction: row !important; /* ✅ กลับมาเป็นแนวนอน */
-    align-items: center !important; /* ✅ สั่งจัดกึ่งกลางแนวตั้ง (สำคัญมาก) */
+    flex-direction: row !important;      /* แนวนอน */
+    align-items: center !important;      /* กึ่งกลางแนวตั้ง */
     justify-content: flex-start !important;
-    
-    padding-left: 60px !important; /* เว้นที่ทางซ้ายให้ปุ่ม 3 ขีด */
-    min-height: 50px !important;   /* ความสูงขั้นต่ำให้พอดีกับปุ่ม */
+    padding-left: 60px !important;       /* ✅ เว้นที่ซ้ายให้ปุ่มเมนู */
+    min-height: 50px !important;
     margin-bottom: 12px !important;
     width: 100%;
   }
-.calendar-header-control h1 { 
+  
+  .calendar-header-control h1 { 
     font-size: 1.5rem !important; 
-    margin: 0 !important; /* ✅ ลบ Margin ทิ้ง เพื่อไม่ให้ดันขึ้น/ลง */
+    margin: 0 !important;
     line-height: 1 !important;
-    
-    /* 👇 ถ้ายังรู้สึกสูงไป ให้เพิ่ม padding-top ตรงนี้เพื่อดันลงนิดนึง */
-    padding-top: 4px; 
+    padding-top: 4px;
   }
 
-  .calendar-header-control p {
-    display: none !important; 
-  }
-  /* --- 2. Search Bar --- */
+  .calendar-header-control p { display: none !important; }
+
+  /* --- Search Bar --- */
   .search-bar-container { padding: 16px; margin-bottom: 16px; }
+  
   .mobile-filter-header {
     display: flex; justify-content: space-between; align-items: center;
     font-weight: 600; color: #fff; cursor: pointer;
@@ -623,7 +623,7 @@
     padding: 6px; color: #a29bfe; display: flex;
   }
 
-  /* Form Layout */
+  /* Form Logic */
   .search-form-wrapper {
     display: none; margin-top: 15px; padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -635,58 +635,108 @@
     width: 100%; flex: none; min-width: 0;
   }
 
-  /* วันที่ Start/End กลับมาเรียงแนวนอน (คู่กัน) */
   .date-group-row {
-    display: flex;
-    flex-direction: row !important; 
-    gap: 10px;
-    width: 100%;
+    display: flex; flex-direction: row !important; gap: 10px; width: 100%;
   }
   .date-group-row .form-group-inline { flex: 1; }
 
   .search-btn { width: 100%; margin-top: 5px; height: 45px; }
   .desktop-only-label { display: none !important; }
 
-  /* --- 3. แก้ปฏิทินยาวเกินไป (Compact Calendar) --- */
-  .calendar-wrapper { 
-    padding: 10px; /* ลด padding ภายใน */
-  }
+  /* --- Calendar Core (แก้ความสูง & ปุ่ม More จม) --- */
+  .calendar-wrapper { padding: 10px; }
   
-  .rbc-calendar { 
-    min-height: 400px !important; /* ✅ ลดความสูงลงจาก 500px ให้ดันขึ้นมา */
-    height: auto !important;
+  /* ✅ ความสูง 460px คือจุดที่พอดีสุด (ไม่ยาวเกิน และมีที่ให้ปุ่ม More) */
+  .rbc-calendar {
+    height: 460px !important;
+    min-height: unset !important;
+    width: 100% !important;
   }
 
-  /* จัด Toolbar ให้กระชับขึ้น */
+  .rbc-month-row {
+    min-height: unset !important;
+    flex: 1 0 0 !important;
+    overflow: hidden !important; 
+  }
+
+  /* บีบพื้นที่ Header วันที่ */
+  .rbc-date-cell {
+    font-size: 0.75rem !important; 
+    padding-right: 4px !important; 
+    padding-top: 2px !important;   
+    margin-bottom: 2px !important; 
+  }
+
+  /* --- Toolbar (แก้พื้นที่ว่างเยอะ & ปุ่มไม่มีขอบ) --- */
   .rbc-toolbar { 
     flex-direction: column; 
-    gap: 8px; /* ลดช่องว่างระหว่างบรรทัด */
-    margin-bottom: 10px !important; 
+    gap: 6px; /* ✅ ลดช่องว่าง */
+    margin-bottom: 8px !important; /* ✅ ดันชิดตารางมากขึ้น */
   }
   .rbc-toolbar-label { 
-    order: -1; 
-    font-size: 1.1rem; /* ลดขนาดฟอนต์หัวข้อเดือน */
-    margin-bottom: 4px !important; 
-    font-weight: 700;
+    order: -1; font-size: 1.1rem; margin-bottom: 4px !important; font-weight: 700;
   }
-  
   .rbc-btn-group { display: flex; width: 100%; }
   
-  /* แก้สีปุ่มกด */
+  .rbc-btn-group button { 
+    flex: 1; 
+    padding: 6px 0 !important; /* ปุ่มผอมลง */
+    font-size: 0.8rem; 
+    /* ✅ ใส่ขอบกลับมา */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 6px !important;
+    margin: 0 2px;
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* ปุ่ม Active/Hover */
   .rbc-btn-group button.rbc-active,
   .rbc-btn-group button:active,
   .rbc-btn-group button:hover,
   .rbc-btn-group button:focus {
-    background: #6c5ce7 !important;
-    color: white !important;
+    background: #6c5ce7 !important; color: white !important;
     box-shadow: 0 2px 10px rgba(108, 92, 231, 0.4) !important;
-    border-color: transparent !important;
-    outline: none !important;
+    border-color: transparent !important; outline: none !important;
   }
 
-  /* ===========================
-     ✅ MODAL FIX
-     =========================== */
+  /* --- Event Styling (ย่อขนาด) --- */
+  .rbc-event {
+    padding: 0px 4px !important;
+    font-size: 0.7rem !important;
+    line-height: 1.3 !important;
+    border-radius: 3px !important;
+    min-height: auto !important;
+    margin-bottom: 1px !important;
+  }
+
+  .rbc-event-content {
+    font-size: 0.7rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* --- Show More Button Fix --- */
+  .rbc-show-more {
+    font-size: 0.7rem !important;
+    padding: 0px 4px !important;
+    margin-top: 0px !important;
+    line-height: 1.3 !important;
+    border-radius: 3px !important;
+    background-color: rgba(108, 92, 231, 0.1) !important;
+    border: 1px solid rgba(108, 92, 231, 0.2) !important;
+    color: #a29bfe !important;
+    display: block !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    height: auto !important;
+  }
+  .rbc-show-more:hover, .rbc-show-more:active {
+    background-color: #6c5ce7 !important; color: white !important;
+  }
+
+  /* --- Modal Styles --- */
   .event-modal-content {
     width: 90% !important; max-height: 80vh !important;
     display: flex !important; flex-direction: column !important;
@@ -708,49 +758,31 @@
   .detail-item label { font-size: 0.7rem !important; }
   .detail-item p { font-size: 0.9rem !important; word-break: break-word; }
 
-  .modal-footer { padding: 12px 16px !important; flex-shrink: 0; background: rgba(0, 0, 0, 0.3); }
-
-  /* ปรับขนาด Task (Event) ให้กะทัดรัด */
-  .rbc-event {
-    padding: 1px 4px !important;   /* ลดช่องว่างขอบ (เดิม 2px 6px) */
-    font-size: 0.7rem !important;  /* ลดขนาดตัวหนังสือ (ให้เล็กพอมองเห็น) */
-    line-height: 1.2 !important;   /* ลดความสูงบรรทัด */
-    border-radius: 3px !important; /* ลดความโค้งมนให้สมส่วน */
-    min-height: auto !important;   /* ปลดล็อคความสูง */
-    margin-bottom: 1px !important; /* ลดระยะห่างระหว่าง Event */
+  /* Modal Footer - ปรับให้ปุ่มและ badge สวยงาม */
+  .modal-footer { 
+    padding: 12px 16px !important; 
+    flex-shrink: 0; 
+    background: rgba(0, 0, 0, 0.3);
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
   }
 
-  /* ปรับตัวหนังสือข้างใน */
-  .rbc-event-content {
-    font-size: 0.7rem !important;
-    white-space: nowrap !important; /* บังคับบรรทัดเดียว */
-    overflow: hidden !important;
-    text-overflow: ellipsis !important; /* ถ้าชื่อยาวเกินให้ขึ้น ... */
-  }
-  
-  /* ลดความสูงของช่องวัน (Row) นิดหน่อยเพื่อให้แสดง Event ได้มากขึ้น */
-  .rbc-month-row {
-    min-height: 80px !important; /* ปรับลดหรือเพิ่มตามต้องการ */
-  }
-  /* ปรับปุ่ม +X more ให้เล็กและกระชับ */
-  .rbc-show-more {
-    font-size: 0.7rem !important;        /* ลดขนาดตัวหนังสือเท่า Event */
-    padding: 1px 4px !important;         /* ลดช่องว่างภายใน */
-    margin-top: 1px !important;          /* ลดระยะห่างด้านบน */
-    line-height: 1.2 !important;         /* ลดความสูงบรรทัด */
-    border-radius: 3px !important;       /* ความมนเท่า Event */
-    background-color: rgba(108, 92, 231, 0.1) !important; /* สีพื้นจางๆ */
-    border: 1px solid rgba(108, 92, 231, 0.2) !important; /* ขอบบางๆ */
-    color: #a29bfe !important;           /* สีตัวหนังสือ */
-    display: block !important;           /* ให้แสดงเป็นก้อน */
-    text-align: center !important;       /* จัดกึ่งกลาง */
-    white-space: nowrap !important;      /* ห้ามขึ้นบรรทัดใหม่ */
+  /* Delete Button - ลดขนาด */
+  .delete-btn {
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 6px !important;
   }
 
-  /* ปรับสีตอนกดปุ่ม More */
-  .rbc-show-more:hover, 
-  .rbc-show-more:active {
-    background-color: #6c5ce7 !important;
-    color: white !important;
+  /* Status Badge - ขยายเต็มความกว้าง */
+  .status-badge {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+    display: block !important;
   }
 }

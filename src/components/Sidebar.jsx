@@ -4,13 +4,13 @@ import { useAuth } from '../context/AuthContext'
 import { useState } from 'react'
 import {
   Users,
-  Settings,
   Calendar,
   LogOut,
   Menu,
   UserCircle2,
   History,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react'
 import './Sidebar.css'
 
@@ -24,11 +24,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, set
 
   const menuItems = [
     { path: '/calendar', icon: Calendar, label: 'Calendar' },
-    { path: '/user-events', icon: UserCircle2, label: 'User Events' },
-    { path: '/cancelled-events', icon: History, label: 'Cancelled' },
+    { path: '/user-events', icon: UserCircle2, label: 'Events' },
+    { path: '/cancelled-events', icon: History, label: 'MIT Cancelled' },
     { path: '/miss-sync-events', icon: AlertCircle, label: 'Miss Sync' },
+    { path: '/config-file', icon: FileText, label: 'Config File' },
     ...(isAdmin ? [{ path: '/users', icon: Users, label: 'User Management' }] : []),
-    { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 
   return (

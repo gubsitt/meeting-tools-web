@@ -62,14 +62,14 @@ export default function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            Explore the Horizon.
+            Future of Work
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.8 }}
           >
-            Experience the future of management with EXZY.
+            Empowering your business with next-gen
           </motion.p>
         </div>
       </div>

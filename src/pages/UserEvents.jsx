@@ -6,6 +6,7 @@ import Loading from '../components/Loading'
 import toast from 'react-hot-toast'
 import { Search, X, Eye, Filter } from 'lucide-react'
 import UserEventModal from '../components/UserEventModal'
+import Pagination from '../components/Pagination'
 import './UserEvents.css'
 
 export default function UserEvents() {
@@ -18,10 +19,19 @@ export default function UserEvents() {
     const [selectedUser, setSelectedUser] = useState(null)
     const [showDropdown, setShowDropdown] = useState(false)
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-    const [searchEventId, setSearchEventId] = useState('')
+
+    // Filter State
+    const [eventId, setEventId] = useState('')
+    const [resourceId, setResourceId] = useState('')
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
 
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null)
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage] = useState(10)
 
     // Debounce Search
     useEffect(() => {
@@ -49,10 +59,15 @@ export default function UserEvents() {
         setSelectedUser(user);
         setSearchQuery(user.email); // Show email or name in input
         setShowDropdown(false);
-        setIsMobileFilterOpen(false); // ปิด filter บนมือถือ
+    }
 
-        // Fetch Events immediately
-        fetchEvents(user._id);
+    const handleSearch = () => {
+        if (!eventId && !selectedUser && !resourceId && !startDate && !endDate) {
+            toast.error('Please select at least one filter')
+            return
+        }
+        setIsMobileFilterOpen(false);
+        fetchEvents();
     }
 
     const handleClearSearch = () => {
@@ -60,24 +75,57 @@ export default function UserEvents() {
         setSelectedUser(null);
         setEvents([]);
         setSearchResults([]);
+        setEventId('');
+        setResourceId('');
+        setStartDate('');
+        setEndDate('');
         setIsMobileFilterOpen(true); // เปิด filter กลับมาเมื่อ clear
     }
 
-    const fetchEvents = async (userId) => {
+    const fetchEvents = async () => {
+        if (!eventId && !selectedUser && !resourceId && !startDate && !endDate) {
+            toast.error('Please select at least one filter (Event ID, User, Resource, or Date Range)')
+            return
+        }
+
         setLoading(true)
-        // ... existing imports
 
         try {
-            const res = await UserEventService.getUserEvents(userId)
+            // สร้าง filters object
+            const filters = {}
+
+            if (eventId) {
+                filters.eventId = eventId
+            }
+
+            if (selectedUser) {
+                filters.userId = selectedUser._id
+            }
+
+            if (resourceId) {
+                filters.resourceId = resourceId
+            }
+
+            if (startDate) {
+                // แปลง date string เป็น unix timestamp (milliseconds)
+                filters.startDate = moment(startDate).startOf('day').valueOf()
+            }
+
+            if (endDate) {
+                // แปลง date string เป็น unix timestamp (milliseconds, end of day)
+                filters.endDate = moment(endDate).endOf('day').valueOf()
+            }
+
+            const res = await UserEventService.getUserEvents(filters)
 
             if (res.success && res.data) {
                 const formattedEvents = res.data
                     .map(item => ({
-                        id: item._id, // Use _id from transaction or event
+                        id: item._id,
                         title: item.title || 'Untitled Event',
                         start: new Date(item.startTime.unix),
                         end: new Date(item.endTime.unix),
-                        resource: item, // Store full object
+                        resource: item,
                         isCancelled: item.cancelled,
                         location: item.resourceId || 'Unknown Location'
                     }))
@@ -87,12 +135,15 @@ export default function UserEvents() {
 
                 setEvents(formattedEvents)
 
+                // Reset pagination to first page
+                setCurrentPage(1)
+
                 // Jump to the latest event date if available
                 if (formattedEvents.length > 0) {
                     setCurrentDate(formattedEvents[0].start);
                     toast.success(`Found ${formattedEvents.length} events`)
                 } else {
-                    toast('No events found for this user')
+                    toast('No events found')
                 }
             } else {
                 setEvents([])
@@ -109,6 +160,11 @@ export default function UserEvents() {
 
     const handleSelectEvent = (event) => {
         setSelectedEvent(event)
+    }
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     const closeModal = () => {
@@ -177,22 +233,38 @@ export default function UserEvents() {
                                         if (selectedUser) setSelectedUser(null);
                                     }}
                                     className="custom-input"
+                                    style={{ paddingRight: searchQuery ? '45px' : '18px' }}
                                 />
                                 {searchQuery && (
                                     <button
                                         onClick={handleClearSearch}
+                                        className="clear-search-btn"
                                         style={{
                                             position: 'absolute',
-                                            right: '10px',
+                                            right: '12px',
                                             top: '50%',
                                             transform: 'translateY(-50%)',
-                                            background: 'none',
+                                            background: 'rgba(255, 255, 255, 0.1)',
                                             border: 'none',
-                                            color: '#ccc',
-                                            cursor: 'pointer'
+                                            borderRadius: '6px',
+                                            color: 'rgba(255, 255, 255, 0.6)',
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255, 107, 107, 0.2)'
+                                            e.currentTarget.style.color = '#ff6b6b'
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+                                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'
                                         }}
                                     >
-                                        <X size={16} />
+                                        <X size={14} />
                                     </button>
                                 )}
 
@@ -214,22 +286,61 @@ export default function UserEvents() {
                                 )}
                             </div>
                         </div>
-                        <div className="form-group-inline" style={{ marginTop: '10px' }}>
-                            <label>Event ID (Optional)</label>
+
+                        <div className="form-group-inline">
+                            <label>Event ID</label>
                             <input
                                 type="text"
-                                placeholder="Filter by Event ID..."
-                                value={searchEventId}
-                                onChange={(e) => setSearchEventId(e.target.value)}
+                                placeholder="Enter Event ID..."
+                                value={eventId}
+                                onChange={(e) => setEventId(e.target.value)}
                                 className="custom-input"
                             />
                         </div>
-                        {/* Placeholder for alignment, similar to Calendar search button */}
-                        <div className="form-group-inline" style={{ minWidth: 'auto', flex: 'none' }}>
-                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
-                            <div className="search-btn" style={{ cursor: 'default' }}>
-                                <Search size={18} />
+
+                        <div className="form-group-inline">
+                            <label>Room Email</label>
+                            <input
+                                type="text"
+                                placeholder="Enter Resource ID..."
+                                value={resourceId}
+                                onChange={(e) => setResourceId(e.target.value)}
+                                className="custom-input"
+                            />
+                        </div>
+
+                        {/* Date Range Row */}
+                        <div className="date-group-row">
+                            <div className="form-group-inline">
+                                <label>Start Date</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="custom-input date-input"
+                                />
                             </div>
+                            <div className="form-group-inline">
+                                <label>End Date</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="custom-input date-input"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Search Button */}
+                        <div className="form-group-inline search-btn-wrapper">
+                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
+                            <button
+                                className="search-btn"
+                                onClick={handleSearch}
+                                disabled={loading}
+                            >
+                                <Search size={18} /> {loading ? '...' : 'Search'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -246,75 +357,92 @@ export default function UserEvents() {
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', width: '100%' }}>
                         <Loading />
                     </div>
-                ) : !selectedUser ? (
-                    <div className="no-data">
-                        <p>Search for a user to see their event history.</p>
-                    </div>
                 ) : events.length === 0 ? (
                     <div className="no-data">
-                        <p>No events found for {selectedUser.name}.</p>
+                        <p>{!eventId && !selectedUser && !resourceId && !startDate && !endDate
+                            ? 'Search for events using filters above.'
+                            : 'No events found with the selected filters.'}</p>
                     </div>
-                ) : (
-                    <table className="user-events-table">
-                        <thead>
-                            <tr>
-                                <th>Event ID</th>
-                                <th>Subject</th>
-                                <th>Room / Location</th>
-                                <th>Event Time</th>
-                                <th style={{ textAlign: 'center' }}>Status</th>
-                                <th style={{ textAlign: 'center' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {events.filter(event => !searchEventId || event.id?.toLowerCase().includes(searchEventId.toLowerCase())).map((event, index) => (
-                                <tr key={event.id || index}>
-                                    <td data-label="Event ID">
-                                        <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                            {event.id || '-'}
-                                        </div>
-                                    </td>
-                                    <td data-label="Subject">
-                                        <div style={{ fontWeight: 600, color: '#fff' }}>
-                                            {event.title}
-                                        </div>
-                                    </td>
-                                    <td data-label="Room / Location">
-                                        {event.resource.resourceName && (
-                                            <div style={{ fontWeight: 600, color: '#fff' }}>
-                                                {event.resource.resourceName}
-                                            </div>
-                                        )}
-                                        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                                            {event.location}
-                                        </div>
-                                    </td>
-                                    <td data-label="Time">
-                                        <div style={{ fontSize: '0.9rem' }}>
-                                            {moment(event.start).format('DD MMM YYYY')}
-                                        </div>
-                                        <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                                            {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}
-                                        </div>
-                                    </td>
-                                    <td data-label="Status" style={{ textAlign: 'center' }}>
-                                        <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
-                                            {event.isCancelled ? 'Cancelled' : 'Scheduled'}
-                                        </span>
-                                    </td>
-                                    <td data-label="Action" style={{ textAlign: 'center' }}>
-                                        <button
-                                            className="view-btn"
-                                            onClick={() => setSelectedEvent(event)}
-                                        >
-                                            <Eye size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                ) : (() => {
+                    // Calculate pagination
+                    const filteredEvents = events.filter(event => !eventId || event.id?.toLowerCase().includes(eventId.toLowerCase()))
+                    const totalPages = Math.ceil(filteredEvents.length / itemsPerPage)
+                    const startIndex = (currentPage - 1) * itemsPerPage
+                    const endIndex = startIndex + itemsPerPage
+                    const paginatedEvents = filteredEvents.slice(startIndex, endIndex)
+
+                    return (
+                        <>
+                            <table className="user-events-table">
+                                <thead>
+                                    <tr>
+                                        <th>Event ID</th>
+                                        <th>Subject</th>
+                                        <th>Room / Location</th>
+                                        <th>Event Time</th>
+                                        <th style={{ textAlign: 'center' }}>Status</th>
+                                        <th style={{ textAlign: 'center' }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {paginatedEvents.map((event, index) => (
+                                        <tr key={event.id || index}>
+                                            <td data-label="Event ID">
+                                                <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                    {event.id || '-'}
+                                                </div>
+                                            </td>
+                                            <td data-label="Subject">
+                                                <div style={{ fontWeight: 600, color: '#fff' }}>
+                                                    {event.title}
+                                                </div>
+                                            </td>
+                                            <td data-label="Room / Location">
+                                                <div style={{ fontWeight: 500 }}>
+                                                    {event.resource?.resourceName || event.resource?.resourceId || event.location}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                                    {event.resource?.roomType || ''}
+                                                </div>
+                                            </td>
+                                            <td data-label="Event Time">
+                                                <div style={{ fontSize: '0.9rem' }}>
+                                                    {event.start ? new Date(event.start).toLocaleDateString('en-GB') : '-'}
+                                                </div>
+                                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                                    {event.start && event.end
+                                                        ? `${new Date(event.start).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+                                                        : '-'}
+                                                </div>
+                                            </td>
+                                            <td data-label="Status" style={{ textAlign: 'center' }}>
+                                                <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
+                                                    {event.isCancelled ? 'Cancelled' : 'Scheduled'}
+                                                </span>
+                                            </td>
+                                            <td data-label="Action" style={{ textAlign: 'center' }}>
+                                                <button
+                                                    className="view-btn"
+                                                    onClick={() => setSelectedEvent(event)}
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                                itemsPerPage={itemsPerPage}
+                                totalItems={filteredEvents.length}
+                            />
+                        </>
+                    )
+                })()}
             </motion.div>
 
             <UserEventModal

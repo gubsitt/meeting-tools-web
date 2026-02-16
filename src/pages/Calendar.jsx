@@ -15,15 +15,15 @@ const localizer = momentLocalizer(moment)
 export default function Calendar() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
-  const [roomEmail, setRoomEmail] = useState('dev365.room1@exzydev.onmicrosoft.com')
+  const [roomEmail, setRoomEmail] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  
+
   // ✅ เพิ่ม State สำหรับเปิด/ปิด Filter บนมือถือ
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
   const [dateRange, setDateRange] = useState({
-    start: moment().startOf('month').format('YYYY-MM-DD'),
-    end: moment().endOf('month').format('YYYY-MM-DD')
+    start: '',
+    end: ''
   })
 
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -35,7 +35,7 @@ export default function Calendar() {
 
     setLoading(true)
     // ปิด Filter บนมือถือเมื่อกดค้นหา เพื่อให้เห็นผลลัพธ์ทันที
-    setIsMobileFilterOpen(false); 
+    setIsMobileFilterOpen(false);
 
     try {
       const res = await CalendarService.getEvents(roomEmail, dateRange.start, dateRange.end, searchQuery)
@@ -157,10 +157,10 @@ export default function Calendar() {
         {/* ✅ Form Logic: Desktop เห็นตลอด, Mobile ต้องกดเปิดก่อน */}
         <div className={`search-form-wrapper ${isMobileFilterOpen ? 'open' : ''}`}>
           <form onSubmit={handleSearch} className="search-form">
-            
+
             {/* แถว 1: Search & Email */}
             <div className="form-group-inline search-input-wrapper">
-              <label>Search (ID / iCalUID)</label>
+              <label>ID / iCalUID</label>
               <input
                 type="text"
                 className="custom-input"
@@ -178,15 +178,15 @@ export default function Calendar() {
             {/* แถว 2: วันที่ (บนมือถือจะจัดให้อยู่บรรทัดเดียวกัน) */}
             <div className="date-group-row">
               <div className="form-group-inline">
-                <label>Start</label>
+                <label>Start Date</label>
                 <input type="date" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} className="custom-input date-input" />
               </div>
               <div className="form-group-inline">
-                <label>End</label>
+                <label>End Date</label>
                 <input type="date" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} className="custom-input date-input" />
               </div>
             </div>
-            
+
             {/* ปุ่ม Search */}
             <div className="form-group-inline search-btn-wrapper">
               <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>

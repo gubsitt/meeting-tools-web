@@ -115,7 +115,7 @@ export default function CalendarEventModal({ isOpen, onClose, event, onDelete, l
                                         <div className="detail-item">
                                             <MapPin className="icon" size={20} />
                                             <div>
-                                                <label>Location</label>
+                                                <label>Resource</label>
                                                 <p>{event.resource?.location?.displayName || 'Unknown'}</p>
                                             </div>
                                         </div>

@@ -28,13 +28,12 @@ export default function CancelledEvents() {
     const [modalLoading, setModalLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    // Filter transactions by Event ID
-    const filteredTransactions = transactions.filter(t =>
-        !searchFilter.searchQuery || t.eventId?.toLowerCase().includes(searchFilter.searchQuery.toLowerCase())
-    )
+    const [roomId, setRoomId] = useState('')
 
     // Pagination Hook
-    const pagination = usePagination(filteredTransactions, 10)
+    const pagination = usePagination(transactions, 10)
+
+
 
     // Removed initial useEffect to prevent auto-fetch
     /* useEffect(() => {
@@ -48,10 +47,25 @@ export default function CancelledEvents() {
         mobileFilter.close()
 
         try {
-            const startTimestamp = dayjs(dateFilter.startDate).startOf('day').valueOf()
-            const endTimestamp = dayjs(dateFilter.endDate).endOf('day').valueOf()
+            const payload = {}
 
-            const response = await CancelledEventService.getCancelledTransactions(startTimestamp, endTimestamp)
+            // Only add date filters if they are selected
+            if (dateFilter.startDate) {
+                payload.startTime = dayjs(dateFilter.startDate).startOf('day').valueOf()
+            }
+            if (dateFilter.endDate) {
+                payload.endTime = dayjs(dateFilter.endDate).endOf('day').valueOf()
+            }
+
+            if (searchFilter.searchQuery) {
+                payload.eventId = searchFilter.searchQuery
+            }
+
+            if (roomId) {
+                payload.roomID = roomId
+            }
+
+            const response = await CancelledEventService.getCancelledTransactions(payload)
             if (response.success) {
                 setTransactions(response.data)
                 pagination.resetPagination()
@@ -152,19 +166,27 @@ export default function CancelledEvents() {
                                 />
                             </div>
                         </div>
-                        <div className="date-group-row">
-                            <div className="form-group-inline" style={{ flex: 1 }}>
-                                <label>Event ID</label>
-                                <input
-                                    type="text"
-                                    className="custom-input"
-                                    placeholder="Search by Event ID..."
-                                    value={searchFilter.searchQuery}
-                                    onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
-                                />
-                            </div>
+                        <div className="form-group-inline">
+                            <label>Room ID</label>
+                            <input
+                                type="text"
+                                className="custom-input"
+                                placeholder="Search by Room ID..."
+                                value={roomId}
+                                onChange={(e) => setRoomId(e.target.value)}
+                            />
                         </div>
                         <div className="form-group-inline">
+                            <label>Event ID</label>
+                            <input
+                                type="text"
+                                className="custom-input"
+                                placeholder="Search by Event ID..."
+                                value={searchFilter.searchQuery}
+                                onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group-inline search-btn-wrapper">
                             <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
                             <button type="submit" className="search-btn" disabled={loading}>
                                 <Search size={18} /> {loading ? 'Searching...' : 'Search'}

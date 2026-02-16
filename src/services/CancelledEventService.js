@@ -3,12 +3,13 @@ import axios from 'axios'
 const API_BASE_URL = 'http://localhost:5000/api'
 
 const CancelledEventService = {
-    getCancelledTransactions: async (startTime, endTime, roomId) => {
+    getCancelledTransactions: async ({ startTime, endTime, roomID, eventId }) => {
         try {
             const params = {};
             if (startTime) params.startTime = startTime;
             if (endTime) params.endTime = endTime;
-            if (roomId) params.roomID = roomId;
+            if (roomID) params.roomID = roomID;
+            if (eventId) params.eventId = eventId;
 
             const response = await axios.get(`${API_BASE_URL}/cancelled-events`, {
                 params,

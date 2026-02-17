@@ -813,15 +813,21 @@
         flex-direction: row !important;
         gap: 10px;
         width: 100%;
+        order: 1;
     }
 
     .date-group-row .form-group-inline {
         flex: 1;
     }
 
+    /* ย้ายปุ่ม Search ลงล่างสุดบนมือถือ */
+    .search-btn-wrapper {
+        order: 2;
+    }
+
     .search-btn {
         width: 100%;
-        margin-top: 5px;
+        margin-top: 10px;
         height: 45px;
     }
 

@@ -194,7 +194,7 @@ export default function UserEvents() {
                             <div style={{ position: 'relative', width: '100%' }}>
                                 <input
                                     type="text"
-                                    placeholder="Type to search..."
+                                    placeholder="Search by User..."
                                     value={userSearch.searchQuery}
                                     onChange={(e) => {
                                         userSearch.setSearchQuery(e.target.value)
@@ -259,7 +259,7 @@ export default function UserEvents() {
                             <label>Event ID</label>
                             <input
                                 type="text"
-                                placeholder="Enter Event ID..."
+                                placeholder="Search by Event ID..."
                                 value={eventId}
                                 onChange={(e) => setEventId(e.target.value)}
                                 className="custom-input"
@@ -267,10 +267,10 @@ export default function UserEvents() {
                         </div>
 
                         <div className="form-group-inline">
-                            <label>Room Email</label>
+                            <label>Room ID</label>
                             <input
                                 type="text"
-                                placeholder="Enter Resource ID..."
+                                placeholder="Search by Room ID..."
                                 value={resourceId}
                                 onChange={(e) => setResourceId(e.target.value)}
                                 className="custom-input"

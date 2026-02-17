@@ -17,6 +17,9 @@ const MissSyncEvents = () => {
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
+    // New State for Room ID
+    const [roomId, setRoomId] = useState('');
+
     // Custom Hooks
     const mobileFilter = useMobileFilter(false);
     const dateFilter = useDateRangeFilter('', '');
@@ -26,15 +29,8 @@ const MissSyncEvents = () => {
     const [syncAlert, setSyncAlert] = useState(null);
     const alertTimeoutRef = useRef(null);
 
-    // Filter events by Search Query (Event ID)
-    const filteredEvents = events.filter(event =>
-        !searchFilter.searchQuery ||
-        event.id?.toLowerCase().includes(searchFilter.searchQuery.toLowerCase()) ||
-        event.masterEventId?.toLowerCase().includes(searchFilter.searchQuery.toLowerCase())
-    );
-
-    // Pagination Hook
-    const pagination = usePagination(filteredEvents, 10);
+    // Pagination Hook - Use 'events' directly as filtering is now server-side
+    const pagination = usePagination(events, 10);
 
     // Clear timeout when component unmounts
     useEffect(() => {
@@ -52,13 +48,29 @@ const MissSyncEvents = () => {
         mobileFilter.close();
 
         try {
-            // Send ISO strings with start/end of day times
-            const start = moment(dateFilter.startDate).startOf('day').toISOString();
-            const end = moment(dateFilter.endDate).endOf('day').toISOString();
+            const payload = {};
 
-            const response = await MissSyncService.getMissSyncEvents(start, end);
+            // Add date filters if selected
+            if (dateFilter.startDate) {
+                payload.startDate = moment(dateFilter.startDate).startOf('day').toISOString();
+            }
+            if (dateFilter.endDate) {
+                payload.endDate = moment(dateFilter.endDate).endOf('day').toISOString();
+            }
+
+            // Add other filters
+            if (searchFilter.searchQuery) {
+                payload.eventId = searchFilter.searchQuery;
+            }
+            if (roomId) {
+                payload.roomId = roomId;
+            }
+
+            const response = await MissSyncService.getMissSyncEvents(payload);
+
             if (response.success) {
-                // Filter out cancelled events
+                // Filter out cancelled events (if needed, though backend logically shouldn't return them if we trust the API, but keeping as safeguard or per requirement)
+                // The user's backend code snippet doesn't explicitly filter out cancelled events in the query, so keeping this check is safe.
                 const activeEvents = response.data.filter(event =>
                     !event.title?.startsWith('Canceled:') && !event.isCancelled
                 );
@@ -266,19 +278,27 @@ const MissSyncEvents = () => {
                                 />
                             </div>
                         </div>
-                        <div className="date-group-row">
-                            <div className="form-group-inline" style={{ flex: 1 }}>
-                                <label>Event ID</label>
-                                <input
-                                    type="text"
-                                    className="custom-input"
-                                    placeholder="Filter by Event ID..."
-                                    value={searchFilter.searchQuery}
-                                    onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
-                                />
-                            </div>
+                        <div className="form-group-inline">
+                            <label>Room ID</label>
+                            <input
+                                type="text"
+                                className="custom-input"
+                                placeholder="Search by Room ID..."
+                                value={roomId}
+                                onChange={(e) => setRoomId(e.target.value)}
+                            />
                         </div>
                         <div className="form-group-inline">
+                            <label>Event ID</label>
+                            <input
+                                type="text"
+                                className="custom-input"
+                                placeholder="Search by Event ID..."
+                                value={searchFilter.searchQuery}
+                                onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group-inline search-btn-wrapper">
                             <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
                             <button
                                 type="submit"

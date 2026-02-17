@@ -166,19 +166,19 @@ export default function Calendar() {
 
             {/* แถว 1: Search & Email */}
             <div className="form-group-inline search-input-wrapper">
-              <label>ID / iCalUID</label>
+              <label>Event ID</label>
               <input
                 type="text"
                 className="custom-input"
-                placeholder="Paste Event ID..."
+                placeholder="Search by Event ID..."
                 value={searchFilter.searchQuery}
                 onChange={(e) => searchFilter.setSearchQuery(e.target.value)}
               />
             </div>
 
             <div className="form-group-inline search-email-wrapper">
-              <label>Room Email</label>
-              <input type="text" placeholder="Enter room email..." value={roomEmail} onChange={(e) => setRoomEmail(e.target.value)} className="custom-input" />
+              <label>Room ID</label>
+              <input type="text" placeholder="Search by Room ID..." value={roomEmail} onChange={(e) => setRoomEmail(e.target.value)} className="custom-input" />
             </div>
 
             {/* แถว 2: วันที่ (บนมือถือจะจัดให้อยู่บรรทัดเดียวกัน) */}

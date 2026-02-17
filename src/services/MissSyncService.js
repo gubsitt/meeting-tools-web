@@ -1,11 +1,13 @@
 import api from './api';
 
 const MissSyncService = {
-    getMissSyncEvents: async (startDate, endDate) => {
+    getMissSyncEvents: async ({ startDate, endDate, eventId, roomId }) => {
         try {
             const params = {};
             if (startDate) params.startDate = startDate;
             if (endDate) params.endDate = endDate;
+            if (eventId) params.eventId = eventId;
+            if (roomId) params.roomId = roomId;
 
             const response = await api.get('/api/events/miss-sync', { params });
             return response.data;

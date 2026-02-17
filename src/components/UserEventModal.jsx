@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download, Eye, EyeOff, UserCheck, ChevronDown } from 'lucide-react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
+import './UserEventModal.css'
 
 export default function UserEventModal({ isOpen, onClose, event }) {
     const [viewMode, setViewMode] = useState('detail')
@@ -17,22 +18,22 @@ export default function UserEventModal({ isOpen, onClose, event }) {
 
         const fetchUsers = async () => {
             const userIds = []
-            
+
             // Add owner ID
             if (event.resource?.owner) {
                 userIds.push(event.resource.owner)
             }
-            
+
             // Add attendee IDs
             if (event.resource?.attendees && event.resource.attendees.length > 0) {
                 userIds.push(...event.resource.attendees)
             }
-            
+
             // Remove duplicates
             const uniqueUserIds = [...new Set(userIds)]
-            
+
             if (uniqueUserIds.length === 0) return
-            
+
             setLoadingUsers(true)
             try {
                 const response = await UserEventService.getUsersByIds(uniqueUserIds)
@@ -348,8 +349,8 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                                 if (lastTrans?.time?.unix) {
                                                     // Check if timestamp is in milliseconds (> year 3000 in seconds)
                                                     const timestamp = lastTrans.time.unix
-                                                    lastUpdateTime = timestamp > 32503680000 
-                                                        ? moment(timestamp) 
+                                                    lastUpdateTime = timestamp > 32503680000
+                                                        ? moment(timestamp)
                                                         : moment.unix(timestamp)
                                                 }
                                             }
@@ -377,7 +378,7 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                                         // Check if timestamp is in milliseconds or seconds
                                                         // Unix timestamp for year 3000 is ~32503680000 seconds
                                                         const timestamp = trans.time?.unix || 0
-                                                        const transDate = timestamp > 32503680000 
+                                                        const transDate = timestamp > 32503680000
                                                             ? moment(timestamp) // milliseconds
                                                             : moment.unix(timestamp) // seconds
                                                         return (

@@ -42,6 +42,18 @@ const UserEventService = {
             console.error("Error fetching users by IDs:", error);
             throw error;
         }
+    },
+
+    updateEvent: async (eventId, updateData) => {
+        try {
+            const response = await axios.put(`${API_BASE_URL}/events/${eventId}`, updateData, {
+                withCredentials: true
+            });
+            return response.data
+        } catch (error) {
+            console.error("Error updating event:", error);
+            throw error;
+        }
     }
 }
 

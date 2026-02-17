@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download, Eye, EyeOff, UserCheck, ChevronDown } from 'lucide-react'
+import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download, Eye, EyeOff, UserCheck, ChevronDown, Edit2, Save } from 'lucide-react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
 import './UserEventModal.css'
+import toast from 'react-hot-toast'
 
-export default function UserEventModal({ isOpen, onClose, event }) {
-    const [viewMode, setViewMode] = useState('detail')
+export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
+    const [viewMode, setViewMode] = useState('detail') // detail, json, edit
     const [copied, setCopied] = useState(false)
     const [showAllHistory, setShowAllHistory] = useState(false)
     const [usersData, setUsersData] = useState({})
     const [loadingUsers, setLoadingUsers] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
+    const [saving, setSaving] = useState(false)
+    const [editFormData, setEditFormData] = useState({
+        title: '',
+        startTime: '',
+        endTime: '',
+        resourceId: '',
+        pendingSync: false,
+        cancelled: false,
+        impersonated: false,
+        attendees: []
+    })
 
     // Fetch user data when modal opens
     useEffect(() => {
@@ -53,7 +66,25 @@ export default function UserEventModal({ isOpen, onClose, event }) {
         }
 
         fetchUsers()
+        fetchUsers()
     }, [isOpen, event])
+
+    useEffect(() => {
+        if (event) {
+            setEditFormData({
+                title: event.title || '',
+                startTime: moment(event.start).format('YYYY-MM-DDTHH:mm'),
+                endTime: moment(event.end).format('YYYY-MM-DDTHH:mm'),
+                resourceId: event.resource?.resourceId || '',
+                pendingSync: event.resource?.pendingSync || false,
+                cancelled: event.resource?.cancelled || false,
+                impersonated: event.resource?.impersonated || false,
+                attendees: event.resource?.attendees || []
+            })
+            setIsEditing(false)
+            setViewMode('detail')
+        }
+    }, [event])
 
     if (!isOpen || !event) return null
 
@@ -77,6 +108,62 @@ export default function UserEventModal({ isOpen, onClose, event }) {
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
+    }
+
+    const handleSave = async () => {
+        if (!editFormData.title || !editFormData.startTime || !editFormData.endTime) {
+            toast.error('Please fill in all required fields')
+            return
+        }
+
+        setSaving(true)
+        try {
+            const updateData = {
+                title: editFormData.title,
+                startTime: moment(editFormData.startTime).valueOf(),
+                endTime: moment(editFormData.endTime).valueOf(),
+                resourceId: editFormData.resourceId,
+                pendingSync: editFormData.pendingSync,
+                cancelled: editFormData.cancelled,
+                impersonated: editFormData.impersonated,
+                attendees: editFormData.attendees
+            }
+
+            // user requested backend snippets show it expects 'resourceId', 'title', 'pendingSync', ...
+            // And it seems to handle specific fields.
+            // Let's assume standard timestamp or ISO string. The prompt snippet said "startTime", "endTime".
+            // Typically backend expects ISO or timestamp. If `event.start` was used to init moment, it's likely a date object or string.
+            // UserEvents.jsx:99 `start: new Date(item.startTime.unix)` -> checks out, `unix` likely millis or seconds.
+            // Wait, `item.startTime.unix` suggesting it IS unix timestamp.
+            // But `UserEventService` snippet wasn't shown for the *existing* update.
+            // The user snippet `updateEvent` uses `Event.findByIdAndUpdate`.
+            // Let's send what we have. If backend expects something else, we might need to adjust.
+            // Based on `UserEvents.jsx`: `start: new Date(item.startTime.unix)`
+            // If I send new Date().valueOf(), that's millis.
+
+            const response = await UserEventService.updateEvent(event.id, updateData)
+
+            if (response.success) {
+                toast.success('Event updated successfully')
+                setIsEditing(false)
+                setViewMode('detail')
+
+                // Call parent callback to update list and selected event without refresh
+                if (onUpdate && response.data) {
+                    onUpdate(response.data)
+                } else if (onClose) {
+                    // Fallback if no onUpdate provided
+                    onClose()
+                }
+            } else {
+                throw new Error(response.message || 'Failed to update')
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error(error.message || 'Failed to update event')
+        } finally {
+            setSaving(false)
+        }
     }
 
     // Reset view mode when modal opens/changes
@@ -107,24 +194,17 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                 <h2>{event.title}</h2>
                                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                                     <button
-                                        onClick={() => setViewMode('detail')}
-                                        style={{
-                                            background: viewMode === 'detail' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
-                                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                                            color: 'white',
-                                            padding: '4px 12px',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.8rem',
-                                            transition: 'all 0.2s'
+                                        onClick={() => {
+                                            if (isEditing) {
+                                                setIsEditing(false)
+                                                setViewMode('detail')
+                                            } else {
+                                                setIsEditing(true)
+                                                setViewMode('edit')
+                                            }
                                         }}
-                                    >
-                                        Details
-                                    </button>
-                                    <button
-                                        onClick={() => setViewMode('json')}
                                         style={{
-                                            background: viewMode === 'json' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                                            background: isEditing ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
                                             border: '1px solid rgba(255, 255, 255, 0.1)',
                                             color: 'white',
                                             padding: '4px 12px',
@@ -137,8 +217,45 @@ export default function UserEventModal({ isOpen, onClose, event }) {
                                             transition: 'all 0.2s'
                                         }}
                                     >
-                                        <Code size={14} /> JSON
+                                        <Edit2 size={14} /> {isEditing ? 'Cancel' : 'Edit'}
                                     </button>
+                                    {!isEditing && (
+                                        <>
+                                            <button
+                                                onClick={() => setViewMode('detail')}
+                                                style={{
+                                                    background: viewMode === 'detail' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    color: 'white',
+                                                    padding: '4px 12px',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.8rem',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                Details
+                                            </button>
+                                            <button
+                                                onClick={() => setViewMode('json')}
+                                                style={{
+                                                    background: viewMode === 'json' ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    color: 'white',
+                                                    padding: '4px 12px',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.8rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                <Code size={14} /> JSON
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             <button className="close-btn" onClick={onClose}>
@@ -148,7 +265,152 @@ export default function UserEventModal({ isOpen, onClose, event }) {
 
                         {/* Body */}
                         <div className="modal-body">
-                            {viewMode === 'detail' ? (
+                            {isEditing ? (
+                                <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Subject</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.title}
+                                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                            style={{
+                                                width: '100%',
+                                                background: 'rgba(0, 0, 0, 0.2)',
+                                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                borderRadius: '8px',
+                                                padding: '12px',
+                                                color: 'white',
+                                                outline: 'none',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        <div className="form-group">
+                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Start Time</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={editFormData.startTime}
+                                                onChange={(e) => setEditFormData({ ...editFormData, startTime: e.target.value })}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(0, 0, 0, 0.2)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '8px',
+                                                    padding: '12px',
+                                                    color: 'white',
+                                                    outline: 'none',
+                                                    fontSize: '0.95rem'
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>End Time</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={editFormData.endTime}
+                                                onChange={(e) => setEditFormData({ ...editFormData, endTime: e.target.value })}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(0, 0, 0, 0.2)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '8px',
+                                                    padding: '12px',
+                                                    color: 'white',
+                                                    outline: 'none',
+                                                    fontSize: '0.95rem'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Resource ID</label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.resourceId}
+                                            onChange={(e) => setEditFormData({ ...editFormData, resourceId: e.target.value })}
+                                            style={{
+                                                width: '100%',
+                                                background: 'rgba(0, 0, 0, 0.2)',
+                                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                borderRadius: '8px',
+                                                padding: '12px',
+                                                color: 'white',
+                                                outline: 'none',
+                                                fontSize: '1rem',
+                                                fontFamily: 'monospace'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editFormData.pendingSync}
+                                                onChange={(e) => setEditFormData({ ...editFormData, pendingSync: e.target.checked })}
+                                                style={{ accentColor: '#6c5ce7', width: '16px', height: '16px' }}
+                                            />
+                                            <span style={{ fontSize: '0.9rem' }}>Pending Sync</span>
+                                        </label>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editFormData.cancelled}
+                                                onChange={(e) => setEditFormData({ ...editFormData, cancelled: e.target.checked })}
+                                                style={{ accentColor: '#ff6b6b', width: '16px', height: '16px' }}
+                                            />
+                                            <span style={{ fontSize: '0.9rem' }}>Cancelled</span>
+                                        </label>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editFormData.impersonated}
+                                                onChange={(e) => setEditFormData({ ...editFormData, impersonated: e.target.checked })}
+                                                style={{ accentColor: '#6c5ce7', width: '16px', height: '16px' }}
+                                            />
+                                            <span style={{ fontSize: '0.9rem' }}>Impersonated</span>
+                                        </label>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+                                        <button
+                                            onClick={() => {
+                                                setIsEditing(false)
+                                                setViewMode('detail')
+                                            }}
+                                            style={{
+                                                background: 'transparent',
+                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                color: 'white',
+                                                padding: '10px 20px',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer'
+                                            }}
+                                            disabled={saving}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleSave}
+                                            disabled={saving}
+                                            style={{
+                                                background: '#6c5ce7',
+                                                border: 'none',
+                                                color: 'white',
+                                                padding: '10px 20px',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                opacity: saving ? 0.7 : 1
+                                            }}
+                                        >
+                                            {saving ? 'Saving...' : <><Save size={18} /> Save Changes</>}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : viewMode === 'detail' ? (
                                 <>
                                     <div className="detail-item">
                                         <Code className="icon" size={20} />

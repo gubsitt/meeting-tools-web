@@ -157,6 +157,35 @@ export default function UserEvents() {
         }
     }
 
+    const handleEventUpdate = (updatedEventData) => {
+        // Format the updated event to match the structure used in the list
+        // Defensive coding for date handling (supporting both .unix object and direct timestamp/string)
+        const getTimestamp = (val) => {
+            if (!val) return null
+            if (typeof val === 'object' && val.unix) return new Date(val.unix) // Existing format
+            if (typeof val === 'number') return new Date(val) // Direct timestamp
+            return new Date(val) // ISO string or other
+        }
+
+        const formattedUpdatedEvent = {
+            id: updatedEventData._id,
+            title: updatedEventData.title || 'Untitled Event',
+            start: getTimestamp(updatedEventData.startTime),
+            end: getTimestamp(updatedEventData.endTime),
+            resource: updatedEventData, // Keep raw doc
+            isCancelled: updatedEventData.cancelled,
+            location: updatedEventData.resourceId || 'Unknown Location'
+        }
+
+        // 1. Update the list state
+        setEvents(prevEvents => prevEvents.map(event =>
+            event.id === formattedUpdatedEvent.id ? formattedUpdatedEvent : event
+        ))
+
+        // 2. Update the selected event state to reflect changes immediately in the modal
+        setSelectedEvent(formattedUpdatedEvent)
+    }
+
     return (
         <div className="user-events-page">
             {/* Floating Orbs */}
@@ -277,6 +306,21 @@ export default function UserEvents() {
                             />
                         </div>
 
+                        {/* Search Button - Top Right */}
+                        <div className="form-group-inline search-btn-wrapper">
+                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
+                            <button
+                                className="search-btn"
+                                onClick={handleSearch}
+                                disabled={loading}
+                            >
+                                <Search size={18} /> {loading ? '...' : 'Search'}
+                            </button>
+                        </div>
+
+                        {/* Flex Break - Force date row to new line */}
+                        <div className="flex-break"></div>
+
                         {/* Date Range Row */}
                         <div className="date-group-row">
                             <div className="form-group-inline">
@@ -297,18 +341,6 @@ export default function UserEvents() {
                                     className="custom-input date-input"
                                 />
                             </div>
-                        </div>
-
-                        {/* Search Button */}
-                        <div className="form-group-inline search-btn-wrapper">
-                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
-                            <button
-                                className="search-btn"
-                                onClick={handleSearch}
-                                disabled={loading}
-                            >
-                                <Search size={18} /> {loading ? '...' : 'Search'}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -408,6 +440,7 @@ export default function UserEvents() {
                 isOpen={!!selectedEvent}
                 event={selectedEvent}
                 onClose={closeModal}
+                onUpdate={handleEventUpdate}
             />
         </div>
     )

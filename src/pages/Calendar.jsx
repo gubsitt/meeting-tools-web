@@ -228,7 +228,7 @@ export default function Calendar() {
           endAccessor="end"
           style={{ height: '75vh', minHeight: '600px' }}
           eventPropGetter={eventStyleGetter}
-          views={['month', 'week', 'day', 'agenda']}
+          views={['month', 'week', 'day']}
           defaultView="month"
           date={currentDate}
           onNavigate={(date) => setCurrentDate(date)}

@@ -13,28 +13,31 @@ export const API_CONFIG = {
     AUTH_USERS: '/api/auth/users',
     AUTH_UPDATE_ROLE: (userId) => `/api/auth/users/${userId}/role`,
     AUTH_DELETE_USER: (userId) => `/api/auth/users/${userId}`,
-    
+
     // Calendar
     CALENDAR_EVENTS: '/api/calendar/events',
     CALENDAR_DELETE_EVENT: (eventId) => `/api/calendar/events/${eventId}`,
-    
+
     // Events
     EVENTS_SEARCH: '/api/events/search',
     EVENTS_UPDATE: (eventId) => `/api/events/${eventId}`,
-    
+
     // Users
     USERS_SEARCH: '/api/users/search',
     USERS_BY_IDS: '/api/users/by-ids',
-    
+
     // Cancelled Events
     CANCELLED_EVENTS: '/api/cancelled-events',
     CANCELLED_EVENT_OWNER: (eventId) => `/api/cancelled-events/event-owner/${eventId}`,
-    
+
     // Miss Sync Events
-    MISS_SYNC_EVENTS: '/api/miss-sync-events',
-    
+    MISS_SYNC_EVENTS: '/api/events/miss-sync',
+    MISS_SYNC_EVENT_UPDATE: (eventId) => `/api/events/miss-sync/${eventId}`,
+    MISS_SYNC_EVENT_SYNC: (eventId) => `/api/events/miss-sync/sync/${eventId}`,
+
     // Config File
-    CONFIG_FILE: '/api/config'
+    CONFIG_FILE: '/api/config',
+    CONFIG_FILE_CONTENT: '/api/docker/container/file'
   }
 }
 
@@ -120,7 +123,7 @@ export const STORAGE_KEYS = {
 // Calendar Configuration
 export const CALENDAR_CONFIG = {
   DEFAULT_VIEW: 'month',
-  VIEWS: ['month', 'week', 'day', 'agenda'],
+  VIEWS: ['month', 'week', 'day'],
   STEP: 30, // minutes
   TIME_SLOTS: 2
 }

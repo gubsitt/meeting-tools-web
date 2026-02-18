@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, User, Shield, ShieldAlert, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
-import './UserManagement.css' // เดี๋ยวสร้างไฟล์นี้ต่อ
+import '../styles/pages/UserManagement.css'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -15,6 +15,7 @@ export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [error, setError] = useState(null)
   const [accessDenied, setAccessDenied] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(null) // { userId, userName }
 
   // ดึงข้อมูล Users
   const fetchUsers = async () => {
@@ -48,8 +49,13 @@ export default function UserManagement() {
   }
 
   // ลบ User
-  const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return
+  const handleDelete = (userId, userName) => {
+    setDeleteConfirm({ userId, userName })
+  }
+
+  const confirmDelete = async () => {
+    const { userId } = deleteConfirm
+    setDeleteConfirm(null)
 
     try {
       await axios.delete(`${API_URL}/api/auth/users/${userId}`, { withCredentials: true })
@@ -196,7 +202,7 @@ export default function UserManagement() {
                         {user.role !== 'superadmin' && (
                           <button
                             className="delete-btn"
-                            onClick={() => handleDelete(user._id)}
+                            onClick={() => handleDelete(user._id, user.name)}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -210,6 +216,114 @@ export default function UserManagement() {
           )}
         </motion.div>
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteConfirm && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDeleteConfirm(null)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.7)',
+                backdropFilter: 'blur(4px)',
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {/* Modal */}
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(30, 30, 45, 0.98), rgba(20, 20, 35, 0.98))',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 107, 107, 0.3)',
+                  borderRadius: '20px',
+                  padding: '32px',
+                  maxWidth: '450px',
+                  width: '90%',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                }}
+              >
+                <h3 style={{
+                  color: '#ff6b6b',
+                  fontSize: '1.5rem',
+                  marginBottom: '16px',
+                  fontWeight: 700,
+                }}>
+                  Delete User
+                </h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '1rem',
+                  marginBottom: '24px',
+                  lineHeight: '1.6',
+                }}>
+                  Are you sure you want to delete <strong style={{ color: '#fff' }}>"{deleteConfirm?.userName}"</strong>?
+                  <br />
+                  This action cannot be undone.
+                </p>
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  justifyContent: 'flex-end',
+                }}>
+                  <button
+                    onClick={() => setDeleteConfirm(null)}
+                    style={{
+                      padding: '12px 24px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '10px',
+                      color: '#fff',
+                      fontSize: '0.95rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+                    onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    style={{
+                      padding: '12px 24px',
+                      background: 'linear-gradient(135deg, #ff6b6b, #ee5a6f)',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: '#fff',
+                      fontSize: '0.95rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)',
+                    }}
+                    onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

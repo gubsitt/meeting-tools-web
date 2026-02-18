@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom' // [เพิ่ม] ต้องใช้ Link
 import { useAuth } from '../context/AuthContext'
 import { LogOut, CheckCircle, Users, ShieldCheck } from 'lucide-react' // [เพิ่ม] icon ใหม่
-import './Home.css'
+import '../styles/pages/Home.css'
 
 export default function Home() {
   const { user, logout } = useAuth()

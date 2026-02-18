@@ -9,7 +9,7 @@ import usePagination from '../hooks/usePagination';
 import useMobileFilter from '../hooks/useMobileFilter';
 import useDateRangeFilter from '../hooks/useDateRangeFilter';
 import useSearchFilter from '../hooks/useSearchFilter';
-import './MissSyncEvents.css';
+import '../styles/pages/MissSyncEvents.css';
 
 const MissSyncEvents = () => {
 

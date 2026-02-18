@@ -1,6 +1,5 @@
-import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:5000/api'
+import api from './api'
+import { API_CONFIG } from '../config/constants'
 
 const CancelledEventService = {
     getCancelledTransactions: async ({ startTime, endTime, roomID, eventId }) => {
@@ -11,9 +10,8 @@ const CancelledEventService = {
             if (roomID) params.roomID = roomID;
             if (eventId) params.eventId = eventId;
 
-            const response = await axios.get(`${API_BASE_URL}/cancelled-events`, {
-                params,
-                withCredentials: true
+            const response = await api.get(API_CONFIG.ENDPOINTS.CANCELLED_EVENTS, {
+                params
             });
             return response.data;
         } catch (error) {
@@ -24,9 +22,7 @@ const CancelledEventService = {
 
     getEventOwner: async (eventId) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/cancelled-events/event-owner/${eventId}`, {
-                withCredentials: true
-            });
+            const response = await api.get(API_CONFIG.ENDPOINTS.CANCELLED_EVENT_OWNER(eventId));
             return response.data;
         } catch (error) {
             console.error("Error fetching event owner:", error);

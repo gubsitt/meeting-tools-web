@@ -11,7 +11,7 @@ import usePagination from '../hooks/usePagination'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useUserSearch from '../hooks/useUserSearch'
-import './UserEvents.css'
+import '../styles/pages/UserEvents.css'
 
 export default function UserEvents() {
     const [events, setEvents] = useState([])

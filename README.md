@@ -70,23 +70,48 @@ The application will be available at `http://localhost:3000`
 meeting-tools-web/
 ├── public/
 ├── src/
+│   ├── config/
+│   │   └── constants.js          # Centralized configuration & constants
+│   ├── styles/
+│   │   ├── pages/                # Page-specific stylesheets
+│   │   └── components/           # Component-specific stylesheets
+│   ├── utils/
+│   │   └── formatters.js         # Utility functions for formatting
 │   ├── components/
+│   │   ├── Layout.jsx
+│   │   ├── Sidebar.jsx
 │   │   ├── Loading.jsx
-│   │   └── Loading.css
+│   │   ├── Pagination.jsx
+│   │   ├── UserEventModal.jsx
+│   │   ├── CalendarEventModal.jsx
+│   │   └── CancelledEventModal.jsx
 │   ├── context/
-│   │   └── AuthContext.jsx
+│   │   └── AuthContext.jsx       # Authentication context provider
+│   ├── hooks/
+│   │   ├── usePagination.js      # Pagination logic
+│   │   ├── useUserSearch.js      # User search with debounce
+│   │   ├── useMobileFilter.js    # Mobile filter toggle
+│   │   ├── useDateRangeFilter.js # Date range filtering
+│   │   └── useSearchFilter.js    # Generic search filter
 │   ├── pages/
 │   │   ├── Login.jsx
-│   │   ├── Login.css
-│   │   ├── Dashboard.jsx
-│   │   ├── Dashboard.css
-│   │   ├── AdminDashboard.jsx
-│   │   └── AdminDashboard.css
+│   │   ├── Calendar.jsx
+│   │   ├── UserEvents.jsx
+│   │   ├── CancelledEvents.jsx
+│   │   ├── MissSyncEvents.jsx
+│   │   ├── UserManagement.jsx
+│   │   └── ConfigFile.jsx
 │   ├── services/
-│   │   └── api.js
+│   │   ├── api.js                # Axios instance & base config
+│   │   ├── CalendarService.js
+│   │   ├── UserEventService.js
+│   │   ├── CancelledEventService.js
+│   │   ├── MissSyncService.js
+│   │   └── ConfigFileService.js
 │   ├── App.jsx
 │   ├── main.jsx
-│   └── index.css
+│   └── index.css                 # Global styles
+├── .env.example                  # Environment variables template
 ├── index.html
 ├── vite.config.js
 ├── package.json

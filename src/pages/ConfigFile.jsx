@@ -4,8 +4,8 @@ import { FileText, Copy, Download, RefreshCw, AlertCircle, Check, Filter, X, Shi
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import './UserEvents.css';
-import './ConfigFile.css';
+import '../styles/pages/UserEvents.css';
+import '../styles/pages/ConfigFile.css';
 
 const ConfigFile = () => {
     const { user, loading: authLoading } = useAuth();

@@ -11,7 +11,7 @@ import usePagination from '../hooks/usePagination'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useSearchFilter from '../hooks/useSearchFilter'
-import './CancelledEvents.css'
+import '../styles/pages/CancelledEvents.css'
 
 export default function CancelledEvents() {
     const [transactions, setTransactions] = useState([])

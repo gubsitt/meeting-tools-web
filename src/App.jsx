@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import { useAuth } from './context/AuthContext'
+import { TOAST_CONFIG } from './config/constants'
 import Login from './pages/Login'
 import UserManagement from './pages/UserManagement'
 import Loading from './components/Loading'
@@ -42,51 +44,19 @@ function AdminRoute({ children }) {
     return <Navigate to="/calendar" replace />
   }
 
-  // หุ้มด้วย Layout
   return <Layout>{children}</Layout>
 }
-
-import { Toaster } from 'react-hot-toast'
 
 function App() {
   return (
     <Router>
       <Toaster
-        position="top-right"
+        position={TOAST_CONFIG.POSITION}
         toastOptions={{
           className: '',
-          style: {
-            background: 'rgba(22, 33, 62, 0.95)', // Dark Blue-Purple Theme
-            backdropFilter: 'blur(10px)',
-            color: '#fff',
-            border: '1px solid rgba(108, 92, 231, 0.2)', // Soft Purple Border
-            borderLeft: '6px solid #6c5ce7', // Primary Purple
-            borderRadius: '12px',
-            padding: '16px',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
-            fontSize: '0.95rem',
-            maxWidth: '400px',
-          },
-          success: {
-            iconTheme: {
-              primary: '#00b894',
-              secondary: '#fff',
-            },
-            style: {
-              borderLeft: '6px solid #00b894', // Green
-              background: 'rgba(22, 33, 62, 0.95)',
-            }
-          },
-          error: {
-            iconTheme: {
-              primary: '#ff7675',
-              secondary: '#fff',
-            },
-            style: {
-              borderLeft: '6px solid #ff7675', // Red
-              background: 'rgba(22, 33, 62, 0.95)',
-            }
-          },
+          style: TOAST_CONFIG.STYLE,
+          success: TOAST_CONFIG.SUCCESS,
+          error: TOAST_CONFIG.ERROR,
         }}
       />
       <Routes>

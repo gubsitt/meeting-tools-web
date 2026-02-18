@@ -1,13 +1,11 @@
-import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:5000/api'
+import api from './api'
+import { API_CONFIG } from '../config/constants'
 
 const UserEventService = {
     searchUsers: async (query) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/users/search`, {
-                params: { q: query },
-                withCredentials: true
+            const response = await api.get(API_CONFIG.ENDPOINTS.USERS_SEARCH, {
+                params: { q: query }
             });
             return response.data;
         } catch (error) {
@@ -19,9 +17,8 @@ const UserEventService = {
     getUserEvents: async (filters) => {
         try {
             // filters: { userId, resourceId, startDate, endDate }
-            const response = await axios.get(`${API_BASE_URL}/events/search`, {
-                params: filters,
-                withCredentials: true
+            const response = await api.get(API_CONFIG.ENDPOINTS.EVENTS_SEARCH, {
+                params: filters
             });
             return response.data;
         } catch (error) {
@@ -32,10 +29,8 @@ const UserEventService = {
 
     getUsersByIds: async (userIds) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/users/by-ids`, {
+            const response = await api.post(API_CONFIG.ENDPOINTS.USERS_BY_IDS, {
                 userIds
-            }, {
-                withCredentials: true
             });
             return response.data;
         } catch (error) {
@@ -46,9 +41,7 @@ const UserEventService = {
 
     updateEvent: async (eventId, updateData) => {
         try {
-            const response = await axios.put(`${API_BASE_URL}/events/${eventId}`, updateData, {
-                withCredentials: true
-            });
+            const response = await api.put(API_CONFIG.ENDPOINTS.EVENTS_UPDATE(eventId), updateData);
             return response.data
         } catch (error) {
             console.error("Error updating event:", error);

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
-import './Login.css'
+import '../styles/pages/Login.css'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 

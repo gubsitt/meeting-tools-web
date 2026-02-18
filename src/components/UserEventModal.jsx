@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Clock, MapPin, User, Users, KeyRound, CalendarPlus, Info, Car, Code, Copy, Check, Download, Eye, EyeOff, UserCheck, ChevronDown, Edit2, Save } from 'lucide-react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
-import './UserEventModal.css'
+import '../styles/components/UserEventModal.css'
 import toast from 'react-hot-toast'
 
 export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
@@ -15,14 +15,10 @@ export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
     const [isEditing, setIsEditing] = useState(false)
     const [saving, setSaving] = useState(false)
     const [editFormData, setEditFormData] = useState({
-        title: '',
-        startTime: '',
-        endTime: '',
         resourceId: '',
         pendingSync: false,
         cancelled: false,
-        impersonated: false,
-        attendees: []
+        impersonated: false
     })
 
     // Fetch user data when modal opens
@@ -72,14 +68,10 @@ export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
     useEffect(() => {
         if (event) {
             setEditFormData({
-                title: event.title || '',
-                startTime: moment(event.start).format('YYYY-MM-DDTHH:mm'),
-                endTime: moment(event.end).format('YYYY-MM-DDTHH:mm'),
                 resourceId: event.resource?.resourceId || '',
                 pendingSync: event.resource?.pendingSync || false,
                 cancelled: event.resource?.cancelled || false,
-                impersonated: event.resource?.impersonated || false,
-                attendees: event.resource?.attendees || []
+                impersonated: event.resource?.impersonated || false
             })
             setIsEditing(false)
             setViewMode('detail')
@@ -111,22 +103,15 @@ export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
     }
 
     const handleSave = async () => {
-        if (!editFormData.title || !editFormData.startTime || !editFormData.endTime) {
-            toast.error('Please fill in all required fields')
-            return
-        }
+
 
         setSaving(true)
         try {
             const updateData = {
-                title: editFormData.title,
-                startTime: moment(editFormData.startTime).valueOf(),
-                endTime: moment(editFormData.endTime).valueOf(),
                 resourceId: editFormData.resourceId,
                 pendingSync: editFormData.pendingSync,
                 cancelled: editFormData.cancelled,
-                impersonated: editFormData.impersonated,
-                attendees: editFormData.attendees
+                impersonated: editFormData.impersonated
             }
 
             // user requested backend snippets show it expects 'resourceId', 'title', 'pendingSync', ...
@@ -268,62 +253,6 @@ export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
                             {isEditing ? (
                                 <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div className="form-group">
-                                        <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Subject</label>
-                                        <input
-                                            type="text"
-                                            value={editFormData.title}
-                                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                                            style={{
-                                                width: '100%',
-                                                background: 'rgba(0, 0, 0, 0.2)',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                borderRadius: '8px',
-                                                padding: '12px',
-                                                color: 'white',
-                                                outline: 'none',
-                                                fontSize: '1rem'
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                        <div className="form-group">
-                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Start Time</label>
-                                            <input
-                                                type="datetime-local"
-                                                value={editFormData.startTime}
-                                                onChange={(e) => setEditFormData({ ...editFormData, startTime: e.target.value })}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(0, 0, 0, 0.2)',
-                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                    borderRadius: '8px',
-                                                    padding: '12px',
-                                                    color: 'white',
-                                                    outline: 'none',
-                                                    fontSize: '0.95rem'
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>End Time</label>
-                                            <input
-                                                type="datetime-local"
-                                                value={editFormData.endTime}
-                                                onChange={(e) => setEditFormData({ ...editFormData, endTime: e.target.value })}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(0, 0, 0, 0.2)',
-                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                    borderRadius: '8px',
-                                                    padding: '12px',
-                                                    color: 'white',
-                                                    outline: 'none',
-                                                    fontSize: '0.95rem'
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
                                         <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Resource ID</label>
                                         <input
                                             type="text"
@@ -342,34 +271,71 @@ export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
                                             }}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editFormData.pendingSync}
-                                                onChange={(e) => setEditFormData({ ...editFormData, pendingSync: e.target.checked })}
-                                                style={{ accentColor: '#6c5ce7', width: '16px', height: '16px' }}
-                                            />
-                                            <span style={{ fontSize: '0.9rem' }}>Pending Sync</span>
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editFormData.cancelled}
-                                                onChange={(e) => setEditFormData({ ...editFormData, cancelled: e.target.checked })}
-                                                style={{ accentColor: '#ff6b6b', width: '16px', height: '16px' }}
-                                            />
-                                            <span style={{ fontSize: '0.9rem' }}>Cancelled</span>
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editFormData.impersonated}
-                                                onChange={(e) => setEditFormData({ ...editFormData, impersonated: e.target.checked })}
-                                                style={{ accentColor: '#6c5ce7', width: '16px', height: '16px' }}
-                                            />
-                                            <span style={{ fontSize: '0.9rem' }}>Impersonated</span>
-                                        </label>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                                        <div className="form-group">
+                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Pending Sync</label>
+                                            <select
+                                                value={editFormData.pendingSync.toString()}
+                                                onChange={(e) => setEditFormData({ ...editFormData, pendingSync: e.target.value === 'true' })}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(0, 0, 0, 0.2)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '8px',
+                                                    padding: '12px',
+                                                    color: 'white',
+                                                    outline: 'none',
+                                                    fontSize: '0.95rem',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="true" style={{ color: 'black' }}>True</option>
+                                                <option value="false" style={{ color: 'black' }}>False</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Cancelled</label>
+                                            <select
+                                                value={editFormData.cancelled.toString()}
+                                                onChange={(e) => setEditFormData({ ...editFormData, cancelled: e.target.value === 'true' })}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(0, 0, 0, 0.2)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '8px',
+                                                    padding: '12px',
+                                                    color: 'white',
+                                                    outline: 'none',
+                                                    fontSize: '0.95rem',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="true" style={{ color: 'black' }}>True</option>
+                                                <option value="false" style={{ color: 'black' }}>False</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Impersonated</label>
+                                            <select
+                                                value={editFormData.impersonated.toString()}
+                                                onChange={(e) => setEditFormData({ ...editFormData, impersonated: e.target.value === 'true' })}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(0, 0, 0, 0.2)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '8px',
+                                                    padding: '12px',
+                                                    color: 'white',
+                                                    outline: 'none',
+                                                    fontSize: '0.95rem',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="true" style={{ color: 'black' }}>True</option>
+                                                <option value="false" style={{ color: 'black' }}>False</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>

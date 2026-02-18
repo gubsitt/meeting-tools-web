@@ -1,9 +1,8 @@
 import axios from 'axios'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+import { API_CONFIG } from '../config/constants'
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_CONFIG.BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
@@ -33,15 +32,15 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  getCurrentUser: () => api.get('/api/auth/me'),
-  logout: () => api.post('/api/auth/logout')
+  getCurrentUser: () => api.get(API_CONFIG.ENDPOINTS.AUTH_ME),
+  logout: () => api.post(API_CONFIG.ENDPOINTS.AUTH_LOGOUT)
 }
 
 // User API (Admin)
 export const userAPI = {
-  getAllUsers: (params) => api.get('/api/auth/users', { params }),
-  updateUserRole: (userId, role) => api.patch(`/api/auth/users/${userId}/role`, { role }),
-  deleteUser: (userId) => api.delete(`/api/auth/users/${userId}`)
+  getAllUsers: (params) => api.get(API_CONFIG.ENDPOINTS.AUTH_USERS, { params }),
+  updateUserRole: (userId, role) => api.patch(API_CONFIG.ENDPOINTS.AUTH_UPDATE_ROLE(userId), { role }),
+  deleteUser: (userId) => api.delete(API_CONFIG.ENDPOINTS.AUTH_DELETE_USER(userId))
 }
 
 // // User Events API

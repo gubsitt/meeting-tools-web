@@ -12,7 +12,7 @@ import {
   AlertCircle,
   FileText
 } from 'lucide-react'
-import './Sidebar.css'
+import '../styles/components/Sidebar.css'
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) {
   const { user, logout } = useAuth()

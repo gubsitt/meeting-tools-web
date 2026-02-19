@@ -404,98 +404,100 @@ const MissSyncEvents = () => {
                     </div>
                 ) : (
                     <>
-                        <table className="user-events-table">
-                            <thead>
-                                <tr>
-                                    <th>Event ID</th>
-                                    <th>Subject</th>
-                                    <th>Room</th>
-                                    <th>Time</th>
-                                    <th style={{ textAlign: 'center' }}>Global ID</th>
-                                    <th style={{ textAlign: 'center' }}>Resource ID</th>
-                                    <th style={{ textAlign: 'center' }}>Sync ID</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {pagination.paginatedData.map((event) => {
-                                    const isGlobalMissing = !event.globalSyncId;
-                                    const isResourceMissing = !event.resourceSyncId;
-                                    const isSyncIdMissing = !event.syncId;
+                        <div className="table-scroll-container">
+                            <table className="user-events-table">
+                                <thead>
+                                    <tr>
+                                        <th>Event ID</th>
+                                        <th>Subject</th>
+                                        <th>Room</th>
+                                        <th>Time</th>
+                                        <th style={{ textAlign: 'center' }}>Global ID</th>
+                                        <th style={{ textAlign: 'center' }}>Resource ID</th>
+                                        <th style={{ textAlign: 'center' }}>Sync ID</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pagination.paginatedData.map((event) => {
+                                        const isGlobalMissing = !event.globalSyncId;
+                                        const isResourceMissing = !event.resourceSyncId;
+                                        const isSyncIdMissing = !event.syncId;
 
-                                    return (
-                                        <tr key={event._id}>
-                                            <td data-label="Event ID">
-                                                <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                                    {event._id || '-'}
-                                                </div>
-                                            </td>
-                                            <td data-label="Subject" style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
-                                            <td data-label="Room" style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
-                                            <td data-label="Time">
-                                                <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
-                                                    <span style={{ color: '#fff' }}>
-                                                        {moment(event.startTime?.unix || event.startTime).format('DD MMM YYYY')}
+                                        return (
+                                            <tr key={event._id}>
+                                                <td data-label="Event ID">
+                                                    <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                        {event._id || '-'}
+                                                    </div>
+                                                </td>
+                                                <td data-label="Subject" style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
+                                                <td data-label="Room" style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
+                                                <td data-label="Time">
+                                                    <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
+                                                        <span style={{ color: '#fff' }}>
+                                                            {moment(event.startTime?.unix || event.startTime).format('DD MMM YYYY')}
+                                                        </span>
+                                                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>
+                                                            {moment(event.startTime?.unix || event.startTime).format('HH:mm')} -
+                                                            {moment(event.endTime?.unix || event.endTime).format('HH:mm')}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Global ID" style={{ textAlign: 'center' }}>
+                                                    <span
+                                                        className={`status-badge ${!isGlobalMissing ? 'active' : 'cancelled'}`}
+                                                        title="Global Sync ID"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
+                                                    >
+                                                        <Globe size={14} />
+                                                        {!isGlobalMissing ? 'Synced' : 'Missing'}
                                                     </span>
-                                                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>
-                                                        {moment(event.startTime?.unix || event.startTime).format('HH:mm')} -
-                                                        {moment(event.endTime?.unix || event.endTime).format('HH:mm')}
+                                                </td>
+                                                <td data-label="Resource ID" style={{ textAlign: 'center' }}>
+                                                    <span
+                                                        className={`status-badge ${!isResourceMissing ? 'active' : 'cancelled'}`}
+                                                        title="Resource Sync ID"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
+                                                    >
+                                                        <Smartphone size={14} />
+                                                        {!isResourceMissing ? 'Synced' : 'Missing'}
                                                     </span>
-                                                </div>
-                                            </td>
-                                            <td data-label="Global ID" style={{ textAlign: 'center' }}>
-                                                <span
-                                                    className={`status-badge ${!isGlobalMissing ? 'active' : 'cancelled'}`}
-                                                    title="Global Sync ID"
-                                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                                >
-                                                    <Globe size={14} />
-                                                    {!isGlobalMissing ? 'Synced' : 'Missing'}
-                                                </span>
-                                            </td>
-                                            <td data-label="Resource ID" style={{ textAlign: 'center' }}>
-                                                <span
-                                                    className={`status-badge ${!isResourceMissing ? 'active' : 'cancelled'}`}
-                                                    title="Resource Sync ID"
-                                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                                >
-                                                    <Smartphone size={14} />
-                                                    {!isResourceMissing ? 'Synced' : 'Missing'}
-                                                </span>
-                                            </td>
-                                            <td data-label="Sync ID" style={{ textAlign: 'center' }}>
-                                                <span
-                                                    className={`status-badge ${!isSyncIdMissing ? 'active' : 'cancelled'}`}
-                                                    title="Sync ID"
-                                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                                >
-                                                    <RefreshCw size={14} />
-                                                    {!isSyncIdMissing ? 'Synced' : 'Missing'}
-                                                </span>
-                                            </td>
-                                            <td data-label="Action">
-                                                <button
-                                                    className="view-btn"
-                                                    onClick={() => syncEvent(event._id)}
-                                                    disabled={syncingEventId === event._id}
-                                                    style={{
-                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                        minWidth: '100px'
-                                                    }}
-                                                >
-                                                    {syncingEventId === event._id ? (
-                                                        <RefreshCw className="spin" size={14} />
-                                                    ) : (
+                                                </td>
+                                                <td data-label="Sync ID" style={{ textAlign: 'center' }}>
+                                                    <span
+                                                        className={`status-badge ${!isSyncIdMissing ? 'active' : 'cancelled'}`}
+                                                        title="Sync ID"
+                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
+                                                    >
                                                         <RefreshCw size={14} />
-                                                    )}
-                                                    {syncingEventId === event._id ? 'Syncing...' : 'Sync'}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                                        {!isSyncIdMissing ? 'Synced' : 'Missing'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Action">
+                                                    <button
+                                                        className="view-btn"
+                                                        onClick={() => syncEvent(event._id)}
+                                                        disabled={syncingEventId === event._id}
+                                                        style={{
+                                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                            minWidth: '100px'
+                                                        }}
+                                                    >
+                                                        {syncingEventId === event._id ? (
+                                                            <RefreshCw className="spin" size={14} />
+                                                        ) : (
+                                                            <RefreshCw size={14} />
+                                                        )}
+                                                        {syncingEventId === event._id ? 'Syncing...' : 'Sync'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
 
                         <Pagination
                             currentPage={pagination.currentPage}

@@ -10,7 +10,8 @@ import {
   UserCircle2,
   History,
   AlertCircle,
-  FileText
+  FileText,
+  Activity
 } from 'lucide-react'
 import '../styles/components/Sidebar.css'
 
@@ -28,7 +29,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, set
     { path: '/cancelled-events', icon: History, label: 'MIT Cancelled' },
     { path: '/miss-sync-events', icon: AlertCircle, label: 'Miss Sync' },
     { path: '/config-file', icon: FileText, label: 'Config File' },
-    ...(isAdmin ? [{ path: '/users', icon: Users, label: 'User Management' }] : []),
+    ...(isAdmin ? [
+      { path: '/activity-logs', icon: Activity, label: 'Activity Log' },
+      { path: '/users', icon: Users, label: 'User Management' },
+    ] : []),
   ]
 
   return (

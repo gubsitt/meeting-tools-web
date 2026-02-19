@@ -1,5 +1,5 @@
-/* --- Reusing Calendar Theme & UserEvents Theme for Consistency --- */
-.cancelled-events-page {
+/* --- Container หลัก --- */
+.activity-log-page {
     padding: 32px;
     max-width: 1400px;
     margin: 0 auto;
@@ -13,49 +13,41 @@
     background: transparent;
 }
 
-/* Header */
-.cancelled-header-control {
+.activity-log-header {
     margin-bottom: 24px;
 }
 
-.cancelled-header-control h1 {
+.activity-log-header h1 {
     font-size: 2rem;
     margin-bottom: 8px;
     color: white;
     font-weight: 700;
 }
 
-.cancelled-header-control p {
+.activity-log-header p {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.95rem;
 }
 
-/* Glass Search Bar */
+/* --- Search Bar (กล่องค้นหาแบบแก้ว) --- */
 .search-bar-container {
     position: relative;
     z-index: 10;
     background: rgba(255, 255, 255, 0.08);
-    /* Adjusted to match UserEvents */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     padding: 28px;
-    /* Increased padding */
     border-radius: 20px;
     margin-bottom: 32px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.search-bar-container:hover {
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
 }
 
 .search-form {
     display: flex;
     align-items: flex-end;
     gap: 16px;
-    /* Adjusted gap */
     flex-wrap: wrap;
 }
 
@@ -65,19 +57,19 @@
     gap: 10px;
     flex: 1;
     min-width: 200px;
+    position: relative;
 }
 
 .form-group-inline label {
     font-size: 0.75rem;
-    /* Uppercase small label style */
     color: #b39dfe;
-    /* Using the purple tint from UserEvents */
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
-.custom-input {
+.custom-input,
+.custom-select {
     padding: 14px 18px;
     background: rgba(0, 0, 0, 0.25);
     border: 1.5px solid rgba(255, 255, 255, 0.12);
@@ -89,16 +81,28 @@
     width: 100%;
 }
 
+.custom-select {
+    cursor: pointer;
+    appearance: none;
+}
+
+.custom-select option {
+    background: #1e272e;
+    color: white;
+}
+
 .custom-input::placeholder {
     color: rgba(255, 255, 255, 0.35);
 }
 
-.custom-input:hover {
+.custom-input:hover,
+.custom-select:hover {
     border-color: rgba(108, 92, 231, 0.3);
     background: rgba(0, 0, 0, 0.3);
 }
 
-.custom-input:focus {
+.custom-input:focus,
+.custom-select:focus {
     border-color: #6c5ce7;
     background: rgba(0, 0, 0, 0.35);
     box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
@@ -124,7 +128,6 @@
     gap: 10px;
     padding: 14px 28px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    /* Purple gradient */
     color: white;
     border: none;
     border-radius: 12px;
@@ -150,25 +153,8 @@
     opacity: 0.6;
 }
 
-/* Mobile Filter Toggle */
-.mobile-filter-header {
-    display: none;
-}
-
-.search-form-wrapper {
-    width: 100%;
-}
-
-.desktop-only-label {
-    display: block;
-}
-
-.date-group-row {
-    display: contents;
-}
-
-/* Glass Content Wrapper (Table) */
-.cancelled-events-content-wrapper {
+/* --- Content Wrapper & Table --- */
+.activity-log-content-wrapper {
     position: relative;
     z-index: 0;
     background: rgba(255, 255, 255, 0.1);
@@ -191,9 +177,10 @@
     flex: 1;
     overflow: auto;
     min-height: 0;
+    /* Custom scrollbar styles if needed inside */
 }
 
-/* Custom Scrollbar */
+/* Move custom scrollbar styles to the scroll container */
 .table-scroll-container::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -214,9 +201,53 @@
     background: rgba(255, 255, 255, 0.4);
 }
 
-/* Remove old wrapper scrollbar */
-.cancelled-events-content-wrapper::-webkit-scrollbar {
-    display: none;
+.activity-log-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    min-width: 900px;
+}
+
+.activity-log-table th {
+    text-align: left;
+    padding: 16px;
+    color: #a29bfe;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: -24px;
+    background: rgba(22, 33, 62, 0.95);
+    z-index: 20;
+    backdrop-filter: blur(10px);
+}
+
+.activity-log-table td {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+    font-size: 0.95rem;
+    vertical-align: middle;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.activity-log-table tr td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.activity-log-table tr td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.activity-log-table tr:hover td {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .no-data {
@@ -227,121 +258,113 @@
     color: rgba(255, 255, 255, 0.5);
     font-size: 1.1rem;
     font-weight: 500;
-    text-align: center;
 }
 
-/* Table Styles */
-.cancelled-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-    min-width: 900px;
-    color: #e0e0e0;
-}
-
-.cancelled-table th {
-    text-align: left;
-    padding: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(22, 33, 62, 0.95);
+/* Action Badge */
+.action-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-block;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    color: #a29bfe;
-    font-weight: 700;
-    position: sticky;
-    top: -24px;
-    z-index: 20;
-    backdrop-filter: blur(10px);
 }
 
-.cancelled-table td {
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    color: white;
-    font-size: 0.95rem;
-    vertical-align: middle;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.action-badge.create {
+    background: rgba(0, 184, 148, 0.2);
+    color: #55efc4;
+    border: 1px solid rgba(0, 184, 148, 0.3);
 }
 
-.cancelled-table tr td:first-child {
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
+.action-badge.update {
+    background: rgba(9, 132, 227, 0.2);
+    color: #74b9ff;
+    border: 1px solid rgba(9, 132, 227, 0.3);
 }
 
-.cancelled-table tr td:last-child {
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+.action-badge.delete {
+    background: rgba(214, 48, 49, 0.2);
+    color: #ff7675;
+    border: 1px solid rgba(214, 48, 49, 0.3);
 }
 
-.cancelled-table tr {
-    transition: transform 0.2s, background 0.2s;
-}
-
-.cancelled-table tr:hover td {
-    background: rgba(255, 255, 255, 0.08);
-    /* Brighter hover state */
-}
-
-/* Action Button */
-.view-btn {
-    padding: 8px 12px;
-    background: rgba(108, 92, 231, 0.15);
+.action-badge.login {
+    background: rgba(108, 92, 231, 0.2);
     color: #a29bfe;
     border: 1px solid rgba(108, 92, 231, 0.3);
-    border-radius: 8px;
-    cursor: pointer;
+}
+
+.action-badge.logout {
+    background: rgba(99, 110, 114, 0.2);
+    color: #b2bec3;
+    border: 1px solid rgba(99, 110, 114, 0.3);
+}
+
+/* Details Scrollable Area */
+.details-cell {
+    max-width: 300px;
+    overflow-x: auto;
+    font-family: monospace;
     font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: pre-wrap;
+    max-height: 80px;
+    overflow-y: auto;
 }
 
-.view-btn:hover {
-    background: #6c5ce7;
-    color: white;
-    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
-    transform: translateY(-2px);
+.details-cell::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
 }
 
-/* ========================================
-   📱 MOBILE RESPONSIVE STYLES
-   ======================================== */
+.details-cell::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
 
+.details-cell::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+/* Mobile Filter Toggle - Hidden on Desktop */
+.mobile-filter-header {
+    display: none;
+}
+
+.search-form-wrapper {
+    width: 100%;
+}
+
+/* Mobile Responsive */
 @media screen and (max-width: 768px) {
-
-    /* Layout */
-    .cancelled-events-page {
+    .activity-log-page {
         padding: 12px;
     }
 
-    /* Header */
-    .cancelled-header-control {
+    /* Header adjustments */
+    .activity-log-header {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: flex-start !important;
         padding-left: 60px !important;
+        /* Make room for menu button if needed, or consistent with other pages */
         min-height: 50px !important;
         margin-bottom: 12px !important;
     }
 
-    .cancelled-header-control h1 {
+    .activity-log-header h1 {
         font-size: 1.5rem !important;
         margin: 0 !important;
         line-height: 1 !important;
     }
 
-    .cancelled-header-control p {
+    .activity-log-header p {
         display: none !important;
     }
 
-    /* Search Bar */
+    /* Mobile Filter Logic */
     .search-bar-container {
         padding: 16px;
         margin-bottom: 16px;
@@ -354,6 +377,7 @@
         font-weight: 600;
         color: #fff;
         cursor: pointer;
+        margin-bottom: 0;
     }
 
     .mobile-filter-header span {
@@ -372,7 +396,6 @@
         display: flex;
     }
 
-    /* Form Logic */
     .search-form-wrapper {
         display: none;
         margin-top: 15px;
@@ -390,55 +413,39 @@
         gap: 12px;
     }
 
-    .form-group-inline {
-        width: 100%;
-        flex: none;
-        min-width: 0;
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-    .date-group-row {
-        display: flex;
-        flex-direction: row !important;
-        gap: 10px;
-        width: 100%;
-    }
-
-    .date-group-row .form-group-inline {
-        flex: 1;
-    }
-
-    .search-btn {
-        width: 100%;
-        margin-top: 5px;
-        height: 45px;
-    }
-
-    .desktop-only-label {
-        display: none !important;
-    }
-
-    /* Table Container */
-    .cancelled-events-content-wrapper {
+    /* Table adjustments */
+    .activity-log-content-wrapper {
         padding: 12px;
         max-height: none;
         overflow-x: auto;
     }
 
-    /* Table - Card Style on Mobile */
-    .cancelled-table {
+    .activity-log-table {
         display: block;
         min-width: 0;
     }
 
-    .cancelled-table thead {
+    .activity-log-table thead {
         display: none;
     }
 
-    .cancelled-table tbody {
+    .activity-log-table tbody {
         display: block;
     }
 
-    .cancelled-table tr {
+    .activity-log-table tr {
         display: block;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -447,7 +454,7 @@
         padding: 16px;
     }
 
-    .cancelled-table td {
+    .activity-log-table td {
         display: block;
         text-align: left;
         padding: 8px 0;
@@ -455,7 +462,7 @@
         background: transparent !important;
     }
 
-    .cancelled-table td::before {
+    .activity-log-table td::before {
         content: attr(data-label);
         font-weight: 700;
         color: #a29bfe;
@@ -463,26 +470,13 @@
         font-size: 0.75rem;
         text-transform: uppercase;
         margin-bottom: 4px;
-        letter-spacing: 1px;
     }
 
-    .view-btn {
+    .form-group-inline {
+        min-width: 100%;
+    }
+
+    .search-btn {
         width: 100%;
-        justify-content: center;
-        padding: 12px;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            max-height: 0;
-            transform: translateY(-10px);
-        }
-
-        to {
-            opacity: 1;
-            max-height: 500px;
-            transform: translateY(0);
-        }
     }
 }

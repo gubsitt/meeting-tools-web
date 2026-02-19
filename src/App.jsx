@@ -11,6 +11,7 @@ import UserEvents from './pages/UserEvents'
 import CancelledEvents from './pages/CancelledEvents'
 import MissSyncEvents from './pages/MissSyncEvents'
 import ConfigFile from './pages/ConfigFile'
+import ActivityLog from './pages/ActivityLog'
 
 // Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Calendar)
 function LoginRoute() {
@@ -72,6 +73,16 @@ function App() {
           element={
             <AdminRoute>
               <UserManagement />
+            </AdminRoute>
+          }
+        />
+
+
+        <Route
+          path="/activity-logs"
+          element={
+            <AdminRoute>
+              <ActivityLog />
             </AdminRoute>
           }
         />

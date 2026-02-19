@@ -216,32 +216,45 @@
     border-radius: 24px;
     padding: 24px;
     margin-bottom: 40px;
-    overflow: auto;
-    /* Enable both X and Y scrolling */
+    /* Flex layout for sticky pagination */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     min-height: 400px;
     max-height: 65vh;
-    /* Limit height to force scrollbar */
 }
 
-/* Custom Scrollbar */
-.user-events-content-wrapper::-webkit-scrollbar {
+.table-scroll-container {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+/* Custom Scrollbar - apply to table-scroll-container instead */
+.table-scroll-container::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-.user-events-content-wrapper::-webkit-scrollbar-track {
+.table-scroll-container::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
 }
 
-.user-events-content-wrapper::-webkit-scrollbar-thumb {
+.table-scroll-container::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
     transition: background 0.2s;
 }
 
-.user-events-content-wrapper::-webkit-scrollbar-thumb:hover {
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.4);
+}
+
+/* Remove old scrollbar styles from wrapper if specific ones existed or let them cascade/override */
+.user-events-content-wrapper::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar on wrapper itself */
 }
 
 .no-data {

@@ -217,69 +217,71 @@ export default function CancelledEvents() {
                     </div>
                 ) : (
                     <>
-                        <table className="cancelled-table">
-                            <thead>
-                                <tr>
-                                    <th>Event ID</th>
-                                    <th>Subject</th>
-                                    <th>Room</th>
-                                    <th>Event Time</th>
-                                    <th>Cancelled At</th>
-                                    <th>Detail</th>
-                                    <th style={{ textAlign: 'center' }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {pagination.paginatedData.map((t, index) => (
-                                    <tr key={t._id || index}>
-                                        <td data-label="Event ID">
-                                            <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                                {t.eventId || '-'}
-                                            </div>
-                                        </td>
-                                        <td data-label="Subject">
-                                            <div style={{ fontWeight: 600, color: '#fff' }}>
-                                                {t.subject || '-'}
-                                            </div>
-                                        </td>
-                                        <td data-label="Room">
-                                            <div style={{ fontWeight: 500 }}>
-                                                {t.roomId ? t.roomId.split('@')[0] : '-'}
-                                            </div>
-                                            <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                                                {t.roomId}
-                                            </div>
-                                        </td>
-                                        <td data-label="Event Time">
-                                            <div style={{ fontSize: '0.9rem' }}>
-                                                {dayjs(t.startTime).format('DD MMM YYYY')}
-                                            </div>
-                                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                                                {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
-                                            </div>
-                                        </td>
-                                        <td data-label="Cancelled At">
-                                            {t.time && t.time.unix ? (
-                                                <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
-                                                    {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
-                                                </span>
-                                            ) : '-'}
-                                        </td>
-                                        <td data-label="Detail" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {t.detail || '-'}
-                                        </td>
-                                        <td data-label="Action" style={{ textAlign: 'center' }}>
-                                            <button
-                                                className="view-btn"
-                                                onClick={() => handleViewDetails(t.eventId)}
-                                            >
-                                                <Eye size={16} />
-                                            </button>
-                                        </td>
+                        <div className="table-scroll-container">
+                            <table className="cancelled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Event ID</th>
+                                        <th>Subject</th>
+                                        <th>Room</th>
+                                        <th>Event Time</th>
+                                        <th>Cancelled At</th>
+                                        <th>Detail</th>
+                                        <th style={{ textAlign: 'center' }}>Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {pagination.paginatedData.map((t, index) => (
+                                        <tr key={t._id || index}>
+                                            <td data-label="Event ID">
+                                                <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                    {t.eventId || '-'}
+                                                </div>
+                                            </td>
+                                            <td data-label="Subject">
+                                                <div style={{ fontWeight: 600, color: '#fff' }}>
+                                                    {t.subject || '-'}
+                                                </div>
+                                            </td>
+                                            <td data-label="Room">
+                                                <div style={{ fontWeight: 500 }}>
+                                                    {t.roomId ? t.roomId.split('@')[0] : '-'}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                                    {t.roomId}
+                                                </div>
+                                            </td>
+                                            <td data-label="Event Time">
+                                                <div style={{ fontSize: '0.9rem' }}>
+                                                    {dayjs(t.startTime).format('DD MMM YYYY')}
+                                                </div>
+                                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                                    {dayjs(t.startTime).format('HH:mm')} - {dayjs(t.endTime).format('HH:mm')}
+                                                </div>
+                                            </td>
+                                            <td data-label="Cancelled At">
+                                                {t.time && t.time.unix ? (
+                                                    <span style={{ fontSize: '0.9rem', color: '#ff7675' }}>
+                                                        {dayjs(t.time.unix).format('DD MMM YYYY HH:mm')}
+                                                    </span>
+                                                ) : '-'}
+                                            </td>
+                                            <td data-label="Detail" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {t.detail || '-'}
+                                            </td>
+                                            <td data-label="Action" style={{ textAlign: 'center' }}>
+                                                <button
+                                                    className="view-btn"
+                                                    onClick={() => handleViewDetails(t.eventId)}
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
                         <Pagination
                             currentPage={pagination.currentPage}

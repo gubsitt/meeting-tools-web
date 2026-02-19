@@ -365,65 +365,67 @@ export default function UserEvents() {
                     </div>
                 ) : (
                     <>
-                        <table className="user-events-table">
-                            <thead>
-                                <tr>
-                                    <th>Event ID</th>
-                                    <th>Subject</th>
-                                    <th>Room / Location</th>
-                                    <th>Event Time</th>
-                                    <th style={{ textAlign: 'center' }}>Status</th>
-                                    <th style={{ textAlign: 'center' }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {pagination.paginatedData.map((event, index) => (
-                                    <tr key={event.id || index}>
-                                        <td data-label="Event ID">
-                                            <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                                {event.id || '-'}
-                                            </div>
-                                        </td>
-                                        <td data-label="Subject">
-                                            <div style={{ fontWeight: 600, color: '#fff' }}>
-                                                {event.title}
-                                            </div>
-                                        </td>
-                                        <td data-label="Room / Location">
-                                            <div style={{ fontWeight: 500 }}>
-                                                {event.resource?.resourceName || event.resource?.resourceId || event.location}
-                                            </div>
-                                            <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
-                                                {event.resource?.roomType || ''}
-                                            </div>
-                                        </td>
-                                        <td data-label="Event Time">
-                                            <div style={{ fontSize: '0.9rem' }}>
-                                                {event.start ? new Date(event.start).toLocaleDateString('en-GB') : '-'}
-                                            </div>
-                                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                                                {event.start && event.end
-                                                    ? `${new Date(event.start).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
-                                                    : '-'}
-                                            </div>
-                                        </td>
-                                        <td data-label="Status" style={{ textAlign: 'center' }}>
-                                            <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
-                                                {event.isCancelled ? 'Cancelled' : 'Scheduled'}
-                                            </span>
-                                        </td>
-                                        <td data-label="Action" style={{ textAlign: 'center' }}>
-                                            <button
-                                                className="view-btn"
-                                                onClick={() => setSelectedEvent(event)}
-                                            >
-                                                <Eye size={16} />
-                                            </button>
-                                        </td>
+                        <div className="table-scroll-container">
+                            <table className="user-events-table">
+                                <thead>
+                                    <tr>
+                                        <th>Event ID</th>
+                                        <th>Subject</th>
+                                        <th>Room / Location</th>
+                                        <th>Event Time</th>
+                                        <th style={{ textAlign: 'center' }}>Status</th>
+                                        <th style={{ textAlign: 'center' }}>Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {pagination.paginatedData.map((event, index) => (
+                                        <tr key={event.id || index}>
+                                            <td data-label="Event ID">
+                                                <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
+                                                    {event.id || '-'}
+                                                </div>
+                                            </td>
+                                            <td data-label="Subject">
+                                                <div style={{ fontWeight: 600, color: '#fff' }}>
+                                                    {event.title}
+                                                </div>
+                                            </td>
+                                            <td data-label="Room / Location">
+                                                <div style={{ fontWeight: 500 }}>
+                                                    {event.resource?.resourceName || event.resource?.resourceId || event.location}
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+                                                    {event.resource?.roomType || ''}
+                                                </div>
+                                            </td>
+                                            <td data-label="Event Time">
+                                                <div style={{ fontSize: '0.9rem' }}>
+                                                    {event.start ? new Date(event.start).toLocaleDateString('en-GB') : '-'}
+                                                </div>
+                                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                                    {event.start && event.end
+                                                        ? `${new Date(event.start).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+                                                        : '-'}
+                                                </div>
+                                            </td>
+                                            <td data-label="Status" style={{ textAlign: 'center' }}>
+                                                <span className={`status-badge ${event.isCancelled ? 'cancelled' : 'active'}`}>
+                                                    {event.isCancelled ? 'Cancelled' : 'Scheduled'}
+                                                </span>
+                                            </td>
+                                            <td data-label="Action" style={{ textAlign: 'center' }}>
+                                                <button
+                                                    className="view-btn"
+                                                    onClick={() => setSelectedEvent(event)}
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
                         <Pagination
                             currentPage={pagination.currentPage}

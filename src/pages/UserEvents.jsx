@@ -13,6 +13,9 @@ import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useUserSearch from '../hooks/useUserSearch'
 import '../styles/pages/UserEvents.css'
 
+const today = new Date().toISOString().slice(0, 10)
+const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
 export default function UserEvents() {
     const [events, setEvents] = useState([])
     const [loading, setLoading] = useState(false)
@@ -328,6 +331,8 @@ export default function UserEvents() {
                                 <input
                                     type="date"
                                     value={dateFilter.startDate}
+                                    min={minDate}
+                                    max={today}
                                     onChange={(e) => dateFilter.setStartDate(e.target.value)}
                                     className="custom-input date-input"
                                 />
@@ -337,6 +342,8 @@ export default function UserEvents() {
                                 <input
                                     type="date"
                                     value={dateFilter.endDate}
+                                    min={minDate}
+                                    max={today}
                                     onChange={(e) => dateFilter.setEndDate(e.target.value)}
                                     className="custom-input date-input"
                                 />
@@ -374,7 +381,7 @@ export default function UserEvents() {
                                         <th>Room / Location</th>
                                         <th>Event Time</th>
                                         <th style={{ textAlign: 'center' }}>Status</th>
-                                        <th style={{ textAlign: 'center' }}>Action</th>
+                                        <th style={{ textAlign: 'center' }}>View</th>
                                     </tr>
                                 </thead>
                                 <tbody>

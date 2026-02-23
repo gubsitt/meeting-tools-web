@@ -11,6 +11,9 @@ import useDateRangeFilter from '../hooks/useDateRangeFilter';
 import useSearchFilter from '../hooks/useSearchFilter';
 import '../styles/pages/MissSyncEvents.css';
 
+const today = new Date().toISOString().slice(0, 10)
+const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
 const MissSyncEvents = () => {
 
     const [events, setEvents] = useState([]);
@@ -265,6 +268,8 @@ const MissSyncEvents = () => {
                                     type="date"
                                     className="custom-input date-input"
                                     value={dateFilter.startDate}
+                                    min={minDate}
+                                    max={today}
                                     onChange={(e) => dateFilter.setStartDate(e.target.value)}
                                 />
                             </div>
@@ -274,6 +279,8 @@ const MissSyncEvents = () => {
                                     type="date"
                                     className="custom-input date-input"
                                     value={dateFilter.endDate}
+                                    min={minDate}
+                                    max={today}
                                     onChange={(e) => dateFilter.setEndDate(e.target.value)}
                                 />
                             </div>
@@ -412,10 +419,10 @@ const MissSyncEvents = () => {
                                         <th>Subject</th>
                                         <th>Room</th>
                                         <th>Time</th>
-                                        <th style={{ textAlign: 'center' }}>Global ID</th>
-                                        <th style={{ textAlign: 'center' }}>Resource ID</th>
+                                        <th style={{ textAlign: 'center' }}>Global Sync</th>
+                                        <th style={{ textAlign: 'center' }}>Resource Sync</th>
                                         <th style={{ textAlign: 'center' }}>Sync ID</th>
-                                        <th>Action</th>
+                                        <th style={{ textAlign: 'center' }}>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -427,68 +434,55 @@ const MissSyncEvents = () => {
                                         return (
                                             <tr key={event._id}>
                                                 <td data-label="Event ID">
-                                                    <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }}>
-                                                        {event._id || '-'}
+                                                    <span className="event-id-chip" title={event._id}>
+                                                        {event._id ? event._id.slice(-10) : '-'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Subject">
+                                                    <span style={{ fontWeight: 600, color: '#fff' }}>
+                                                        {event.title || '(No Subject)'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Room">
+                                                    <div style={{ fontWeight: 500, color: '#dfe6e9', fontSize: '0.85rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {event.resourceId}
                                                     </div>
                                                 </td>
-                                                <td data-label="Subject" style={{ fontWeight: '500' }}>{event.title || '(No Subject)'}</td>
-                                                <td data-label="Room" style={{ color: '#dfe6e9' }}>{event.resourceId}</td>
                                                 <td data-label="Time">
-                                                    <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
-                                                        <span style={{ color: '#fff' }}>
+                                                    <div className="time-cell">
+                                                        <span className="time-date">
                                                             {moment(event.startTime?.unix || event.startTime).format('DD MMM YYYY')}
                                                         </span>
-                                                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>
-                                                            {moment(event.startTime?.unix || event.startTime).format('HH:mm')} -
-                                                            {moment(event.endTime?.unix || event.endTime).format('HH:mm')}
+                                                        <span className="time-range">
+                                                            {moment(event.startTime?.unix || event.startTime).format('HH:mm')} – {moment(event.endTime?.unix || event.endTime).format('HH:mm')}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td data-label="Global ID" style={{ textAlign: 'center' }}>
-                                                    <span
-                                                        className={`status-badge ${!isGlobalMissing ? 'active' : 'cancelled'}`}
-                                                        title="Global Sync ID"
-                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                                    >
-                                                        <Globe size={14} />
+                                                <td data-label="Global Sync" style={{ textAlign: 'center' }}>
+                                                    <span className={`sync-badge ${!isGlobalMissing ? 'synced' : 'missing'}`}>
+                                                        <Globe size={12} />
                                                         {!isGlobalMissing ? 'Synced' : 'Missing'}
                                                     </span>
                                                 </td>
-                                                <td data-label="Resource ID" style={{ textAlign: 'center' }}>
-                                                    <span
-                                                        className={`status-badge ${!isResourceMissing ? 'active' : 'cancelled'}`}
-                                                        title="Resource Sync ID"
-                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                                    >
-                                                        <Smartphone size={14} />
+                                                <td data-label="Resource Sync" style={{ textAlign: 'center' }}>
+                                                    <span className={`sync-badge ${!isResourceMissing ? 'synced' : 'missing'}`}>
+                                                        <Smartphone size={12} />
                                                         {!isResourceMissing ? 'Synced' : 'Missing'}
                                                     </span>
                                                 </td>
                                                 <td data-label="Sync ID" style={{ textAlign: 'center' }}>
-                                                    <span
-                                                        className={`status-badge ${!isSyncIdMissing ? 'active' : 'cancelled'}`}
-                                                        title="Sync ID"
-                                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', margin: '0 auto' }}
-                                                    >
-                                                        <RefreshCw size={14} />
+                                                    <span className={`sync-badge ${!isSyncIdMissing ? 'synced' : 'missing'}`}>
+                                                        <RefreshCw size={12} />
                                                         {!isSyncIdMissing ? 'Synced' : 'Missing'}
                                                     </span>
                                                 </td>
-                                                <td data-label="Action">
+                                                <td data-label="Action" style={{ textAlign: 'center' }}>
                                                     <button
-                                                        className="view-btn"
+                                                        className={`sync-btn${syncingEventId === event._id ? ' syncing' : ''}`}
                                                         onClick={() => syncEvent(event._id)}
                                                         disabled={syncingEventId === event._id}
-                                                        style={{
-                                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                            minWidth: '100px'
-                                                        }}
                                                     >
-                                                        {syncingEventId === event._id ? (
-                                                            <RefreshCw className="spin" size={14} />
-                                                        ) : (
-                                                            <RefreshCw size={14} />
-                                                        )}
+                                                        <RefreshCw size={14} className={syncingEventId === event._id ? 'spin' : ''} />
                                                         {syncingEventId === event._id ? 'Syncing...' : 'Sync'}
                                                     </button>
                                                 </td>

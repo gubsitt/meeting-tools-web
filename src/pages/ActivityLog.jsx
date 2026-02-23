@@ -8,6 +8,9 @@ import useMobileFilter from '../hooks/useMobileFilter'
 import Pagination from '../components/Pagination'
 import '../styles/pages/ActivityLog.css'
 
+const today = new Date().toISOString().slice(0, 10)
+const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
 export default function ActivityLog() {
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(false)
@@ -161,6 +164,8 @@ export default function ActivityLog() {
                                 type="date"
                                 className="custom-input date-input"
                                 value={filters.startDate}
+                                min={minDate}
+                                max={today}
                                 onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                             />
                         </div>
@@ -171,6 +176,8 @@ export default function ActivityLog() {
                                 type="date"
                                 className="custom-input date-input"
                                 value={filters.endDate}
+                                min={minDate}
+                                max={today}
                                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                             />
                         </div>

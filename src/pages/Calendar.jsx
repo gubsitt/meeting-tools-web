@@ -15,6 +15,9 @@ import '../styles/pages/Calendar.css'
 
 const localizer = momentLocalizer(moment)
 
+const today = new Date().toISOString().slice(0, 10)
+const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
 export default function Calendar() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
@@ -194,11 +197,11 @@ export default function Calendar() {
             <div className="date-group-row">
               <div className="form-group-inline">
                 <label>Start Date</label>
-                <input type="date" value={dateFilter.startDate} onChange={(e) => dateFilter.setStartDate(e.target.value)} className="custom-input date-input" />
+                <input type="date" value={dateFilter.startDate} min={minDate} max={today} onChange={(e) => dateFilter.setStartDate(e.target.value)} className="custom-input date-input" />
               </div>
               <div className="form-group-inline">
                 <label>End Date</label>
-                <input type="date" value={dateFilter.endDate} onChange={(e) => dateFilter.setEndDate(e.target.value)} className="custom-input date-input" />
+                <input type="date" value={dateFilter.endDate} min={minDate} max={today} onChange={(e) => dateFilter.setEndDate(e.target.value)} className="custom-input date-input" />
               </div>
             </div>
 

@@ -308,7 +308,104 @@
   }
 }
 
-/* Status Badge */
+/* Event ID Chip */
+.event-id-chip {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  color: #a29bfe;
+  background: rgba(108, 92, 231, 0.12);
+  border: 1px solid rgba(108, 92, 231, 0.25);
+  border-radius: 6px;
+  padding: 3px 8px;
+  letter-spacing: 0.5px;
+  cursor: default;
+}
+
+/* Time Cell */
+.time-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-date {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.time-range {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Sync Badge */
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  margin: 0 auto;
+}
+
+.sync-badge.synced {
+  background: rgba(0, 184, 148, 0.15);
+  color: #55efc4;
+  border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.sync-badge.missing {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff7675;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Sync Action Button */
+.sync-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+  min-width: 90px;
+}
+
+.sync-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.55);
+  filter: brightness(1.1);
+}
+
+.sync-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.sync-btn.syncing,
+.sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Status Badge (kept for other pages) */
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -329,6 +426,7 @@
   color: #ff6b6b;
   border: 1px solid rgba(255, 107, 107, 0.3);
 }
+
 
 /* ========================================
    📱 MOBILE RESPONSIVE STYLES

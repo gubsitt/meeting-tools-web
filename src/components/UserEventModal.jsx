@@ -251,126 +251,68 @@ export default function UserEventModal({ isOpen, onClose, event, onUpdate }) {
                         {/* Body */}
                         <div className="modal-body">
                             {isEditing ? (
-                                <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                <div className="edit-form">
                                     <div className="form-group">
-                                        <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Resource ID</label>
+                                        <label className="form-label">Resource ID</label>
                                         <input
                                             type="text"
+                                            className="form-input"
                                             value={editFormData.resourceId}
                                             onChange={(e) => setEditFormData({ ...editFormData, resourceId: e.target.value })}
-                                            style={{
-                                                width: '100%',
-                                                background: 'rgba(0, 0, 0, 0.2)',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                borderRadius: '8px',
-                                                padding: '12px',
-                                                color: 'white',
-                                                outline: 'none',
-                                                fontSize: '1rem',
-                                                fontFamily: 'monospace'
-                                            }}
                                         />
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                                    <div className="edit-toggles-grid">
                                         <div className="form-group">
-                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Pending Sync</label>
+                                            <label className="form-label">Pending Sync</label>
                                             <select
+                                                className="form-select"
                                                 value={editFormData.pendingSync.toString()}
                                                 onChange={(e) => setEditFormData({ ...editFormData, pendingSync: e.target.value === 'true' })}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(0, 0, 0, 0.2)',
-                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                    borderRadius: '8px',
-                                                    padding: '12px',
-                                                    color: 'white',
-                                                    outline: 'none',
-                                                    fontSize: '0.95rem',
-                                                    cursor: 'pointer'
-                                                }}
                                             >
-                                                <option value="true" style={{ color: 'black' }}>True</option>
-                                                <option value="false" style={{ color: 'black' }}>False</option>
+                                                <option value="true">True</option>
+                                                <option value="false">False</option>
                                             </select>
                                         </div>
                                         <div className="form-group">
-                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Cancelled</label>
+                                            <label className="form-label">Cancelled</label>
                                             <select
+                                                className="form-select"
                                                 value={editFormData.cancelled.toString()}
                                                 onChange={(e) => setEditFormData({ ...editFormData, cancelled: e.target.value === 'true' })}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(0, 0, 0, 0.2)',
-                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                    borderRadius: '8px',
-                                                    padding: '12px',
-                                                    color: 'white',
-                                                    outline: 'none',
-                                                    fontSize: '0.95rem',
-                                                    cursor: 'pointer'
-                                                }}
                                             >
-                                                <option value="true" style={{ color: 'black' }}>True</option>
-                                                <option value="false" style={{ color: 'black' }}>False</option>
+                                                <option value="true">True</option>
+                                                <option value="false">False</option>
                                             </select>
                                         </div>
                                         <div className="form-group">
-                                            <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', fontSize: '0.9rem' }}>Impersonated</label>
+                                            <label className="form-label">Impersonated</label>
                                             <select
+                                                className="form-select"
                                                 value={editFormData.impersonated.toString()}
                                                 onChange={(e) => setEditFormData({ ...editFormData, impersonated: e.target.value === 'true' })}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(0, 0, 0, 0.2)',
-                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                    borderRadius: '8px',
-                                                    padding: '12px',
-                                                    color: 'white',
-                                                    outline: 'none',
-                                                    fontSize: '0.95rem',
-                                                    cursor: 'pointer'
-                                                }}
                                             >
-                                                <option value="true" style={{ color: 'black' }}>True</option>
-                                                <option value="false" style={{ color: 'black' }}>False</option>
+                                                <option value="true">True</option>
+                                                <option value="false">False</option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+                                    <div className="edit-actions">
                                         <button
+                                            className="edit-cancel-btn"
                                             onClick={() => {
                                                 setIsEditing(false)
                                                 setViewMode('detail')
-                                            }}
-                                            style={{
-                                                background: 'transparent',
-                                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                color: 'white',
-                                                padding: '10px 20px',
-                                                borderRadius: '8px',
-                                                cursor: 'pointer'
                                             }}
                                             disabled={saving}
                                         >
                                             Cancel
                                         </button>
                                         <button
+                                            className={`edit-save-btn${saving ? ' saving' : ''}`}
                                             onClick={handleSave}
                                             disabled={saving}
-                                            style={{
-                                                background: '#6c5ce7',
-                                                border: 'none',
-                                                color: 'white',
-                                                padding: '10px 20px',
-                                                borderRadius: '8px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                opacity: saving ? 0.7 : 1
-                                            }}
                                         >
                                             {saving ? 'Saving...' : <><Save size={18} /> Save Changes</>}
                                         </button>

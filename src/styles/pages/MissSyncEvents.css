@@ -481,7 +481,7 @@
 
   .date-group-row {
     display: flex;
-    flex-direction: row !important;
+    flex-direction: column !important;
     gap: 10px;
     width: 100%;
   }

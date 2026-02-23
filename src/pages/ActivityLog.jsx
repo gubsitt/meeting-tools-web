@@ -23,7 +23,7 @@ export default function ActivityLog() {
     const [filters, setFilters] = useState({
         user: '',
         action: '',
-        startDate: '',
+        startDate: new Date().toISOString().slice(0, 10),
         endDate: ''
     })
 
@@ -45,7 +45,7 @@ export default function ActivityLog() {
 
             if (response.success) {
                 setLogs(response.data)
-                setPagination(response.pagination)
+                setPagination(prev => ({ ...prev, ...response.pagination }))
             } else {
                 toast.error('Failed to load activity logs')
             }

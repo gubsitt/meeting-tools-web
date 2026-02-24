@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import MissSyncService from '../services/MissSyncService';
 import { Search, RefreshCw, AlertCircle, Smartphone, Globe, Filter, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -9,16 +9,19 @@ import usePagination from '../hooks/usePagination';
 import useMobileFilter from '../hooks/useMobileFilter';
 import useDateRangeFilter from '../hooks/useDateRangeFilter';
 import useSearchFilter from '../hooks/useSearchFilter';
+import InfoTooltip from '../components/InfoTooltip';
+import '../styles/pages/shared.css';
 import '../styles/pages/MissSyncEvents.css';
 
-const today = new Date().toISOString().slice(0, 10)
-const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 const MissSyncEvents = () => {
 
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
+
+    const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+    const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
     // New State for Room ID
     const [roomId, setRoomId] = useState('');
@@ -29,7 +32,9 @@ const MissSyncEvents = () => {
     const searchFilter = useSearchFilter(500); // For Event ID search
 
     const [syncingEventId, setSyncingEventId] = useState(null);
+    const [isBulkSyncing, setIsBulkSyncing] = useState(false);
     const [syncAlert, setSyncAlert] = useState(null);
+    const [selectedEventIds, setSelectedEventIds] = useState([]);
     const alertTimeoutRef = useRef(null);
 
     // Pagination Hook - Use 'events' directly as filtering is now server-side
@@ -78,6 +83,7 @@ const MissSyncEvents = () => {
                     !event.title?.startsWith('Canceled:') && !event.isCancelled
                 );
                 setEvents(activeEvents);
+                setSelectedEventIds([]); // Clear selection on new search
                 pagination.resetPagination();
 
                 if (activeEvents.length > 0) {
@@ -181,6 +187,117 @@ const MissSyncEvents = () => {
         }
     };
 
+    // --- Bulk Sync Handlers ---
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = pagination.paginatedData.map(ev => ev._id);
+            setSelectedEventIds(allIds);
+        } else {
+            setSelectedEventIds([]);
+        }
+    };
+
+    const handleSelectToggle = (eventId) => {
+        setSelectedEventIds(prev =>
+            prev.includes(eventId)
+                ? prev.filter(id => id !== eventId)
+                : [...prev, eventId]
+        );
+    };
+
+    const handleBulkSync = async () => {
+        if (selectedEventIds.length === 0) return;
+        setIsBulkSyncing(true);
+
+        if (alertTimeoutRef.current) {
+            clearTimeout(alertTimeoutRef.current);
+        }
+
+        try {
+            const response = await MissSyncService.syncMultipleEvents(selectedEventIds);
+
+            if (response.success) {
+                const totalSuccessful = response.successful?.length || 0;
+                const totalFailed = response.failed?.length || 0;
+
+                let alertType = 'success';
+                let alertMessage = 'Bulk Sync Completed';
+
+                if (totalSuccessful === 0 && totalFailed > 0) {
+                    alertType = 'error';
+                    alertMessage = 'Bulk Sync Failed';
+                } else if (totalSuccessful > 0 && totalFailed > 0) {
+                    alertType = 'warning';
+                    alertMessage = 'Bulk Sync Partially Completed';
+                }
+
+                setSyncAlert({
+                    type: alertType,
+                    message: alertMessage,
+                    summary: response.message || `Processed ${selectedEventIds.length} events. Successful: ${totalSuccessful}, Failed: ${totalFailed}`,
+                    successful: response.successful || [],
+                    failed: response.failed || []
+                });
+
+                // Update the events in the list directly if there were successes
+                if (response.successful && response.successful.length > 0) {
+                    const successMap = new Map();
+                    response.successful.forEach(res => {
+                        // Res depends on backend structure, assuming res.data contains updated fields like syncEvent does
+                        if (res.data && res.data.updated) {
+                            successMap.set(res.eventId, res.data.updated);
+                        } else if (res.data && res.data.data && res.data.data.updated) {
+                            // If it's wrapped in another data object
+                            successMap.set(res.eventId, res.data.data.updated);
+                        }
+                    });
+
+                    if (successMap.size > 0) {
+                        setEvents(prevEvents =>
+                            prevEvents.map(e => {
+                                if (successMap.has(e._id)) {
+                                    const updatedData = successMap.get(e._id);
+                                    return {
+                                        ...e,
+                                        globalSyncId: updatedData.globalSyncId || e.globalSyncId,
+                                        resourceSyncId: updatedData.resourceSyncId || e.resourceSyncId,
+                                        syncId: updatedData.syncId || e.syncId
+                                    };
+                                }
+                                return e;
+                            })
+                        );
+                    } else {
+                        // Fallback, re-fetch to see changes if mapping is complex
+                        fetchEvents();
+                    }
+                }
+
+            } else {
+                setSyncAlert({
+                    type: 'error',
+                    message: 'Bulk Sync Failed!',
+                    details: response.message || 'An error occurred during bulk sync.'
+                });
+            }
+        } catch (error) {
+            const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
+            setSyncAlert({
+                type: 'error',
+                message: 'Bulk Sync Failed!',
+                details: errorMsg
+            });
+        } finally {
+            setIsBulkSyncing(false);
+            setSelectedEventIds([]); // Clear selection after sync attempt
+
+            // Auto hide after 8 seconds
+            alertTimeoutRef.current = setTimeout(() => {
+                setSyncAlert(null);
+                alertTimeoutRef.current = null;
+            }, 8000);
+        }
+    };
 
 
     return (
@@ -211,9 +328,39 @@ const MissSyncEvents = () => {
                             <h2 className={`alert-title ${syncAlert.type}`}>
                                 {syncAlert.message}
                             </h2>
-                            {syncAlert.details && (
-                                <p className="alert-details">{syncAlert.details}</p>
+                            {syncAlert.summary && (
+                                <p className="alert-details" style={{ marginBottom: '16px' }}>{syncAlert.summary}</p>
                             )}
+
+                            {/* Detailed List */}
+                            <div style={{ textAlign: 'left', maxHeight: '200px', overflowY: 'auto', marginBottom: '32px', padding: '0 16px' }}>
+                                {syncAlert.successful?.length > 0 && (
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <div style={{ color: '#00b894', fontWeight: 'bold', marginBottom: '8px' }}>Successful ({syncAlert.successful.length}):</div>
+                                        <ul style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', paddingLeft: '20px', margin: 0 }}>
+                                            {syncAlert.successful.map((item, idx) => (
+                                                <li key={idx} style={{ marginBottom: '4px' }}>
+                                                    <span style={{ fontFamily: 'monospace' }}>{item.eventId}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {syncAlert.failed?.length > 0 && (
+                                    <div>
+                                        <div style={{ color: '#ff7675', fontWeight: 'bold', marginBottom: '8px' }}>Failed ({syncAlert.failed.length}):</div>
+                                        <ul style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', paddingLeft: '20px', margin: 0 }}>
+                                            {syncAlert.failed.map((item, idx) => (
+                                                <li key={idx} style={{ marginBottom: '4px' }}>
+                                                    <span style={{ fontFamily: 'monospace' }}>{item.eventId}</span>
+                                                    <span style={{ opacity: 0.6, marginLeft: '8px', fontSize: '0.75rem' }}>- {item.error || 'Unknown error'}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+
                             <button
                                 className="alert-close-btn"
                                 onClick={() => {
@@ -240,9 +387,39 @@ const MissSyncEvents = () => {
                 className="calendar-header-control"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
             >
-                <h1>Miss Sync Events</h1>
-                <p>Events missing GlobalSyncID or ResourceSyncID</p>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h1>Miss Sync Events</h1>
+                        <InfoTooltip
+                            title="About Miss Sync Events"
+                            content={
+                                <>
+                                    <p>This page identifies reservations where synchronization between the local database and Microsoft Graph API is incomplete.</p>
+                                    <ul>
+                                        <li><strong>Data Source:</strong> Local <code>Event</code> collection.</li>
+                                        <li><strong>Trigger:</strong> Events missing <code>globalSyncId</code>, <code>resourceSyncId</code>, or <code>syncId</code> are flagged here.</li>
+                                        <li><strong>Sync Action:</strong> Clicking 'Sync' manually triggers the backend <code>missSyncService</code> to re-attempt fetching and mapping these IDs from the Graph API. Use the checkboxes to perform bulk syncs.</li>
+                                        <li><strong>Date Limit:</strong> Queries are strictly clamped to a maximum of <strong>90 days</strong> from the current date.</li>
+                                    </ul>
+                                </>
+                            }
+                        />
+                    </div>
+                    <p>Events missing GlobalSyncID or ResourceSyncID</p>
+                </div>
+                {selectedEventIds.length > 0 && (
+                    <button
+                        className="search-btn"
+                        onClick={handleBulkSync}
+                        disabled={isBulkSyncing}
+                        style={{ height: 'auto', padding: '10px 20px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <RefreshCw size={16} className={isBulkSyncing ? 'spin' : ''} />
+                        {isBulkSyncing ? 'Syncing...' : `Sync Selected (${selectedEventIds.length})`}
+                    </button>
+                )}
             </motion.div>
 
             <motion.div
@@ -415,6 +592,14 @@ const MissSyncEvents = () => {
                             <table className="user-events-table">
                                 <thead>
                                     <tr>
+                                        <th style={{ width: '40px', textAlign: 'center' }}>
+                                            <input
+                                                type="checkbox"
+                                                onChange={handleSelectAll}
+                                                checked={pagination.paginatedData.length > 0 && selectedEventIds.length === pagination.paginatedData.length}
+                                                style={{ cursor: 'pointer', accentColor: '#6c5ce7', width: '16px', height: '16px' }}
+                                            />
+                                        </th>
                                         <th>Event ID</th>
                                         <th>Subject</th>
                                         <th>Room</th>
@@ -430,13 +615,22 @@ const MissSyncEvents = () => {
                                         const isGlobalMissing = !event.globalSyncId;
                                         const isResourceMissing = !event.resourceSyncId;
                                         const isSyncIdMissing = !event.syncId;
+                                        const isSelected = selectedEventIds.includes(event._id);
 
                                         return (
-                                            <tr key={event._id}>
+                                            <tr key={event._id} style={{ backgroundColor: isSelected ? 'rgba(108, 92, 231, 0.1)' : '' }}>
+                                                <td style={{ textAlign: 'center' }} className="checkbox-cell">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => handleSelectToggle(event._id)}
+                                                        style={{ cursor: 'pointer', accentColor: '#6c5ce7', width: '16px', height: '16px' }}
+                                                    />
+                                                </td>
                                                 <td data-label="Event ID">
-                                                    <span className="event-id-chip" title={event._id}>
-                                                        {event._id ? event._id.slice(-10) : '-'}
-                                                    </span>
+                                                    <div style={{ fontSize: '0.85rem', color: '#a0a0a0', fontFamily: 'monospace' }} title={event._id}>
+                                                        {event._id ? event._id : '-'}
+                                                    </div>
                                                 </td>
                                                 <td data-label="Subject">
                                                     <span style={{ fontWeight: 600, color: '#fff' }}>

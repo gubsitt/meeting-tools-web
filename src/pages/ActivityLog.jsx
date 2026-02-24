@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Filter, X } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -6,14 +6,17 @@ import ActivityLogService from '../services/ActivityLogService'
 import Loading from '../components/Loading'
 import useMobileFilter from '../hooks/useMobileFilter'
 import Pagination from '../components/Pagination'
+import InfoTooltip from '../components/InfoTooltip'
+import '../styles/pages/shared.css'
 import '../styles/pages/ActivityLog.css'
 
-const today = new Date().toISOString().slice(0, 10)
-const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 export default function ActivityLog() {
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(false)
+
+    const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+    const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 20,
@@ -106,13 +109,28 @@ export default function ActivityLog() {
 
     return (
         <div className="activity-log-page">
-            {/* Header */}
             <motion.div
                 className="activity-log-header"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <h1>Activity Logs</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h1>Activity Logs</h1>
+                    <InfoTooltip
+                        title="About Activity Logs"
+                        content={
+                            <>
+                                <p>This page displays a history of user actions across the system. Data is fetched using the following logic:</p>
+                                <ul>
+                                    <li><strong>Data Source:</strong> <code>meetingtoolsactivitylog</code> collection</li>
+                                    <li><strong>User Info:</strong> Real-time lookup using the user's email to fetch their current <code>firstName</code>, <code>lastName</code>, or <code>displayName</code> directly from the <code>meetingtoolusers</code> collection.</li>
+                                    <li><strong>Date Limit:</strong> For performance, queries are strictly clamped to a maximum of <strong>90 days</strong> from the current date.</li>
+                                    <li><strong>Pagination:</strong> Data is loaded in chunks (20 per page) to ensure fast rendering.</li>
+                                </ul>
+                            </>
+                        }
+                    />
+                </div>
                 <p>Monitor system activities and user actions.</p>
             </motion.div>
 
@@ -240,7 +258,18 @@ export default function ActivityLog() {
                                                 {formatDate(log.timestamp)}
                                             </td>
                                             <td data-label="User">
-                                                <div style={{ fontWeight: 500 }}>{log.users || 'System'}</div>
+                                                {log.users && log.users !== 'System' ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <span style={{ fontWeight: 600, color: '#f8f9fa' }}>
+                                                            {log.firstName ? `${log.firstName} ${log.lastName || ''}`.trim() : log.displayName || log.users.split('@')[0]}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.85em', color: '#a0a0b0' }}>
+                                                            {log.users}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontWeight: 500 }}>System</div>
+                                                )}
                                             </td>
                                             <td data-label="Action" style={{ width: '120px' }}>
                                                 <span className={`action-badge ${getActionBadgeClass(log.action)}`}>
@@ -266,6 +295,6 @@ export default function ActivityLog() {
                     </>
                 )}
             </motion.div>
-        </div>
+        </div >
     )
 }

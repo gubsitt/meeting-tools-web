@@ -36,6 +36,16 @@ const MissSyncService = {
             console.error('Error syncing missing sync IDs:', error);
             throw error;
         }
+    },
+
+    syncMultipleEvents: async (eventIds) => {
+        try {
+            const response = await api.post(API_CONFIG.ENDPOINTS.MISS_SYNC_MULTIPLE, { eventIds });
+            return response.data;
+        } catch (error) {
+            console.error('Error syncing multiple missing sync IDs:', error);
+            throw error;
+        }
     }
 };
 

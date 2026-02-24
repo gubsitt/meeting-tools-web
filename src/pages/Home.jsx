@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom' // [เพิ่ม] ต้องใช้ Link
 import { useAuth } from '../context/AuthContext'
 import { LogOut, CheckCircle, Users, ShieldCheck } from 'lucide-react' // [เพิ่ม] icon ใหม่
+import InfoTooltip from '../components/InfoTooltip'
 import '../styles/pages/Home.css'
 
 export default function Home() {
@@ -30,6 +31,22 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
+        <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+          <InfoTooltip
+            title="About Home Page"
+            align="right"
+            content={
+              <>
+                <p>Welcome to the EXZY Meeting Tools dashboard. This page shows your current session information.</p>
+                <ul>
+                  <li><strong>Profile Data:</strong> Retrieved securely from the session context upon successful login via Microsoft/Google OAuth or Local Admin.</li>
+                  <li><strong>Role Access:</strong> Your displayed role determines which features and pages you can access in the sidebar.</li>
+                </ul>
+              </>
+            }
+          />
+        </div>
+
         <motion.div
           className="success-icon"
           initial={{ scale: 0 }}

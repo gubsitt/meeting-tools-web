@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { SEARCH_CONFIG } from '../config/constants'
 
 /**
  * Custom hook for user search with API integration
@@ -11,41 +12,44 @@ export default function useUserSearch(searchService) {
     const [selectedUser, setSelectedUser] = useState(null)
     const [showDropdown, setShowDropdown] = useState(false)
 
+    // Keep service in a ref so it never triggers useEffect re-runs
+    const serviceRef = useRef(searchService)
+    useEffect(() => { serviceRef.current = searchService }, [searchService])
+
     // Debounced search
     useEffect(() => {
         const delayDebounceFn = setTimeout(async () => {
-            if (searchQuery.trim().length > 2 && !selectedUser) {
+            if (searchQuery.trim().length >= SEARCH_CONFIG.MIN_SEARCH_LENGTH && !selectedUser) {
                 try {
-                    const res = await searchService.searchUsers(searchQuery)
+                    const res = await serviceRef.current.searchUsers(searchQuery)
                     if (res.success && res.data) {
                         setSearchResults(res.data)
                         setShowDropdown(true)
                     }
-                } catch (error) {
-                    console.error('Search error:', error)
+                } catch {
                     setSearchResults([])
                 }
             } else {
                 setSearchResults([])
                 setShowDropdown(false)
             }
-        }, 500)
+        }, SEARCH_CONFIG.DEBOUNCE_DELAY)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [searchQuery, selectedUser, searchService])
+    }, [searchQuery, selectedUser]) // serviceRef is stable — no need in deps
 
-    const handleSelectUser = (user) => {
+    const handleSelectUser = useCallback((user) => {
         setSelectedUser(user)
         setSearchQuery(user.email)
         setShowDropdown(false)
-    }
+    }, [])
 
-    const handleClearSearch = () => {
+    const handleClearSearch = useCallback(() => {
         setSearchQuery('')
         setSelectedUser(null)
         setSearchResults([])
         setShowDropdown(false)
-    }
+    }, [])
 
     return {
         searchQuery,

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 
 /**
  * Custom hook for handling pagination logic
@@ -25,14 +25,14 @@ export default function usePagination(data = [], itemsPerPage = 10) {
         }
     }, [data, currentPage, itemsPerPage])
 
-    const handlePageChange = (page) => {
+    const handlePageChange = useCallback((page) => {
         setCurrentPage(page)
         window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    }, [])
 
-    const resetPagination = () => {
+    const resetPagination = useCallback(() => {
         setCurrentPage(1)
-    }
+    }, [])
 
     return {
         currentPage,

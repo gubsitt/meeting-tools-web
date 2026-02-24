@@ -476,6 +476,7 @@
   /* Table - Card Style on Mobile */
   .user-events-table {
     display: block;
+    width: 100%;
     min-width: 0;
   }
 
@@ -489,11 +490,14 @@
 
   .user-events-table tr {
     display: block;
+    width: 100%;
+    box-sizing: border-box;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     margin-bottom: 16px;
     padding: 16px;
+    position: relative;
   }
 
   .user-events-table td {
@@ -502,6 +506,18 @@
     padding: 8px 0;
     border: none !important;
     background: transparent !important;
+  }
+
+  .user-events-table td.checkbox-cell {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 0;
+    width: auto;
+  }
+
+  .user-events-table td.checkbox-cell::before {
+    display: none;
   }
 
   .user-events-table td::before {
@@ -594,6 +610,13 @@
     height: 45px;
   }
 
+  .sync-badge,
+  .sync-btn {
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+  }
+
   .desktop-only-label {
     display: none !important;
   }
@@ -651,6 +674,10 @@
 
 .alert-title.error {
   color: #ff7675;
+}
+
+.alert-title.warning {
+  color: #fdcb6e;
 }
 
 .alert-details {

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import CalendarService from '../services/CalendarService'
@@ -10,19 +10,22 @@ import CalendarEventModal from '../components/CalendarEventModal'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useSearchFilter from '../hooks/useSearchFilter'
+import InfoTooltip from '../components/InfoTooltip'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import '../styles/pages/shared.css'
 import '../styles/pages/Calendar.css'
 
 const localizer = momentLocalizer(moment)
 
-const today = new Date().toISOString().slice(0, 10)
-const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 export default function Calendar() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
   const [roomEmail, setRoomEmail] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
   // Custom Hooks
   const mobileFilter = useMobileFilter(false)
@@ -85,13 +88,13 @@ export default function Calendar() {
     }
   }
 
-  const handleClear = () => {
-    setRoomEmail('')
-    dateFilter.resetDates()
-    searchFilter.clearSearch()
-    setEvents([])
-    mobileFilter.open()
-  }
+  // const handleClear = () => {
+  //   setRoomEmail('')
+  //   dateFilter.resetDates()
+  //   searchFilter.clearSearch()
+  //   setEvents([])
+  //   mobileFilter.open()
+  // }
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event)
@@ -151,10 +154,24 @@ export default function Calendar() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <h1>Meeting Schedule</h1>
-          <p>Search room availability</p>
+          <InfoTooltip
+            title="About Calendar Page"
+            content={
+              <>
+                <p>This page allows you to view the schedule and availability of specific meeting rooms.</p>
+                <ul>
+                  <li><strong>Data Source:</strong> Direct connection to Microsoft Graph API and cached local <code>Event</code> collection.</li>
+                  <li><strong>Search Requirements:</strong> You must provide a Room ID. (Event ID and Date Range are optional).</li>
+                  <li><strong>Date Limitation:</strong> To ensure performance, the system clamps all search queries to a maximum history and future range of <strong>90 days</strong> from today.</li>
+                  <li><strong>Cancellation:</strong> Cancelled events are not displayed in the results.</li>
+                </ul>
+              </>
+            }
+          />
         </div>
+        <p>Search room availability</p>
       </motion.div>
 
       {/* --- Search Section --- */}
@@ -189,7 +206,7 @@ export default function Calendar() {
             </div>
 
             <div className="form-group-inline search-email-wrapper">
-              <label>Room ID</label>
+              <label>Room ID <span style={{ color: '#ff6b6b' }}>*</span></label>
               <input type="text" placeholder="Search by Room ID..." value={roomEmail} onChange={(e) => setRoomEmail(e.target.value)} className="custom-input" />
             </div>
 

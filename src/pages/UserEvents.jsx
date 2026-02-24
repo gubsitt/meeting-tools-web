@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
 import { motion } from 'framer-motion'
@@ -11,14 +11,16 @@ import usePagination from '../hooks/usePagination'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useUserSearch from '../hooks/useUserSearch'
+import InfoTooltip from '../components/InfoTooltip'
+import '../styles/pages/shared.css'
 import '../styles/pages/UserEvents.css'
-
-const today = new Date().toISOString().slice(0, 10)
-const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 export default function UserEvents() {
     const [events, setEvents] = useState([])
     const [loading, setLoading] = useState(false)
+
+    const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+    const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
     // Custom Hooks
     const userSearch = useUserSearch(UserEventService)
@@ -61,11 +63,6 @@ export default function UserEvents() {
     }
 
     const fetchEvents = async () => {
-        if (!eventId && !userSearch.selectedUser && !resourceId && !dateFilter.startDate && !dateFilter.endDate) {
-            toast.error('Please select at least one filter (Event ID, User, Resource, or Date Range)')
-            return
-        }
-
         setLoading(true)
 
         try {
@@ -201,7 +198,23 @@ export default function UserEvents() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <h1>Events</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h1>Events</h1>
+                    <InfoTooltip
+                        title="About User Events"
+                        content={
+                            <>
+                                <p>This page provides a detailed view of events associated with specific users or rooms.</p>
+                                <ul>
+                                    <li><strong>Data Filtering:</strong> The search filters local DB records by Event ID, Resource ID, User ID (via the search), or Date Range.</li>
+                                    <li><strong>Pre-requisite:</strong> To prevent heavy database loads, you must provide at least one filter before searching.</li>
+                                    <li><strong>Date Limit:</strong> Queries are strictly clamped to a maximum range of <strong>90 days</strong> from the current date.</li>
+                                    <li><strong>Event Status:</strong> You can see if an event is active or cancelled directly from the list, and click View to edit the raw transaction data.</li>
+                                </ul>
+                            </>
+                        }
+                    />
+                </div>
                 <p>Search for a user to view their scheduled events.</p>
             </motion.div>
 

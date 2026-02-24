@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import CancelledEventService from '../services/CancelledEventService'
 import toast from 'react-hot-toast'
 import { Search, Eye, Filter, X } from 'lucide-react'
@@ -11,15 +11,17 @@ import usePagination from '../hooks/usePagination'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useSearchFilter from '../hooks/useSearchFilter'
+import InfoTooltip from '../components/InfoTooltip'
+import '../styles/pages/shared.css'
 import '../styles/pages/CancelledEvents.css'
-
-const today = new Date().toISOString().slice(0, 10)
-const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
 export default function CancelledEvents() {
     const [transactions, setTransactions] = useState([])
     const [loading, setLoading] = useState(false)
     const [hasSearched, setHasSearched] = useState(false)
+
+    const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+    const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
     // Custom Hooks
     const mobileFilter = useMobileFilter(false)
@@ -126,10 +128,23 @@ export default function CancelledEvents() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <h1>Cancelled by MIT</h1>
-                    <p>View history of cancelled meeting room reservations</p>
+                    <InfoTooltip
+                        title="About Cancelled Events"
+                        content={
+                            <>
+                                <p>This page displays a log of events that were cancelled through the MIT system.</p>
+                                <ul>
+                                    <li><strong>Data Source:</strong> <code>EventTransaction</code> collection, specifically querying for records with a cancellation action and via MIT.</li>
+                                    <li><strong>Date Limit:</strong> For performance, queries are strictly clamped to a maximum range of <strong>90 days</strong> from the current date.</li>
+                                    {/* <li><strong>Missing Info?:</strong> If you see just an Event ID without subject/room, it means the event was directly purged from the calendar provider but retained as a transaction log.</li> */}
+                                </ul>
+                            </>
+                        }
+                    />
                 </div>
+                <p>View history of cancelled meeting room reservations</p>
             </motion.div>
 
             {/* Filter Section (Glass Style) */}

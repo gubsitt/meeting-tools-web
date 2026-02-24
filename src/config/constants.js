@@ -34,6 +34,7 @@ export const API_CONFIG = {
     MISS_SYNC_EVENTS: '/api/events/miss-sync',
     MISS_SYNC_EVENT_UPDATE: (eventId) => `/api/events/miss-sync/${eventId}`,
     MISS_SYNC_EVENT_SYNC: (eventId) => `/api/events/miss-sync/sync/${eventId}`,
+    MISS_SYNC_MULTIPLE: '/api/events/miss-sync/sync-multiple',
 
     // Config File
     CONFIG_FILE: '/api/config',

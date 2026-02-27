@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import moment from 'moment'
 import UserEventService from '../services/UserEventService'
 import { motion } from 'framer-motion'
@@ -11,6 +11,7 @@ import usePagination from '../hooks/usePagination'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useUserSearch from '../hooks/useUserSearch'
+import useSessionState from '../hooks/useSessionState';
 import InfoTooltip from '../components/InfoTooltip'
 import '../styles/pages/shared.css'
 import '../styles/pages/UserEvents.css'
@@ -22,14 +23,14 @@ export default function UserEvents() {
     const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
     const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
-    // Custom Hooks
-    const userSearch = useUserSearch(UserEventService)
-    const mobileFilter = useMobileFilter(false)
-    const dateFilter = useDateRangeFilter('', '')
+    // Search & Filter Hooks
+    const dateFilter = useDateRangeFilter('', '', 'userEvents')
+    const userSearch = useUserSearch(UserEventService, 'userEvents')
+    const mobileFilter = useMobileFilter()
 
     // Filter State
-    const [eventId, setEventId] = useState('')
-    const [resourceId, setResourceId] = useState('')
+    const [eventId, setEventId] = useSessionState('userEvents_eventId', '')
+    const [resourceId, setResourceId] = useSessionState('userEvents_resourceId', '')
 
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -42,7 +43,13 @@ export default function UserEvents() {
     // Pagination Hook
     const pagination = usePagination(filteredEvents, 10)
 
-
+    // Auto-search on mount if filters exist in session storage
+    useEffect(() => {
+        if (eventId || userSearch.selectedUser || resourceId || dateFilter.startDate || dateFilter.endDate) {
+            fetchEvents()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const handleSearch = () => {
         if (!eventId && !userSearch.selectedUser && !resourceId && !dateFilter.startDate && !dateFilter.endDate) {

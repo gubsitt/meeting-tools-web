@@ -11,6 +11,8 @@ import usePagination from '../hooks/usePagination'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useSearchFilter from '../hooks/useSearchFilter'
+import useUserSearch from '../hooks/useUserSearch'
+import useSessionState from '../hooks/useSessionState'
 import InfoTooltip from '../components/InfoTooltip'
 import '../styles/pages/shared.css'
 import '../styles/pages/CancelledEvents.css'
@@ -24,26 +26,29 @@ export default function CancelledEvents() {
     const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
     // Custom Hooks
-    const mobileFilter = useMobileFilter(false)
-    const dateFilter = useDateRangeFilter('', '')
-    const searchFilter = useSearchFilter(500) // For Event ID search
+    const mobileFilter = useMobileFilter()
+    const dateFilter = useDateRangeFilter('', '', 'cancelledEvents')
+    const searchFilter = useSearchFilter(500, 'cancelledEvents') // For Event ID search
 
     // Modal State
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [modalLoading, setModalLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const [roomId, setRoomId] = useState('')
+    const [roomId, setRoomId] = useSessionState('cancelledEvents_roomId', '')
 
     // Pagination Hook
     const pagination = usePagination(transactions, 10)
 
 
 
-    // Removed initial useEffect to prevent auto-fetch
-    /* useEffect(() => {
-        handleSearch()
-    }, []) */
+    // Auto-search on mount if filters exist in session storage
+    useEffect(() => {
+        if (roomId || searchFilter.searchQuery || dateFilter.startDate || dateFilter.endDate) {
+            handleSearch()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const handleSearch = async (e) => {
         if (e) e.preventDefault()

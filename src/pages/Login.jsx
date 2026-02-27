@@ -17,10 +17,6 @@ export default function Login() {
     window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`
   }
 
-  const handleMicrosoftLogin = () => {
-    window.location.href = `${API_URL}/api/auth/microsoft`
-  }
-
   const handleLocalLogin = async (e) => {
     e.preventDefault()
     setError('')
@@ -52,7 +48,7 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      
+
       {/* --- LEFT SIDE: Image --- */}
       <div className="login-left">
         <div className="login-image-overlay" />
@@ -98,7 +94,7 @@ export default function Login() {
           </div>
 
           {/* Form / Buttons Switcher */}
-          <div className="login-body" style={{ minHeight: '220px' }}>
+          <div className="login-body">
             <AnimatePresence mode="wait">
               {!isEmailMode ? (
                 // --- Social Login Mode ---
@@ -117,17 +113,7 @@ export default function Login() {
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
-                    <span>Sign in with Google</span>
-                  </button>
-
-                  <button className="login-btn microsoft-btn" onClick={handleMicrosoftLogin}>
-                    <svg className="provider-icon" viewBox="0 0 23 23">
-                      <path fill="#f35325" d="M1 1h10v10H1z"/>
-                      <path fill="#81bc06" d="M12 1h10v10H12z"/>
-                      <path fill="#05a6f0" d="M1 12h10v10H1z"/>
-                      <path fill="#ffba08" d="M12 12h10v10H12z"/>
-                    </svg>
-                    <span>Sign in with Microsoft</span>
+                    <span>Continue with Google</span>
                   </button>
                 </motion.div>
               ) : (
@@ -174,8 +160,8 @@ export default function Login() {
 
           {/* Toggle Link - ปรับข้อความ */}
           <div className="login-footer">
-            <button 
-              className="toggle-link" 
+            <button
+              className="toggle-link"
               onClick={() => {
                 setIsEmailMode(!isEmailMode)
                 setError('')

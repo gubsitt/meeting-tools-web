@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import ActivityLogService from '../services/ActivityLogService'
 import Loading from '../components/Loading'
 import useMobileFilter from '../hooks/useMobileFilter'
+import useSessionState from '../hooks/useSessionState'
 import Pagination from '../components/Pagination'
 import InfoTooltip from '../components/InfoTooltip'
 import '../styles/pages/shared.css'
@@ -25,13 +26,21 @@ export default function ActivityLog() {
     })
 
     // Filter State
-    const mobileFilter = useMobileFilter(false)
-    const [filters, setFilters] = useState({
+    const mobileFilter = useMobileFilter()
+    const [filters, setFilters] = useSessionState('activityLog_filters', {
         user: '',
         action: '',
         startDate: new Date().toISOString().slice(0, 10),
         endDate: ''
     })
+
+    // Auto-search on mount if filters have values
+    useEffect(() => {
+        if (filters.user || filters.action || filters.startDate || filters.endDate) {
+            fetchLogs()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const fetchLogs = async (page = 1) => {
         setLoading(true)

@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { SEARCH_CONFIG } from '../config/constants'
+import useSessionState from './useSessionState'
 
 /**
  * Custom hook for user search with API integration
  * @param {Object} searchService - Service object with searchUsers method
+ * @param {string} storageKeyPrefix - Prefix for sessionStorage keys
  * @returns {Object} User search state and handlers
  */
-export default function useUserSearch(searchService) {
-    const [searchQuery, setSearchQuery] = useState('')
+export default function useUserSearch(searchService, storageKeyPrefix = '') {
+    const queryKey = storageKeyPrefix ? `${storageKeyPrefix}_userSearchQuery` : null
+    const selectedUserKey = storageKeyPrefix ? `${storageKeyPrefix}_selectedUser` : null
+
+    const [searchQuery, setSearchQuery] = useSessionState(queryKey, '')
     const [searchResults, setSearchResults] = useState([])
-    const [selectedUser, setSelectedUser] = useState(null)
+    const [selectedUser, setSelectedUser] = useSessionState(selectedUserKey, null)
     const [showDropdown, setShowDropdown] = useState(false)
 
     // Keep service in a ref so it never triggers useEffect re-runs

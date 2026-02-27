@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import CalendarService from '../services/CalendarService'
@@ -10,6 +10,7 @@ import CalendarEventModal from '../components/CalendarEventModal'
 import useMobileFilter from '../hooks/useMobileFilter'
 import useDateRangeFilter from '../hooks/useDateRangeFilter'
 import useSearchFilter from '../hooks/useSearchFilter'
+import useSessionState from '../hooks/useSessionState'
 import InfoTooltip from '../components/InfoTooltip'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '../styles/pages/shared.css'
@@ -21,19 +22,27 @@ const localizer = momentLocalizer(moment)
 export default function Calendar() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
-  const [roomEmail, setRoomEmail] = useState('')
+  const [roomEmail, setRoomEmail] = useSessionState('calendar_roomEmail', '')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
   // Custom Hooks
-  const mobileFilter = useMobileFilter(false)
-  const dateFilter = useDateRangeFilter('', '')
-  const searchFilter = useSearchFilter(500)
+  const mobileFilter = useMobileFilter()
+  const dateFilter = useDateRangeFilter('', '', 'calendar')
+  const searchFilter = useSearchFilter(500, 'calendar')
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState(null)
+
+  // Auto-search on mount if filters have values
+  useEffect(() => {
+    if (roomEmail || dateFilter.startDate || dateFilter.endDate || searchFilter.searchQuery) {
+      handleSearch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();

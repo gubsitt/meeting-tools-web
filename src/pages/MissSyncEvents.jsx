@@ -14,6 +14,8 @@ import '../styles/pages/shared.css';
 import '../styles/pages/MissSyncEvents.css';
 
 
+import useSessionState from '../hooks/useSessionState';
+
 const MissSyncEvents = () => {
 
     const [events, setEvents] = useState([]);
@@ -24,12 +26,12 @@ const MissSyncEvents = () => {
     const minDate = useMemo(() => new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10), [])
 
     // New State for Room ID
-    const [roomId, setRoomId] = useState('');
+    const [roomId, setRoomId] = useSessionState('missSyncEvents_roomId', '');
 
     // Custom Hooks
-    const mobileFilter = useMobileFilter(false);
-    const dateFilter = useDateRangeFilter('', '');
-    const searchFilter = useSearchFilter(500); // For Event ID search
+    const mobileFilter = useMobileFilter();
+    const dateFilter = useDateRangeFilter('', '', 'missSyncEvents');
+    const searchFilter = useSearchFilter(500, 'missSyncEvents'); // For Event ID search
 
     const [syncingEventId, setSyncingEventId] = useState(null);
     const [isBulkSyncing, setIsBulkSyncing] = useState(false);
@@ -48,6 +50,13 @@ const MissSyncEvents = () => {
             }
         };
     }, []);
+    // Auto-search on mount if filters exist in session storage
+    useEffect(() => {
+        if (roomId || dateFilter.startDate || dateFilter.endDate || searchFilter.searchQuery) {
+            fetchEvents()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const fetchEvents = async (e) => {
         if (e) e.preventDefault();

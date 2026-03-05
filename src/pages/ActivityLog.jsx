@@ -42,13 +42,14 @@ export default function ActivityLog() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const fetchLogs = async (page = 1) => {
+    const fetchLogs = async (page = 1, overrideFilters = null) => {
         setLoading(true)
         try {
+            const activeFilters = overrideFilters !== null ? overrideFilters : filters
             const params = {
                 page,
                 limit: pagination.limit,
-                ...filters
+                ...activeFilters
             }
 
             // Remove empty filters
@@ -72,11 +73,6 @@ export default function ActivityLog() {
         }
     }
 
-    // Initial load
-    useEffect(() => {
-        fetchLogs(1)
-    }, [])
-
     const handleSearch = (e) => {
         e.preventDefault()
         mobileFilter.close()
@@ -90,14 +86,10 @@ export default function ActivityLog() {
     }
 
     const handleClearFilters = () => {
-        setFilters({
-            user: '',
-            action: '',
-            startDate: '',
-            endDate: ''
-        })
-        mobileFilter.close()
-        setTimeout(() => fetchLogs(1), 0)
+        const cleared = { user: '', action: '', startDate: '', endDate: '' }
+        setFilters(cleared)
+        setLogs([])
+        mobileFilter.open()
     }
 
     const formatDate = (dateString) => {
@@ -210,25 +202,25 @@ export default function ActivityLog() {
                         </div>
 
                         <div className="form-group-inline search-btn-wrapper">
-                            <label style={{ visibility: 'hidden' }}>Search</label>
-                            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                                <button type="submit" className="search-btn" style={{ flex: 1 }} disabled={loading}>
-                                    <Search size={18} /> {loading ? 'Searching...' : 'Search'}
-                                </button>
-
-                                {(filters.user || filters.action || filters.startDate || filters.endDate) && (
-                                    <button
-                                        type="button"
-                                        className="search-btn"
-                                        style={{ background: 'rgba(255, 255, 255, 0.1)', minWidth: 'auto', padding: '14px', flex: '0 0 auto' }}
-                                        onClick={handleClearFilters}
-                                        title="Clear filters"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                )}
-                            </div>
+                            <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
+                            <button type="submit" className="search-btn" disabled={loading}>
+                                <Search size={18} /> {loading ? 'Searching...' : 'Search'}
+                            </button>
                         </div>
+
+                        {(filters.user || filters.action || filters.startDate || filters.endDate || logs.length > 0) && (
+                            <div className="form-group-inline search-btn-wrapper">
+                                <label className="desktop-only-label" style={{ opacity: 0 }}>Clear</label>
+                                <button
+                                    type="button"
+                                    className="search-btn"
+                                    style={{ background: 'rgba(255,255,255,0.12)', boxShadow: 'none' }}
+                                    onClick={handleClearFilters}
+                                >
+                                    <X size={18} /> Clear
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </motion.div>

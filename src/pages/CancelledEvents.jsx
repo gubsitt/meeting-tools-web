@@ -50,6 +50,15 @@ export default function CancelledEvents() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const handleClear = () => {
+        setTransactions([])
+        setRoomId('')
+        searchFilter.clearSearch()
+        dateFilter.resetDates()
+        setHasSearched(false)
+        mobileFilter.open()
+    }
+
     const handleSearch = async (e) => {
         if (e) e.preventDefault()
         setLoading(true)
@@ -219,6 +228,19 @@ export default function CancelledEvents() {
                                 <Search size={18} /> {loading ? 'Searching...' : 'Search'}
                             </button>
                         </div>
+                        {(transactions.length > 0 || hasSearched) && (
+                            <div className="form-group-inline search-btn-wrapper">
+                                <label className="desktop-only-label" style={{ opacity: 0 }}>Clear</label>
+                                <button
+                                    type="button"
+                                    className="search-btn"
+                                    style={{ background: 'rgba(255,255,255,0.12)', boxShadow: 'none' }}
+                                    onClick={handleClear}
+                                >
+                                    <X size={18} /> Clear
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </motion.div>

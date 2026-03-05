@@ -58,6 +58,17 @@ const MissSyncEvents = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const handleClear = () => {
+        setEvents([]);
+        setRoomId('');
+        searchFilter.clearSearch();
+        dateFilter.resetDates();
+        setHasSearched(false);
+        setSelectedEventIds([]);
+        pagination.resetPagination();
+        mobileFilter.open();
+    };
+
     const fetchEvents = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
@@ -502,6 +513,19 @@ const MissSyncEvents = () => {
                                 Search
                             </button>
                         </div>
+                        {(events.length > 0 || hasSearched) && (
+                            <div className="form-group-inline search-btn-wrapper">
+                                <label className="desktop-only-label" style={{ opacity: 0 }}>Clear</label>
+                                <button
+                                    type="button"
+                                    className="search-btn"
+                                    style={{ background: 'rgba(255,255,255,0.12)', boxShadow: 'none' }}
+                                    onClick={handleClear}
+                                >
+                                    <X size={18} /> Clear
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </motion.div>

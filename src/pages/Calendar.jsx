@@ -78,8 +78,14 @@ export default function Calendar() {
           setCurrentDate(formattedEvents[0].start);
           toast.success(`Found ${formattedEvents.length} events`)
         } else {
+          // If no events, set currentDate safely
           if (!searchFilter.searchQuery) {
-            setCurrentDate(new Date(dateFilter.startDate))
+            if (dateFilter.startDate) {
+              const d = new Date(dateFilter.startDate)
+              setCurrentDate(isNaN(d) ? new Date() : d)
+            } else {
+              setCurrentDate(new Date())
+            }
           }
           toast('No events found')
         }
@@ -97,13 +103,13 @@ export default function Calendar() {
     }
   }
 
-  // const handleClear = () => {
-  //   setRoomEmail('')
-  //   dateFilter.resetDates()
-  //   searchFilter.clearSearch()
-  //   setEvents([])
-  //   mobileFilter.open()
-  // }
+  const handleClear = () => {
+    setRoomEmail('')
+    dateFilter.resetDates()
+    searchFilter.clearSearch()
+    setEvents([])
+    mobileFilter.open()
+  }
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event)
@@ -230,7 +236,7 @@ export default function Calendar() {
                 <input type="date" value={dateFilter.endDate} min={minDate} max={today} onChange={(e) => dateFilter.setEndDate(e.target.value)} className="custom-input date-input" />
               </div>
             </div>
-
+ 
             {/* ปุ่ม Search */}
             <div className="form-group-inline search-btn-wrapper">
               <label className="desktop-only-label" style={{ opacity: 0 }}>Search</label>
@@ -238,6 +244,19 @@ export default function Calendar() {
                 <Search size={18} /> {loading ? '...' : 'Search'}
               </button>
             </div>
+            {(events.length > 0 || roomEmail || dateFilter.startDate || dateFilter.endDate || searchFilter.searchQuery) && (
+              <div className="form-group-inline search-btn-wrapper">
+                <label className="desktop-only-label" style={{ opacity: 0 }}>Clear</label>
+                <button
+                  type="button"
+                  className="search-btn"
+                  style={{ background: 'rgba(255,255,255,0.12)', boxShadow: 'none' }}
+                  onClick={handleClear}
+                >
+                  <X size={18} /> Clear
+                </button>
+              </div>
+            )}
           </form>
         </div>
       </motion.div>
@@ -259,7 +278,7 @@ export default function Calendar() {
           eventPropGetter={eventStyleGetter}
           views={['month', 'week', 'day']}
           defaultView="month"
-          date={currentDate}
+          date={isNaN(currentDate) ? new Date() : currentDate}
           onNavigate={(date) => setCurrentDate(date)}
           popup
           onSelectEvent={handleSelectEvent}

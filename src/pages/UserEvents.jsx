@@ -341,6 +341,19 @@ export default function UserEvents() {
                             </button>
                         </div>
 
+                        {(events.length > 0 || eventId || userSearch.selectedUser || resourceId || dateFilter.startDate || dateFilter.endDate) && (
+                            <div className="form-group-inline search-btn-wrapper">
+                                <label className="desktop-only-label" style={{ opacity: 0 }}>Clear</label>
+                                <button
+                                    className="search-btn"
+                                    style={{ background: 'rgba(255,255,255,0.12)', boxShadow: 'none' }}
+                                    onClick={handleClearSearch}
+                                >
+                                    <X size={18} /> Clear
+                                </button>
+                            </div>
+                        )}
+
                         {/* Flex Break - Force date row to new line */}
                         <div className="flex-break"></div>
 

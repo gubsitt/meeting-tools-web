@@ -36,6 +36,9 @@ export const API_CONFIG = {
     MISS_SYNC_EVENT_SYNC: (eventId) => `/api/events/miss-sync/sync/${eventId}`,
     MISS_SYNC_MULTIPLE: '/api/events/miss-sync/sync-multiple',
 
+    // Compare Events
+    COMPARE_EVENTS: '/api/events/compare',
+
     // Config File
     CONFIG_FILE: '/api/config',
     CONFIG_FILE_CONTENT: '/api/docker/container/file'

@@ -12,6 +12,7 @@ import CancelledEvents from './pages/CancelledEvents'
 import MissSyncEvents from './pages/MissSyncEvents'
 import ConfigFile from './pages/ConfigFile'
 import ActivityLog from './pages/ActivityLog'
+import CompareEvents from './pages/CompareEvents'
 
 // Route สำหรับคนยังไม่ Login (ถ้า Login แล้วจะดีดไป Calendar)
 function LoginRoute() {
@@ -88,6 +89,15 @@ function App() {
         />
 
         <Route
+          path="/compare-events"
+          element={
+            <PrivateRoute>
+              <CompareEvents />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/calendar"
           element={
             <PrivateRoute>
@@ -126,9 +136,9 @@ function App() {
         <Route
           path="/config-file"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <ConfigFile />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
 
